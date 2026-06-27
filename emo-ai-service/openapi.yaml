@@ -1,0 +1,99 @@
+# Generated with protoc-gen-openapi
+# https://github.com/google/gnostic/tree/master/cmd/protoc-gen-openapi
+
+openapi: 3.0.3
+info:
+    title: UserService API
+    version: 0.0.1
+paths:
+    /v1/users/login:
+        post:
+            tags:
+                - UserService
+            description: 登录
+            operationId: UserService_Login
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/user.v1.LoginRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/user.v1.LoginResponse'
+    /v1/users/register:
+        post:
+            tags:
+                - UserService
+            description: 注册
+            operationId: UserService_Register
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/user.v1.RegisterRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/user.v1.RegisterResponse'
+components:
+    schemas:
+        user.v1.LoginRequest:
+            required:
+                - username
+                - password
+            type: object
+            properties:
+                username:
+                    type: string
+                password:
+                    type: string
+            description: 登录
+        user.v1.LoginResponse:
+            type: object
+            properties:
+                accessToken:
+                    type: string
+                refreshToken:
+                    type: string
+                expiresAt:
+                    type: string
+                userId:
+                    type: string
+                username:
+                    type: string
+                avatar:
+                    type: string
+                roles:
+                    type: array
+                    items:
+                        type: string
+        user.v1.RegisterRequest:
+            required:
+                - username
+                - password
+                - phone
+            type: object
+            properties:
+                username:
+                    type: string
+                password:
+                    type: string
+                phone:
+                    type: string
+            description: 注册
+        user.v1.RegisterResponse:
+            type: object
+            properties:
+                userId:
+                    type: string
+tags:
+    - name: UserService
