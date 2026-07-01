@@ -1,0 +1,195 @@
+syntax = "proto3";
+
+package chat.v1;
+
+option go_package = "emo-ai-service/api/chat/v1;v1";
+
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+
+service ChatService {
+  // 创建 AI 情感咨询会话。
+  rpc CreateSession(CreateSessionRequest) returns (ChatSession) {
+    option (google.api.http) = {
+      post: "/v1/chat/sessions"
+      body: "*"
+    };
+  }
+
+  // 分页查询当前用户的历史咨询会话。
+  rpc ListSessions(ListSessionsRequest) returns (ListSessionsResponse) {
+    option (google.api.http) = {
+      get: "/v1/chat/sessions"
+    };
+  }
+
+  // 获取当前用户指定咨询会话详情。
+  rpc GetSession(GetSessionRequest) returns (ChatSession) {
+    option (google.api.http) = {
+      get: "/v1/chat/sessions/{id}"
+    };
+  }
+
+  // 修改咨询会话标题或状态。
+  rpc UpdateSession(UpdateSessionRequest) returns (ChatSession) {
+    option (google.api.http) = {
+      patch: "/v1/chat/sessions/{id}"
+      body: "*"
+    };
+  }
+
+  // 删除当前用户指定咨询会话。
+  rpc DeleteSession(DeleteSessionRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      delete: "/v1/chat/sessions/{id}"
+    };
+  }
+
+  // 分页查询指定咨询会话下的聊天消息。
+  rpc ListMessages(ListMessagesRequest) returns (ListMessagesResponse) {
+    option (google.api.http) = {
+      get: "/v1/chat/sessions/{session_id}/messages"
+    };
+  }
+
+  // 发送用户消息，触发 AI 回复，并保存双方消息。
+  rpc SendMessage(SendMessageRequest) returns (SendMessageResponse) {
+    option (google.api.http) = {
+      post: "/v1/chat/sessions/{session_id}/messages"
+      body: "*"
+    };
+  }
+
+  // 提交对某条 AI 回复的评分和反馈。
+  rpc CreateFeedback(CreateFeedbackRequest) returns (ChatFeedback) {
+    option (google.api.http) = {
+      post: "/v1/chat/messages/{message_id}/feedback"
+      body: "*"
+    };
+  }
+
+  // 生成并保存指定咨询会话的上下文摘要。
+  rpc SummarizeSession(SummarizeSessionRequest) returns (ChatContextSummary) {
+    option (google.api.http) = {
+      post: "/v1/chat/sessions/{session_id}/summarize"
+      body: "*"
+    };
+  }
+}
+
+message ChatSession {
+  int64 id = 1;
+  int64 user_id = 2;
+  string title = 3;
+  string scenario = 4;
+  string status = 5;
+  string summary = 6;
+  int32 message_count = 7;
+  int64 last_message_at = 8;
+  int64 created_at = 9;
+  int64 updated_at = 10;
+}
+
+message ChatMessage {
+  int64 id = 1;
+  int64 session_id = 2;
+  int64 user_id = 3;
+  string role = 4;
+  string content = 5;
+  string content_type = 6;
+  string model = 7;
+  int32 prompt_tokens = 8;
+  int32 completion_tokens = 9;
+  int32 total_tokens = 10;
+  int32 latency_ms = 11;
+  string emotion_snapshot_json = 12;
+  string safety_result_json = 13;
+  string status = 14;
+  string error_message = 15;
+  int64 created_at = 16;
+}
+
+message ChatFeedback {
+  int64 id = 1;
+  int64 user_id = 2;
+  int64 session_id = 3;
+  int64 message_id = 4;
+  int32 rating = 5;
+  string feedback_type = 6;
+  string content = 7;
+  int64 created_at = 8;
+}
+
+message ChatContextSummary {
+  int64 id = 1;
+  int64 session_id = 2;
+  string summary = 3;
+  int64 message_start_id = 4;
+  int64 message_end_id = 5;
+  string model = 6;
+  int64 created_at = 7;
+}
+
+message CreateSessionRequest {
+  string title = 1;
+  string scenario = 2;
+}
+
+message ListSessionsRequest {
+  int32 page = 1;
+  int32 page_size = 2;
+  string status = 3;
+}
+
+message ListSessionsResponse {
+  repeated ChatSession sessions = 1;
+  int64 total = 2;
+}
+
+message GetSessionRequest {
+  int64 id = 1;
+}
+
+message UpdateSessionRequest {
+  int64 id = 1;
+  string title = 2;
+  string status = 3;
+}
+
+message DeleteSessionRequest {
+  int64 id = 1;
+}
+
+message ListMessagesRequest {
+  int64 session_id = 1;
+  int32 page = 2;
+  int32 page_size = 3;
+}
+
+message ListMessagesResponse {
+  repeated ChatMessage messages = 1;
+  int64 total = 2;
+}
+
+message SendMessageRequest {
+  int64 session_id = 1;
+  string content = 2;
+  string content_type = 3;
+}
+
+message SendMessageResponse {
+  ChatMessage user_message = 1;
+  ChatMessage assistant_message = 2;
+  int64 analysis_id = 3;
+}
+
+message CreateFeedbackRequest {
+  int64 message_id = 1;
+  int32 rating = 2;
+  string feedback_type = 3;
+  string content = 4;
+}
+
+message SummarizeSessionRequest {
+  int64 session_id = 1;
+}

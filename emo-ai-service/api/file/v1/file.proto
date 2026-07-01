@@ -1,0 +1,90 @@
+syntax = "proto3";
+
+package file.v1;
+
+option go_package = "emo-ai-service/api/file/v1;v1";
+
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+
+service FileService {
+  // 创建上传凭证，返回上传地址、对象 key 和公开访问地址。
+  rpc CreateUploadToken(CreateUploadTokenRequest) returns (UploadToken) {
+    option (google.api.http) = {
+      post: "/v1/files/upload-token"
+      body: "*"
+    };
+  }
+
+  // 登记文件元数据，用于头像、日记附件等业务资源。
+  rpc CreateFile(CreateFileRequest) returns (FileAsset) {
+    option (google.api.http) = {
+      post: "/v1/files"
+      body: "*"
+    };
+  }
+
+  // 查询当前用户指定文件元数据。
+  rpc GetFile(GetFileRequest) returns (FileAsset) {
+    option (google.api.http) = {
+      get: "/v1/files/{id}"
+    };
+  }
+
+  // 删除当前用户指定文件资源记录。
+  rpc DeleteFile(DeleteFileRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      delete: "/v1/files/{id}"
+    };
+  }
+}
+
+message UploadToken {
+  string provider = 1;
+  string upload_url = 2;
+  string object_key = 3;
+  string public_url = 4;
+  int64 expires_at = 5;
+}
+
+message CreateUploadTokenRequest {
+  string biz_type = 1;
+  string filename = 2;
+  string mime_type = 3;
+  int64 size_bytes = 4;
+}
+
+message FileAsset {
+  int64 id = 1;
+  int64 owner_user_id = 2;
+  string biz_type = 3;
+  string storage_provider = 4;
+  string bucket = 5;
+  string object_key = 6;
+  string url = 7;
+  string mime_type = 8;
+  int64 size_bytes = 9;
+  string checksum = 10;
+  int32 status = 11;
+  int64 created_at = 12;
+  int64 updated_at = 13;
+}
+
+message CreateFileRequest {
+  string biz_type = 1;
+  string storage_provider = 2;
+  string bucket = 3;
+  string object_key = 4;
+  string url = 5;
+  string mime_type = 6;
+  int64 size_bytes = 7;
+  string checksum = 8;
+}
+
+message GetFileRequest {
+  int64 id = 1;
+}
+
+message DeleteFileRequest {
+  int64 id = 1;
+}

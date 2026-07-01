@@ -1,0 +1,149 @@
+syntax = "proto3";
+
+package emotion.v1;
+
+option go_package = "emo-ai-service/api/emotion/v1;v1";
+
+import "google/api/annotations.proto";
+
+service EmotionService {
+  // 对文本创建情绪分析结果，保存情绪、风险、建议和维度分数。
+  rpc CreateAnalysis(CreateAnalysisRequest) returns (EmotionAnalysis) {
+    option (google.api.http) = {
+      post: "/v1/emotion/analyses"
+      body: "*"
+    };
+  }
+
+  // 分页查询当前用户的情绪分析历史。
+  rpc ListAnalyses(ListAnalysesRequest) returns (ListAnalysesResponse) {
+    option (google.api.http) = {
+      get: "/v1/emotion/analyses"
+    };
+  }
+
+  // 获取指定情绪分析详情。
+  rpc GetAnalysis(GetAnalysisRequest) returns (EmotionAnalysis) {
+    option (google.api.http) = {
+      get: "/v1/emotion/analyses/{id}"
+    };
+  }
+
+  // 获取情感分析报告总览统计。
+  rpc GetOverview(GetOverviewRequest) returns (EmotionOverview) {
+    option (google.api.http) = {
+      get: "/v1/emotion/reports/overview"
+    };
+  }
+
+  // 获取情绪趋势折线图数据。
+  rpc GetTrends(GetTrendsRequest) returns (EmotionTrends) {
+    option (google.api.http) = {
+      get: "/v1/emotion/reports/trends"
+    };
+  }
+
+  // 获取情绪日历视图数据。
+  rpc GetCalendar(GetCalendarRequest) returns (EmotionCalendar) {
+    option (google.api.http) = {
+      get: "/v1/emotion/reports/calendar"
+    };
+  }
+}
+
+message EmotionAnalysis {
+  int64 id = 1;
+  int64 user_id = 2;
+  string source_type = 3;
+  int64 source_id = 4;
+  string primary_emotion = 5;
+  string sentiment = 6;
+  double sentiment_score = 7;
+  int32 stress_score = 8;
+  int32 anxiety_score = 9;
+  int32 depression_risk_score = 10;
+  int32 energy_score = 11;
+  double confidence = 12;
+  string summary = 13;
+  string advice = 14;
+  string risk_level = 15;
+  string model = 16;
+  repeated EmotionDimensionScore dimensions = 17;
+  string raw_result_json = 18;
+  int64 created_at = 19;
+}
+
+message EmotionDimensionScore {
+  string dimension = 1;
+  double score = 2;
+}
+
+message CreateAnalysisRequest {
+  string source_type = 1;
+  int64 source_id = 2;
+  string text = 3;
+}
+
+message ListAnalysesRequest {
+  int32 page = 1;
+  int32 page_size = 2;
+  string source_type = 3;
+  string start_date = 4;
+  string end_date = 5;
+}
+
+message ListAnalysesResponse {
+  repeated EmotionAnalysis analyses = 1;
+  int64 total = 2;
+}
+
+message GetAnalysisRequest {
+  int64 id = 1;
+}
+
+message GetOverviewRequest {
+  string range = 1;
+}
+
+message EmotionOverview {
+  int64 total_analyses = 1;
+  double avg_sentiment_score = 2;
+  double avg_mood_score = 3;
+  string dominant_emotion = 4;
+  int64 high_risk_count = 5;
+  repeated EmotionDimensionScore dimensions = 6;
+}
+
+message GetTrendsRequest {
+  string start_date = 1;
+  string end_date = 2;
+}
+
+message EmotionTrendPoint {
+  string date = 1;
+  double avg_sentiment_score = 2;
+  double avg_mood_score = 3;
+  string dominant_emotion = 4;
+  int64 high_risk_count = 5;
+}
+
+message EmotionTrends {
+  repeated EmotionTrendPoint points = 1;
+}
+
+message GetCalendarRequest {
+  string month = 1;
+}
+
+message EmotionCalendarDay {
+  string date = 1;
+  string dominant_emotion = 2;
+  double avg_mood_score = 3;
+  double avg_sentiment_score = 4;
+  int32 diary_count = 5;
+  int32 chat_count = 6;
+}
+
+message EmotionCalendar {
+  repeated EmotionCalendarDay days = 1;
+}

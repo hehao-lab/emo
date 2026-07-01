@@ -3,20 +3,36 @@
 
 openapi: 3.0.3
 info:
-    title: UserService API
+    title: ""
     version: 0.0.1
 paths:
-    /v1/users/login:
+    /v1/auth/logout:
         post:
             tags:
-                - UserService
-            description: 登录
-            operationId: UserService_Login
+                - SecurityService
+            description: 退出登录并撤销 refresh token。
+            operationId: SecurityService_Logout
             requestBody:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/user.v1.LoginRequest'
+                            $ref: '#/components/schemas/security.v1.LogoutRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content: {}
+    /v1/auth/refresh:
+        post:
+            tags:
+                - SecurityService
+            description: 使用 refresh token 轮换并签发新的 access token。
+            operationId: SecurityService_RefreshToken
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/security.v1.RefreshTokenRequest'
                 required: true
             responses:
                 "200":
@@ -24,18 +40,24 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/user.v1.LoginResponse'
-    /v1/users/register:
+                                $ref: '#/components/schemas/security.v1.RefreshTokenResponse'
+    /v1/chat/messages/{messageId}/feedback:
         post:
             tags:
-                - UserService
-            description: 注册
-            operationId: UserService_Register
+                - ChatService
+            description: 提交对某条 AI 回复的评分和反馈。
+            operationId: ChatService_CreateFeedback
+            parameters:
+                - name: messageId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
             requestBody:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/user.v1.RegisterRequest'
+                            $ref: '#/components/schemas/chat.v1.CreateFeedbackRequest'
                 required: true
             responses:
                 "200":
@@ -43,21 +65,1490 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/user.v1.RegisterResponse'
+                                $ref: '#/components/schemas/chat.v1.ChatFeedback'
+    /v1/chat/sessions:
+        get:
+            tags:
+                - ChatService
+            description: 分页查询当前用户的历史咨询会话。
+            operationId: ChatService_ListSessions
+            parameters:
+                - name: page
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: pageSize
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: status
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/chat.v1.ListSessionsResponse'
+        post:
+            tags:
+                - ChatService
+            description: 创建 AI 情感咨询会话。
+            operationId: ChatService_CreateSession
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/chat.v1.CreateSessionRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/chat.v1.ChatSession'
+    /v1/chat/sessions/{id}:
+        get:
+            tags:
+                - ChatService
+            description: 获取当前用户指定咨询会话详情。
+            operationId: ChatService_GetSession
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/chat.v1.ChatSession'
+        delete:
+            tags:
+                - ChatService
+            description: 删除当前用户指定咨询会话。
+            operationId: ChatService_DeleteSession
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content: {}
+        patch:
+            tags:
+                - ChatService
+            description: 修改咨询会话标题或状态。
+            operationId: ChatService_UpdateSession
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/chat.v1.UpdateSessionRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/chat.v1.ChatSession'
+    /v1/chat/sessions/{sessionId}/messages:
+        get:
+            tags:
+                - ChatService
+            description: 分页查询指定咨询会话下的聊天消息。
+            operationId: ChatService_ListMessages
+            parameters:
+                - name: sessionId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: page
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: pageSize
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/chat.v1.ListMessagesResponse'
+        post:
+            tags:
+                - ChatService
+            description: 发送用户消息，触发 AI 回复，并保存双方消息。
+            operationId: ChatService_SendMessage
+            parameters:
+                - name: sessionId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/chat.v1.SendMessageRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/chat.v1.SendMessageResponse'
+    /v1/chat/sessions/{sessionId}/summarize:
+        post:
+            tags:
+                - ChatService
+            description: 生成并保存指定咨询会话的上下文摘要。
+            operationId: ChatService_SummarizeSession
+            parameters:
+                - name: sessionId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/chat.v1.SummarizeSessionRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/chat.v1.ChatContextSummary'
+    /v1/diaries:
+        get:
+            tags:
+                - DiaryService
+            description: 分页查询当前用户的心情日记，支持标签、心情、日期范围筛选。
+            operationId: DiaryService_ListDiaries
+            parameters:
+                - name: page
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: pageSize
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: tagId
+                  in: query
+                  schema:
+                    type: string
+                - name: mood
+                  in: query
+                  schema:
+                    type: string
+                - name: startDate
+                  in: query
+                  schema:
+                    type: string
+                - name: endDate
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/diary.v1.ListDiariesResponse'
+        post:
+            tags:
+                - DiaryService
+            description: 新增心情日记，保存正文、心情分数、标签和附件。
+            operationId: DiaryService_CreateDiary
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/diary.v1.CreateDiaryRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/diary.v1.MoodDiary'
+    /v1/diaries/{id}:
+        get:
+            tags:
+                - DiaryService
+            description: 获取当前用户指定心情日记详情。
+            operationId: DiaryService_GetDiary
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/diary.v1.MoodDiary'
+        delete:
+            tags:
+                - DiaryService
+            description: 删除当前用户指定心情日记。
+            operationId: DiaryService_DeleteDiary
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content: {}
+        patch:
+            tags:
+                - DiaryService
+            description: 修改当前用户指定心情日记内容、情绪信息、标签和附件。
+            operationId: DiaryService_UpdateDiary
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/diary.v1.UpdateDiaryRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/diary.v1.MoodDiary'
+    /v1/emotion/analyses:
+        get:
+            tags:
+                - EmotionService
+            description: 分页查询当前用户的情绪分析历史。
+            operationId: EmotionService_ListAnalyses
+            parameters:
+                - name: page
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: pageSize
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: sourceType
+                  in: query
+                  schema:
+                    type: string
+                - name: startDate
+                  in: query
+                  schema:
+                    type: string
+                - name: endDate
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/emotion.v1.ListAnalysesResponse'
+        post:
+            tags:
+                - EmotionService
+            description: 对文本创建情绪分析结果，保存情绪、风险、建议和维度分数。
+            operationId: EmotionService_CreateAnalysis
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/emotion.v1.CreateAnalysisRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/emotion.v1.EmotionAnalysis'
+    /v1/emotion/analyses/{id}:
+        get:
+            tags:
+                - EmotionService
+            description: 获取指定情绪分析详情。
+            operationId: EmotionService_GetAnalysis
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/emotion.v1.EmotionAnalysis'
+    /v1/emotion/reports/calendar:
+        get:
+            tags:
+                - EmotionService
+            description: 获取情绪日历视图数据。
+            operationId: EmotionService_GetCalendar
+            parameters:
+                - name: month
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/emotion.v1.EmotionCalendar'
+    /v1/emotion/reports/overview:
+        get:
+            tags:
+                - EmotionService
+            description: 获取情感分析报告总览统计。
+            operationId: EmotionService_GetOverview
+            parameters:
+                - name: range
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/emotion.v1.EmotionOverview'
+    /v1/emotion/reports/trends:
+        get:
+            tags:
+                - EmotionService
+            description: 获取情绪趋势折线图数据。
+            operationId: EmotionService_GetTrends
+            parameters:
+                - name: startDate
+                  in: query
+                  schema:
+                    type: string
+                - name: endDate
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/emotion.v1.EmotionTrends'
+    /v1/files:
+        post:
+            tags:
+                - FileService
+            description: 登记文件元数据，用于头像、日记附件等业务资源。
+            operationId: FileService_CreateFile
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/file.v1.CreateFileRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/file.v1.FileAsset'
+    /v1/files/upload-token:
+        post:
+            tags:
+                - FileService
+            description: 创建上传凭证，返回上传地址、对象 key 和公开访问地址。
+            operationId: FileService_CreateUploadToken
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/file.v1.CreateUploadTokenRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/file.v1.UploadToken'
+    /v1/files/{id}:
+        get:
+            tags:
+                - FileService
+            description: 查询当前用户指定文件元数据。
+            operationId: FileService_GetFile
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/file.v1.FileAsset'
+        delete:
+            tags:
+                - FileService
+            description: 删除当前用户指定文件资源记录。
+            operationId: FileService_DeleteFile
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content: {}
+    /v1/mood-tags:
+        get:
+            tags:
+                - DiaryService
+            description: 查询系统标签和当前用户自定义心情标签。
+            operationId: DiaryService_ListTags
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/diary.v1.ListTagsResponse'
+        post:
+            tags:
+                - DiaryService
+            description: 创建当前用户自定义心情标签。
+            operationId: DiaryService_CreateTag
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/diary.v1.CreateTagRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/diary.v1.MoodTag'
+    /v1/mood-tags/{id}:
+        delete:
+            tags:
+                - DiaryService
+            description: 删除当前用户自定义心情标签。
+            operationId: DiaryService_DeleteTag
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content: {}
+        patch:
+            tags:
+                - DiaryService
+            description: 修改当前用户自定义心情标签。
+            operationId: DiaryService_UpdateTag
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/diary.v1.UpdateTagRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/diary.v1.MoodTag'
+    /v1/security/events:
+        get:
+            tags:
+                - SecurityService
+            description: 分页查询当前用户安全事件。
+            operationId: SecurityService_ListSecurityEvents
+            parameters:
+                - name: page
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: pageSize
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/security.v1.ListSecurityEventsResponse'
+    /v1/security/login-logs:
+        get:
+            tags:
+                - SecurityService
+            description: 分页查询当前用户登录日志。
+            operationId: SecurityService_ListLoginLogs
+            parameters:
+                - name: page
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: pageSize
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/security.v1.ListLoginLogsResponse'
+    /v1/security/password/change:
+        post:
+            tags:
+                - SecurityService
+            description: 修改当前用户密码，并让所有已登录设备失效。
+            operationId: SecurityService_ChangePassword
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/security.v1.ChangePasswordRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content: {}
+    /v1/security/tokens:
+        get:
+            tags:
+                - SecurityService
+            description: 查询当前用户所有 refresh token 会话，用于登录设备管理。
+            operationId: SecurityService_ListTokens
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/security.v1.ListTokensResponse'
+        delete:
+            tags:
+                - SecurityService
+            description: 撤销当前用户全部 refresh token，让所有设备下线。
+            operationId: SecurityService_RevokeAllTokens
+            responses:
+                "200":
+                    description: OK
+                    content: {}
+    /v1/security/tokens/{tokenId}:
+        delete:
+            tags:
+                - SecurityService
+            description: 撤销指定 refresh token，让单个设备下线。
+            operationId: SecurityService_RevokeToken
+            parameters:
+                - name: tokenId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content: {}
+    /v1/system/about:
+        get:
+            tags:
+                - SystemService
+            description: 获取关于我们信息，包括应用介绍、协议链接和联系方式。
+            operationId: SystemService_GetAbout
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/system.v1.AboutInfo'
+    /v1/system/announcements:
+        get:
+            tags:
+                - SystemService
+            description: 查询当前平台有效期内的系统公告。
+            operationId: SystemService_ListAnnouncements
+            parameters:
+                - name: platform
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/system.v1.ListAnnouncementsResponse'
+    /v1/system/configs/public:
+        get:
+            tags:
+                - SystemService
+            description: 查询前端可公开读取的系统配置。
+            operationId: SystemService_ListPublicConfigs
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/system.v1.ListPublicConfigsResponse'
+    /v1/system/versions/latest:
+        get:
+            tags:
+                - SystemService
+            description: 查询指定平台最新版本和更新策略。
+            operationId: SystemService_GetLatestVersion
+            parameters:
+                - name: platform
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/system.v1.AppVersion'
+    /v1/users/me:
+        get:
+            tags:
+                - ProfileService
+            description: 获取当前登录用户的账号信息和个人资料，用于“我的页面”展示。
+            operationId: ProfileService_GetMe
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/profile.v1.UserProfile'
+    /v1/users/me/avatar:
+        put:
+            tags:
+                - ProfileService
+            description: 修改当前登录用户头像地址，并返回最新个人资料。
+            operationId: ProfileService_UpdateAvatar
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/profile.v1.UpdateAvatarRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/profile.v1.UserProfile'
+    /v1/users/me/profile:
+        patch:
+            tags:
+                - ProfileService
+            description: 修改当前登录用户的个人资料，包括昵称、邮箱、生日、简介、地区等。
+            operationId: ProfileService_UpdateProfile
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/profile.v1.UpdateProfileRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/profile.v1.UserProfile'
 components:
     schemas:
-        user.v1.LoginRequest:
-            required:
-                - username
-                - password
+        chat.v1.ChatContextSummary:
             type: object
             properties:
+                id:
+                    type: string
+                sessionId:
+                    type: string
+                summary:
+                    type: string
+                messageStartId:
+                    type: string
+                messageEndId:
+                    type: string
+                model:
+                    type: string
+                createdAt:
+                    type: string
+        chat.v1.ChatFeedback:
+            type: object
+            properties:
+                id:
+                    type: string
+                userId:
+                    type: string
+                sessionId:
+                    type: string
+                messageId:
+                    type: string
+                rating:
+                    type: integer
+                    format: int32
+                feedbackType:
+                    type: string
+                content:
+                    type: string
+                createdAt:
+                    type: string
+        chat.v1.ChatMessage:
+            type: object
+            properties:
+                id:
+                    type: string
+                sessionId:
+                    type: string
+                userId:
+                    type: string
+                role:
+                    type: string
+                content:
+                    type: string
+                contentType:
+                    type: string
+                model:
+                    type: string
+                promptTokens:
+                    type: integer
+                    format: int32
+                completionTokens:
+                    type: integer
+                    format: int32
+                totalTokens:
+                    type: integer
+                    format: int32
+                latencyMs:
+                    type: integer
+                    format: int32
+                emotionSnapshotJson:
+                    type: string
+                safetyResultJson:
+                    type: string
+                status:
+                    type: string
+                errorMessage:
+                    type: string
+                createdAt:
+                    type: string
+        chat.v1.ChatSession:
+            type: object
+            properties:
+                id:
+                    type: string
+                userId:
+                    type: string
+                title:
+                    type: string
+                scenario:
+                    type: string
+                status:
+                    type: string
+                summary:
+                    type: string
+                messageCount:
+                    type: integer
+                    format: int32
+                lastMessageAt:
+                    type: string
+                createdAt:
+                    type: string
+                updatedAt:
+                    type: string
+        chat.v1.CreateFeedbackRequest:
+            type: object
+            properties:
+                messageId:
+                    type: string
+                rating:
+                    type: integer
+                    format: int32
+                feedbackType:
+                    type: string
+                content:
+                    type: string
+        chat.v1.CreateSessionRequest:
+            type: object
+            properties:
+                title:
+                    type: string
+                scenario:
+                    type: string
+        chat.v1.ListMessagesResponse:
+            type: object
+            properties:
+                messages:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/chat.v1.ChatMessage'
+                total:
+                    type: string
+        chat.v1.ListSessionsResponse:
+            type: object
+            properties:
+                sessions:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/chat.v1.ChatSession'
+                total:
+                    type: string
+        chat.v1.SendMessageRequest:
+            type: object
+            properties:
+                sessionId:
+                    type: string
+                content:
+                    type: string
+                contentType:
+                    type: string
+        chat.v1.SendMessageResponse:
+            type: object
+            properties:
+                userMessage:
+                    $ref: '#/components/schemas/chat.v1.ChatMessage'
+                assistantMessage:
+                    $ref: '#/components/schemas/chat.v1.ChatMessage'
+                analysisId:
+                    type: string
+        chat.v1.SummarizeSessionRequest:
+            type: object
+            properties:
+                sessionId:
+                    type: string
+        chat.v1.UpdateSessionRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+                title:
+                    type: string
+                status:
+                    type: string
+        diary.v1.CreateDiaryRequest:
+            type: object
+            properties:
+                title:
+                    type: string
+                content:
+                    type: string
+                mood:
+                    type: string
+                moodScore:
+                    type: integer
+                    format: int32
+                weather:
+                    type: string
+                location:
+                    type: string
+                occurredOn:
+                    type: string
+                visibility:
+                    type: string
+                tagIds:
+                    type: array
+                    items:
+                        type: string
+                attachmentUrls:
+                    type: array
+                    items:
+                        type: string
+        diary.v1.CreateTagRequest:
+            type: object
+            properties:
+                name:
+                    type: string
+                color:
+                    type: string
+                icon:
+                    type: string
+                sort:
+                    type: integer
+                    format: int32
+        diary.v1.ListDiariesResponse:
+            type: object
+            properties:
+                diaries:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/diary.v1.MoodDiary'
+                total:
+                    type: string
+        diary.v1.ListTagsResponse:
+            type: object
+            properties:
+                tags:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/diary.v1.MoodTag'
+        diary.v1.MoodDiary:
+            type: object
+            properties:
+                id:
+                    type: string
+                userId:
+                    type: string
+                title:
+                    type: string
+                content:
+                    type: string
+                mood:
+                    type: string
+                moodScore:
+                    type: integer
+                    format: int32
+                weather:
+                    type: string
+                location:
+                    type: string
+                occurredOn:
+                    type: string
+                visibility:
+                    type: string
+                tags:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/diary.v1.MoodTag'
+                attachmentUrls:
+                    type: array
+                    items:
+                        type: string
+                analysisId:
+                    type: string
+                createdAt:
+                    type: string
+                updatedAt:
+                    type: string
+        diary.v1.MoodTag:
+            type: object
+            properties:
+                id:
+                    type: string
+                name:
+                    type: string
+                color:
+                    type: string
+                icon:
+                    type: string
+                sort:
+                    type: integer
+                    format: int32
+                system:
+                    type: boolean
+                createdAt:
+                    type: string
+                updatedAt:
+                    type: string
+        diary.v1.UpdateDiaryRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+                title:
+                    type: string
+                content:
+                    type: string
+                mood:
+                    type: string
+                moodScore:
+                    type: integer
+                    format: int32
+                weather:
+                    type: string
+                location:
+                    type: string
+                occurredOn:
+                    type: string
+                visibility:
+                    type: string
+                tagIds:
+                    type: array
+                    items:
+                        type: string
+                attachmentUrls:
+                    type: array
+                    items:
+                        type: string
+        diary.v1.UpdateTagRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+                name:
+                    type: string
+                color:
+                    type: string
+                icon:
+                    type: string
+                sort:
+                    type: integer
+                    format: int32
+        emotion.v1.CreateAnalysisRequest:
+            type: object
+            properties:
+                sourceType:
+                    type: string
+                sourceId:
+                    type: string
+                text:
+                    type: string
+        emotion.v1.EmotionAnalysis:
+            type: object
+            properties:
+                id:
+                    type: string
+                userId:
+                    type: string
+                sourceType:
+                    type: string
+                sourceId:
+                    type: string
+                primaryEmotion:
+                    type: string
+                sentiment:
+                    type: string
+                sentimentScore:
+                    type: number
+                    format: double
+                stressScore:
+                    type: integer
+                    format: int32
+                anxietyScore:
+                    type: integer
+                    format: int32
+                depressionRiskScore:
+                    type: integer
+                    format: int32
+                energyScore:
+                    type: integer
+                    format: int32
+                confidence:
+                    type: number
+                    format: double
+                summary:
+                    type: string
+                advice:
+                    type: string
+                riskLevel:
+                    type: string
+                model:
+                    type: string
+                dimensions:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/emotion.v1.EmotionDimensionScore'
+                rawResultJson:
+                    type: string
+                createdAt:
+                    type: string
+        emotion.v1.EmotionCalendar:
+            type: object
+            properties:
+                days:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/emotion.v1.EmotionCalendarDay'
+        emotion.v1.EmotionCalendarDay:
+            type: object
+            properties:
+                date:
+                    type: string
+                dominantEmotion:
+                    type: string
+                avgMoodScore:
+                    type: number
+                    format: double
+                avgSentimentScore:
+                    type: number
+                    format: double
+                diaryCount:
+                    type: integer
+                    format: int32
+                chatCount:
+                    type: integer
+                    format: int32
+        emotion.v1.EmotionDimensionScore:
+            type: object
+            properties:
+                dimension:
+                    type: string
+                score:
+                    type: number
+                    format: double
+        emotion.v1.EmotionOverview:
+            type: object
+            properties:
+                totalAnalyses:
+                    type: string
+                avgSentimentScore:
+                    type: number
+                    format: double
+                avgMoodScore:
+                    type: number
+                    format: double
+                dominantEmotion:
+                    type: string
+                highRiskCount:
+                    type: string
+                dimensions:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/emotion.v1.EmotionDimensionScore'
+        emotion.v1.EmotionTrendPoint:
+            type: object
+            properties:
+                date:
+                    type: string
+                avgSentimentScore:
+                    type: number
+                    format: double
+                avgMoodScore:
+                    type: number
+                    format: double
+                dominantEmotion:
+                    type: string
+                highRiskCount:
+                    type: string
+        emotion.v1.EmotionTrends:
+            type: object
+            properties:
+                points:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/emotion.v1.EmotionTrendPoint'
+        emotion.v1.ListAnalysesResponse:
+            type: object
+            properties:
+                analyses:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/emotion.v1.EmotionAnalysis'
+                total:
+                    type: string
+        file.v1.CreateFileRequest:
+            type: object
+            properties:
+                bizType:
+                    type: string
+                storageProvider:
+                    type: string
+                bucket:
+                    type: string
+                objectKey:
+                    type: string
+                url:
+                    type: string
+                mimeType:
+                    type: string
+                sizeBytes:
+                    type: string
+                checksum:
+                    type: string
+        file.v1.CreateUploadTokenRequest:
+            type: object
+            properties:
+                bizType:
+                    type: string
+                filename:
+                    type: string
+                mimeType:
+                    type: string
+                sizeBytes:
+                    type: string
+        file.v1.FileAsset:
+            type: object
+            properties:
+                id:
+                    type: string
+                ownerUserId:
+                    type: string
+                bizType:
+                    type: string
+                storageProvider:
+                    type: string
+                bucket:
+                    type: string
+                objectKey:
+                    type: string
+                url:
+                    type: string
+                mimeType:
+                    type: string
+                sizeBytes:
+                    type: string
+                checksum:
+                    type: string
+                status:
+                    type: integer
+                    format: int32
+                createdAt:
+                    type: string
+                updatedAt:
+                    type: string
+        file.v1.UploadToken:
+            type: object
+            properties:
+                provider:
+                    type: string
+                uploadUrl:
+                    type: string
+                objectKey:
+                    type: string
+                publicUrl:
+                    type: string
+                expiresAt:
+                    type: string
+        profile.v1.UpdateAvatarRequest:
+            type: object
+            properties:
+                avatarUrl:
+                    type: string
+        profile.v1.UpdateProfileRequest:
+            type: object
+            properties:
+                nickname:
+                    type: string
+                email:
+                    type: string
+                gender:
+                    type: string
+                birthday:
+                    type: string
+                bio:
+                    type: string
+                location:
+                    type: string
+                occupation:
+                    type: string
+                industry:
+                    type: string
+                language:
+                    type: string
+                timezone:
+                    type: string
+        profile.v1.UserProfile:
+            type: object
+            properties:
+                userId:
+                    type: string
                 username:
                     type: string
-                password:
+                phone:
                     type: string
-            description: 登录
-        user.v1.LoginResponse:
+                email:
+                    type: string
+                nickname:
+                    type: string
+                avatarUrl:
+                    type: string
+                roles:
+                    type: array
+                    items:
+                        type: string
+                gender:
+                    type: string
+                birthday:
+                    type: string
+                bio:
+                    type: string
+                location:
+                    type: string
+                occupation:
+                    type: string
+                industry:
+                    type: string
+                language:
+                    type: string
+                timezone:
+                    type: string
+                createdAt:
+                    type: string
+                updatedAt:
+                    type: string
+        security.v1.AuthToken:
+            type: object
+            properties:
+                tokenId:
+                    type: string
+                deviceId:
+                    type: string
+                deviceName:
+                    type: string
+                ip:
+                    type: string
+                userAgent:
+                    type: string
+                expiresAt:
+                    type: string
+                revokedAt:
+                    type: string
+                createdAt:
+                    type: string
+        security.v1.ChangePasswordRequest:
+            type: object
+            properties:
+                oldPassword:
+                    type: string
+                newPassword:
+                    type: string
+        security.v1.ListLoginLogsResponse:
+            type: object
+            properties:
+                logs:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/security.v1.LoginLog'
+                total:
+                    type: string
+        security.v1.ListSecurityEventsResponse:
+            type: object
+            properties:
+                events:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/security.v1.SecurityEvent'
+                total:
+                    type: string
+        security.v1.ListTokensResponse:
+            type: object
+            properties:
+                tokens:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/security.v1.AuthToken'
+        security.v1.LoginLog:
+            type: object
+            properties:
+                id:
+                    type: string
+                username:
+                    type: string
+                loginType:
+                    type: string
+                success:
+                    type: boolean
+                failReason:
+                    type: string
+                ip:
+                    type: string
+                userAgent:
+                    type: string
+                deviceId:
+                    type: string
+                location:
+                    type: string
+                createdAt:
+                    type: string
+        security.v1.LogoutRequest:
+            type: object
+            properties:
+                refreshToken:
+                    type: string
+        security.v1.RefreshTokenRequest:
+            type: object
+            properties:
+                refreshToken:
+                    type: string
+        security.v1.RefreshTokenResponse:
             type: object
             properties:
                 accessToken:
@@ -66,34 +1557,105 @@ components:
                     type: string
                 expiresAt:
                     type: string
-                userId:
+        security.v1.SecurityEvent:
+            type: object
+            properties:
+                id:
                     type: string
-                username:
+                eventType:
                     type: string
-                avatar:
+                riskLevel:
                     type: string
-                roles:
+                ip:
+                    type: string
+                userAgent:
+                    type: string
+                metadataJson:
+                    type: string
+                createdAt:
+                    type: string
+        system.v1.AboutInfo:
+            type: object
+            properties:
+                appName:
+                    type: string
+                company:
+                    type: string
+                description:
+                    type: string
+                privacyUrl:
+                    type: string
+                termsUrl:
+                    type: string
+                contactEmail:
+                    type: string
+                website:
+                    type: string
+        system.v1.Announcement:
+            type: object
+            properties:
+                id:
+                    type: string
+                title:
+                    type: string
+                content:
+                    type: string
+                targetPlatform:
+                    type: string
+                startAt:
+                    type: string
+                endAt:
+                    type: string
+        system.v1.AppVersion:
+            type: object
+            properties:
+                id:
+                    type: string
+                platform:
+                    type: string
+                version:
+                    type: string
+                buildNo:
+                    type: integer
+                    format: int32
+                forceUpdate:
+                    type: boolean
+                downloadUrl:
+                    type: string
+                changelog:
+                    type: string
+                minSupportedVersion:
+                    type: string
+                publishedAt:
+                    type: string
+        system.v1.ListAnnouncementsResponse:
+            type: object
+            properties:
+                announcements:
                     type: array
                     items:
-                        type: string
-        user.v1.RegisterRequest:
-            required:
-                - username
-                - password
-                - phone
+                        $ref: '#/components/schemas/system.v1.Announcement'
+        system.v1.ListPublicConfigsResponse:
             type: object
             properties:
-                username:
-                    type: string
-                password:
-                    type: string
-                phone:
-                    type: string
-            description: 注册
-        user.v1.RegisterResponse:
+                configs:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/system.v1.PublicConfig'
+        system.v1.PublicConfig:
             type: object
             properties:
-                userId:
+                key:
+                    type: string
+                valueJson:
+                    type: string
+                description:
                     type: string
 tags:
-    - name: UserService
+    - name: ChatService
+    - name: DiaryService
+    - name: EmotionService
+    - name: FileService
+    - name: ProfileService
+    - name: SecurityService
+    - name: SystemService

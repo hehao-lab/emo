@@ -1,0 +1,154 @@
+syntax = "proto3";
+
+package security.v1;
+
+option go_package = "emo-ai-service/api/security/v1;v1";
+
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+
+service SecurityService {
+  // 使用 refresh token 轮换并签发新的 access token。
+  rpc RefreshToken(RefreshTokenRequest) returns (RefreshTokenResponse) {
+    option (google.api.http) = {
+      post: "/v1/auth/refresh"
+      body: "*"
+    };
+  }
+
+  // 退出登录并撤销 refresh token。
+  rpc Logout(LogoutRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      post: "/v1/auth/logout"
+      body: "*"
+    };
+  }
+
+  // 修改当前用户密码，并让所有已登录设备失效。
+  rpc ChangePassword(ChangePasswordRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      post: "/v1/security/password/change"
+      body: "*"
+    };
+  }
+
+  // 分页查询当前用户登录日志。
+  rpc ListLoginLogs(ListLoginLogsRequest) returns (ListLoginLogsResponse) {
+    option (google.api.http) = {
+      get: "/v1/security/login-logs"
+    };
+  }
+
+  // 查询当前用户所有 refresh token 会话，用于登录设备管理。
+  rpc ListTokens(ListTokensRequest) returns (ListTokensResponse) {
+    option (google.api.http) = {
+      get: "/v1/security/tokens"
+    };
+  }
+
+  // 撤销指定 refresh token，让单个设备下线。
+  rpc RevokeToken(RevokeTokenRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      delete: "/v1/security/tokens/{token_id}"
+    };
+  }
+
+  // 撤销当前用户全部 refresh token，让所有设备下线。
+  rpc RevokeAllTokens(RevokeAllTokensRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      delete: "/v1/security/tokens"
+    };
+  }
+
+  // 分页查询当前用户安全事件。
+  rpc ListSecurityEvents(ListSecurityEventsRequest) returns (ListSecurityEventsResponse) {
+    option (google.api.http) = {
+      get: "/v1/security/events"
+    };
+  }
+}
+
+message RefreshTokenRequest {
+  string refresh_token = 1;
+}
+
+message RefreshTokenResponse {
+  string access_token = 1;
+  string refresh_token = 2;
+  int64 expires_at = 3;
+}
+
+message LogoutRequest {
+  string refresh_token = 1;
+}
+
+message ChangePasswordRequest {
+  string old_password = 1;
+  string new_password = 2;
+}
+
+message ListLoginLogsRequest {
+  int32 page = 1;
+  int32 page_size = 2;
+}
+
+message LoginLog {
+  int64 id = 1;
+  string username = 2;
+  string login_type = 3;
+  bool success = 4;
+  string fail_reason = 5;
+  string ip = 6;
+  string user_agent = 7;
+  string device_id = 8;
+  string location = 9;
+  int64 created_at = 10;
+}
+
+message ListLoginLogsResponse {
+  repeated LoginLog logs = 1;
+  int64 total = 2;
+}
+
+message ListTokensRequest {}
+
+message AuthToken {
+  string token_id = 1;
+  string device_id = 2;
+  string device_name = 3;
+  string ip = 4;
+  string user_agent = 5;
+  int64 expires_at = 6;
+  int64 revoked_at = 7;
+  int64 created_at = 8;
+}
+
+message ListTokensResponse {
+  repeated AuthToken tokens = 1;
+}
+
+message RevokeTokenRequest {
+  string token_id = 1;
+}
+
+message RevokeAllTokensRequest {}
+
+message ListSecurityEventsRequest {
+  int32 page = 1;
+  int32 page_size = 2;
+}
+
+message SecurityEvent {
+  int64 id = 1;
+  string event_type = 2;
+  string risk_level = 3;
+  string ip = 4;
+  string user_agent = 5;
+  string metadata_json = 6;
+  int64 created_at = 7;
+}
+
+message ListSecurityEventsResponse {
+  repeated SecurityEvent events = 1;
+  int64 total = 2;
+}

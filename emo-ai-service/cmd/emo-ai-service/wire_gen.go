@@ -7,6 +7,7 @@
 package main
 
 import (
+	"emo-ai-service/internal/auth"
 	"emo-ai-service/internal/biz"
 	"emo-ai-service/internal/conf"
 	"emo-ai-service/internal/data"
@@ -23,16 +24,41 @@ import (
 // Injectors from wire.go:
 
 // wireApp init kratos application.
-func wireApp(confServer *conf.Server, confData *conf.Data, logger *slog.Logger) (*kratos.App, func(), error) {
+func wireApp(confServer *conf.Server, confData *conf.Data, confAuth *conf.Auth, logger *slog.Logger) (*kratos.App, func(), error) {
 	grpcServer := server.NewGRPCServer(confServer)
+	tokenManager := auth.NewTokenManager(confAuth)
 	dataData, cleanup, err := data.NewData(confData)
 	if err != nil {
 		return nil, nil, err
 	}
 	userRepo := data.NewUserRepo(dataData)
-	userUsecase := biz.NewUserUsecase(userRepo)
+	securityRepo := data.NewSecurityRepo(dataData)
+	userUsecase := biz.NewUserUsecase(userRepo, securityRepo, tokenManager)
 	userService := service.NewUserService(userUsecase)
-	httpServer := server.NewHTTPServer(confServer, userService)
+	profileRepo := data.NewProfileRepo(dataData)
+	profileUsecase := biz.NewProfileUsecase(profileRepo)
+	profileService := service.NewProfileService(profileUsecase)
+	userAccountRepo := data.NewUserAccountRepo(dataData)
+	securityUsecase := biz.NewSecurityUsecase(userAccountRepo, securityRepo, tokenManager)
+	securityService := service.NewSecurityService(securityUsecase)
+	diaryRepo := data.NewDiaryRepo(dataData)
+	diaryUsecase := biz.NewDiaryUsecase(diaryRepo)
+	diaryService := service.NewDiaryService(diaryUsecase)
+	chatRepo := data.NewChatRepo(dataData)
+	aiClient := data.NewAIClient(dataData)
+	chatUsecase := biz.NewChatUsecase(chatRepo, aiClient)
+	chatService := service.NewChatService(chatUsecase)
+	emotionRepo := data.NewEmotionRepo(dataData)
+	emotionAnalyzer := data.NewEmotionAnalyzer(dataData)
+	emotionUsecase := biz.NewEmotionUsecase(emotionRepo, emotionAnalyzer)
+	emotionService := service.NewEmotionService(emotionUsecase)
+	systemRepo := data.NewSystemRepo(dataData)
+	systemUsecase := biz.NewSystemUsecase(systemRepo)
+	systemService := service.NewSystemService(systemUsecase)
+	fileRepo := data.NewFileRepo(dataData)
+	fileUsecase := biz.NewFileUsecase(fileRepo)
+	fileService := service.NewFileService(fileUsecase)
+	httpServer := server.NewHTTPServer(confServer, tokenManager, userService, profileService, securityService, diaryService, chatService, emotionService, systemService, fileService)
 	app := newApp(logger, grpcServer, httpServer)
 	return app, func() {
 		cleanup()

@@ -1,0 +1,71 @@
+syntax = "proto3";
+
+package profile.v1;
+
+option go_package = "emo-ai-service/api/profile/v1;v1";
+
+import "google/api/annotations.proto";
+
+service ProfileService {
+  // 获取当前登录用户的账号信息和个人资料，用于“我的页面”展示。
+  rpc GetMe(GetMeRequest) returns (UserProfile) {
+    option (google.api.http) = {
+      get: "/v1/users/me"
+    };
+  }
+
+  // 修改当前登录用户的个人资料，包括昵称、邮箱、生日、简介、地区等。
+  rpc UpdateProfile(UpdateProfileRequest) returns (UserProfile) {
+    option (google.api.http) = {
+      patch: "/v1/users/me/profile"
+      body: "*"
+    };
+  }
+
+  // 修改当前登录用户头像地址，并返回最新个人资料。
+  rpc UpdateAvatar(UpdateAvatarRequest) returns (UserProfile) {
+    option (google.api.http) = {
+      put: "/v1/users/me/avatar"
+      body: "*"
+    };
+  }
+}
+
+message GetMeRequest {}
+
+message UserProfile {
+  int64 user_id = 1;
+  string username = 2;
+  string phone = 3;
+  string email = 4;
+  string nickname = 5;
+  string avatar_url = 6;
+  repeated string roles = 7;
+  string gender = 8;
+  string birthday = 9;
+  string bio = 10;
+  string location = 11;
+  string occupation = 12;
+  string industry = 13;
+  string language = 14;
+  string timezone = 15;
+  int64 created_at = 16;
+  int64 updated_at = 17;
+}
+
+message UpdateProfileRequest {
+  string nickname = 1;
+  string email = 2;
+  string gender = 3;
+  string birthday = 4;
+  string bio = 5;
+  string location = 6;
+  string occupation = 7;
+  string industry = 8;
+  string language = 9;
+  string timezone = 10;
+}
+
+message UpdateAvatarRequest {
+  string avatar_url = 1;
+}

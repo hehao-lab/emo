@@ -6,6 +6,7 @@
 package main
 
 import (
+	"emo-ai-service/internal/auth"
 	"emo-ai-service/internal/biz"
 	"emo-ai-service/internal/conf"
 	"emo-ai-service/internal/data"
@@ -18,9 +19,10 @@ import (
 )
 
 // wireApp init kratos application.
-func wireApp(*conf.Server, *conf.Data, *slog.Logger) (*kratos.App, func(), error) {
+func wireApp(*conf.Server, *conf.Data, *conf.Auth, *slog.Logger) (*kratos.App, func(), error) {
 	panic(wire.Build(
 		data.ProviderSet,
+		auth.ProviderSet,
 		biz.ProviderSet,
 		service.ProviderSet,
 		server.ProviderSet,

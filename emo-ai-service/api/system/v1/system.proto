@@ -1,0 +1,94 @@
+syntax = "proto3";
+
+package system.v1;
+
+option go_package = "emo-ai-service/api/system/v1;v1";
+
+import "google/api/annotations.proto";
+
+service SystemService {
+  // 获取关于我们信息，包括应用介绍、协议链接和联系方式。
+  rpc GetAbout(GetAboutRequest) returns (AboutInfo) {
+    option (google.api.http) = {
+      get: "/v1/system/about"
+    };
+  }
+
+  // 查询前端可公开读取的系统配置。
+  rpc ListPublicConfigs(ListPublicConfigsRequest) returns (ListPublicConfigsResponse) {
+    option (google.api.http) = {
+      get: "/v1/system/configs/public"
+    };
+  }
+
+  // 查询指定平台最新版本和更新策略。
+  rpc GetLatestVersion(GetLatestVersionRequest) returns (AppVersion) {
+    option (google.api.http) = {
+      get: "/v1/system/versions/latest"
+    };
+  }
+
+  // 查询当前平台有效期内的系统公告。
+  rpc ListAnnouncements(ListAnnouncementsRequest) returns (ListAnnouncementsResponse) {
+    option (google.api.http) = {
+      get: "/v1/system/announcements"
+    };
+  }
+}
+
+message GetAboutRequest {}
+
+message AboutInfo {
+  string app_name = 1;
+  string company = 2;
+  string description = 3;
+  string privacy_url = 4;
+  string terms_url = 5;
+  string contact_email = 6;
+  string website = 7;
+}
+
+message ListPublicConfigsRequest {}
+
+message PublicConfig {
+  string key = 1;
+  string value_json = 2;
+  string description = 3;
+}
+
+message ListPublicConfigsResponse {
+  repeated PublicConfig configs = 1;
+}
+
+message GetLatestVersionRequest {
+  string platform = 1;
+}
+
+message AppVersion {
+  int64 id = 1;
+  string platform = 2;
+  string version = 3;
+  int32 build_no = 4;
+  bool force_update = 5;
+  string download_url = 6;
+  string changelog = 7;
+  string min_supported_version = 8;
+  int64 published_at = 9;
+}
+
+message ListAnnouncementsRequest {
+  string platform = 1;
+}
+
+message Announcement {
+  int64 id = 1;
+  string title = 2;
+  string content = 3;
+  string target_platform = 4;
+  int64 start_at = 5;
+  int64 end_at = 6;
+}
+
+message ListAnnouncementsResponse {
+  repeated Announcement announcements = 1;
+}

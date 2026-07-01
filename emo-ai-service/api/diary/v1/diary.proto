@@ -1,0 +1,180 @@
+syntax = "proto3";
+
+package diary.v1;
+
+option go_package = "emo-ai-service/api/diary/v1;v1";
+
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+
+service DiaryService {
+  // 新增心情日记，保存正文、心情分数、标签和附件。
+  rpc CreateDiary(CreateDiaryRequest) returns (MoodDiary) {
+    option (google.api.http) = {
+      post: "/v1/diaries"
+      body: "*"
+    };
+  }
+
+  // 分页查询当前用户的心情日记，支持标签、心情、日期范围筛选。
+  rpc ListDiaries(ListDiariesRequest) returns (ListDiariesResponse) {
+    option (google.api.http) = {
+      get: "/v1/diaries"
+    };
+  }
+
+  // 获取当前用户指定心情日记详情。
+  rpc GetDiary(GetDiaryRequest) returns (MoodDiary) {
+    option (google.api.http) = {
+      get: "/v1/diaries/{id}"
+    };
+  }
+
+  // 修改当前用户指定心情日记内容、情绪信息、标签和附件。
+  rpc UpdateDiary(UpdateDiaryRequest) returns (MoodDiary) {
+    option (google.api.http) = {
+      patch: "/v1/diaries/{id}"
+      body: "*"
+    };
+  }
+
+  // 删除当前用户指定心情日记。
+  rpc DeleteDiary(DeleteDiaryRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      delete: "/v1/diaries/{id}"
+    };
+  }
+
+  // 查询系统标签和当前用户自定义心情标签。
+  rpc ListTags(ListTagsRequest) returns (ListTagsResponse) {
+    option (google.api.http) = {
+      get: "/v1/mood-tags"
+    };
+  }
+
+  // 创建当前用户自定义心情标签。
+  rpc CreateTag(CreateTagRequest) returns (MoodTag) {
+    option (google.api.http) = {
+      post: "/v1/mood-tags"
+      body: "*"
+    };
+  }
+
+  // 修改当前用户自定义心情标签。
+  rpc UpdateTag(UpdateTagRequest) returns (MoodTag) {
+    option (google.api.http) = {
+      patch: "/v1/mood-tags/{id}"
+      body: "*"
+    };
+  }
+
+  // 删除当前用户自定义心情标签。
+  rpc DeleteTag(DeleteTagRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      delete: "/v1/mood-tags/{id}"
+    };
+  }
+}
+
+message MoodDiary {
+  int64 id = 1;
+  int64 user_id = 2;
+  string title = 3;
+  string content = 4;
+  string mood = 5;
+  int32 mood_score = 6;
+  string weather = 7;
+  string location = 8;
+  string occurred_on = 9;
+  string visibility = 10;
+  repeated MoodTag tags = 11;
+  repeated string attachment_urls = 12;
+  int64 analysis_id = 13;
+  int64 created_at = 14;
+  int64 updated_at = 15;
+}
+
+message MoodTag {
+  int64 id = 1;
+  string name = 2;
+  string color = 3;
+  string icon = 4;
+  int32 sort = 5;
+  bool system = 6;
+  int64 created_at = 7;
+  int64 updated_at = 8;
+}
+
+message CreateDiaryRequest {
+  string title = 1;
+  string content = 2;
+  string mood = 3;
+  int32 mood_score = 4;
+  string weather = 5;
+  string location = 6;
+  string occurred_on = 7;
+  string visibility = 8;
+  repeated int64 tag_ids = 9;
+  repeated string attachment_urls = 10;
+}
+
+message ListDiariesRequest {
+  int32 page = 1;
+  int32 page_size = 2;
+  int64 tag_id = 3;
+  string mood = 4;
+  string start_date = 5;
+  string end_date = 6;
+}
+
+message ListDiariesResponse {
+  repeated MoodDiary diaries = 1;
+  int64 total = 2;
+}
+
+message GetDiaryRequest {
+  int64 id = 1;
+}
+
+message UpdateDiaryRequest {
+  int64 id = 1;
+  string title = 2;
+  string content = 3;
+  string mood = 4;
+  int32 mood_score = 5;
+  string weather = 6;
+  string location = 7;
+  string occurred_on = 8;
+  string visibility = 9;
+  repeated int64 tag_ids = 10;
+  repeated string attachment_urls = 11;
+}
+
+message DeleteDiaryRequest {
+  int64 id = 1;
+}
+
+message ListTagsRequest {}
+
+message ListTagsResponse {
+  repeated MoodTag tags = 1;
+}
+
+message CreateTagRequest {
+  string name = 1;
+  string color = 2;
+  string icon = 3;
+  int32 sort = 4;
+}
+
+message UpdateTagRequest {
+  int64 id = 1;
+  string name = 2;
+  string color = 3;
+  string icon = 4;
+  int32 sort = 5;
+}
+
+message DeleteTagRequest {
+  int64 id = 1;
+}

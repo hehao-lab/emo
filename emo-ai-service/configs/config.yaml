@@ -16,3 +16,8 @@ data:
     addr: 127.0.0.1:6379
     read_timeout: 3s
     write_timeout: 3s
+auth:
+  jwt_secret: please-change-this-secret-in-production
+  access_token_ttl: 7200s
+  refresh_token_ttl: 2592000s
+  issuer: emo-ai-service

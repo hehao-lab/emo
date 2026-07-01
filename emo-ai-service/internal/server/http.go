@@ -1,7 +1,15 @@
 package server
 
 import (
-	v1 "emo-ai-service/api/user/v1"
+	chatv1 "emo-ai-service/api/chat/v1"
+	diaryv1 "emo-ai-service/api/diary/v1"
+	emotionv1 "emo-ai-service/api/emotion/v1"
+	filev1 "emo-ai-service/api/file/v1"
+	profilev1 "emo-ai-service/api/profile/v1"
+	securityv1 "emo-ai-service/api/security/v1"
+	systemv1 "emo-ai-service/api/system/v1"
+	userv1 "emo-ai-service/api/user/v1"
+	"emo-ai-service/internal/auth"
 	"emo-ai-service/internal/conf"
 	"emo-ai-service/internal/service"
 
@@ -9,11 +17,32 @@ import (
 	"github.com/go-kratos/kratos/v3/transport/http"
 )
 
-// NewHTTPServer new an HTTP server.
-func NewHTTPServer(c *conf.Server, svc *service.UserService) *http.Server {
+func NewHTTPServer(
+	c *conf.Server,
+	tokenManager *auth.TokenManager,
+	userSvc *service.UserService,
+	profileSvc *service.ProfileService,
+	securitySvc *service.SecurityService,
+	diarySvc *service.DiaryService,
+	chatSvc *service.ChatService,
+	emotionSvc *service.EmotionService,
+	systemSvc *service.SystemService,
+	fileSvc *service.FileService,
+) *http.Server {
+	publicOperations := map[string]bool{
+		userv1.OperationUserServiceRegister:              true,
+		userv1.OperationUserServiceLogin:                 true,
+		securityv1.OperationSecurityServiceRefreshToken:  true,
+		securityv1.OperationSecurityServiceLogout:        true,
+		systemv1.OperationSystemServiceGetAbout:          true,
+		systemv1.OperationSystemServiceListPublicConfigs: true,
+		systemv1.OperationSystemServiceGetLatestVersion:  true,
+		systemv1.OperationSystemServiceListAnnouncements: true,
+	}
 	var opts = []http.ServerOption{
 		http.Middleware(
 			recovery.Recovery(),
+			auth.ServerMiddleware(tokenManager, publicOperations),
 		),
 	}
 	if c.Http.Network != "" {
@@ -26,6 +55,13 @@ func NewHTTPServer(c *conf.Server, svc *service.UserService) *http.Server {
 		opts = append(opts, http.Timeout(c.Http.Timeout.AsDuration()))
 	}
 	srv := http.NewServer(opts...)
-	v1.RegisterUserServiceHTTPServer(srv, svc)
+	userv1.RegisterUserServiceHTTPServer(srv, userSvc)
+	profilev1.RegisterProfileServiceHTTPServer(srv, profileSvc)
+	securityv1.RegisterSecurityServiceHTTPServer(srv, securitySvc)
+	diaryv1.RegisterDiaryServiceHTTPServer(srv, diarySvc)
+	chatv1.RegisterChatServiceHTTPServer(srv, chatSvc)
+	emotionv1.RegisterEmotionServiceHTTPServer(srv, emotionSvc)
+	systemv1.RegisterSystemServiceHTTPServer(srv, systemSvc)
+	filev1.RegisterFileServiceHTTPServer(srv, fileSvc)
 	return srv
 }
