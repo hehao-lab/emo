@@ -6,6 +6,119 @@ info:
     title: ""
     version: 0.0.1
 paths:
+    /api/v1/chat:
+        post:
+            tags:
+                - AIChatService
+            description: Chat sends a non-streaming chat request and waits for the full AI answer.
+            operationId: AIChatService_Chat
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/aichat.v1.ChatRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/aichat.v1.ChatReply'
+    /api/v1/conversations:
+        get:
+            tags:
+                - AIChatService
+            description: ListConversations returns conversations owned by the authenticated user.
+            operationId: AIChatService_ListConversations
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/aichat.v1.ConversationSet'
+        post:
+            tags:
+                - AIChatService
+            description: CreateConversation creates a new conversation for the authenticated user.
+            operationId: AIChatService_CreateConversation
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/aichat.v1.CreateConversationRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/aichat.v1.Conversation'
+    /api/v1/conversations/{conversationId}/messages:
+        get:
+            tags:
+                - AIChatService
+            description: ListMessages returns messages in one conversation owned by the user.
+            operationId: AIChatService_ListMessages
+            parameters:
+                - name: conversationId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/aichat.v1.MessageSet'
+    /api/v1/health:
+        get:
+            tags:
+                - AIChatService
+            description: Health proxies the downstream FastAPI health endpoint.
+            operationId: AIChatService_Health
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/aichat.v1.HealthReply'
+    /api/v1/knowledge/documents:
+        get:
+            tags:
+                - AIChatService
+            description: ListKnowledgeDocuments returns the user's knowledge base documents.
+            operationId: AIChatService_ListKnowledgeDocuments
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/aichat.v1.KnowledgeDocumentSet'
+        post:
+            tags:
+                - AIChatService
+            description: CreateKnowledgeDocument uploads text knowledge into the user's knowledge base.
+            operationId: AIChatService_CreateKnowledgeDocument
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/aichat.v1.CreateKnowledgeDocumentRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/aichat.v1.KnowledgeDocument'
     /v1/auth/logout:
         post:
             tags:
@@ -930,6 +1043,112 @@ paths:
                                 $ref: '#/components/schemas/user.v1.SendRegisterEmailCodeResponse'
 components:
     schemas:
+        aichat.v1.ChatReply:
+            type: object
+            properties:
+                conversation:
+                    $ref: '#/components/schemas/aichat.v1.Conversation'
+                userMessage:
+                    $ref: '#/components/schemas/aichat.v1.Message'
+                assistantMessage:
+                    $ref: '#/components/schemas/aichat.v1.Message'
+            description: ChatReply is returned by the non-streaming chat API after persistence is done.
+        aichat.v1.ChatRequest:
+            type: object
+            properties:
+                conversationId:
+                    type: string
+                message:
+                    type: string
+                systemPrompt:
+                    type: string
+            description: ChatRequest is shared by the streaming and non-streaming chat APIs.
+        aichat.v1.Conversation:
+            type: object
+            properties:
+                id:
+                    type: string
+                title:
+                    type: string
+                createdAt:
+                    type: string
+                updatedAt:
+                    type: string
+            description: Conversation mirrors the FastAPI conversation DTO.
+        aichat.v1.ConversationSet:
+            type: object
+            properties:
+                items:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/aichat.v1.Conversation'
+        aichat.v1.CreateConversationRequest:
+            type: object
+            properties:
+                title:
+                    type: string
+        aichat.v1.CreateKnowledgeDocumentRequest:
+            type: object
+            properties:
+                title:
+                    type: string
+                content:
+                    type: string
+                source:
+                    type: string
+        aichat.v1.HealthReply:
+            type: object
+            properties:
+                status:
+                    type: string
+        aichat.v1.KnowledgeDocument:
+            type: object
+            properties:
+                id:
+                    type: string
+                title:
+                    type: string
+                source:
+                    type: string
+                chunkCount:
+                    type: integer
+                    format: int32
+                createdAt:
+                    type: string
+            description: KnowledgeDocument mirrors a stored knowledge document summary.
+        aichat.v1.KnowledgeDocumentSet:
+            type: object
+            properties:
+                items:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/aichat.v1.KnowledgeDocument'
+        aichat.v1.Message:
+            type: object
+            properties:
+                id:
+                    type: string
+                conversationId:
+                    type: string
+                role:
+                    type: string
+                content:
+                    type: string
+                sequence:
+                    type: integer
+                    format: int32
+                modelName:
+                    type: string
+                createdAt:
+                    type: string
+            description: Message mirrors the FastAPI message DTO.
+        aichat.v1.MessageSet:
+            type: object
+            properties:
+                items:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/aichat.v1.Message'
         chat.v1.ChatContextSummary:
             type: object
             properties:
@@ -1833,6 +2052,14 @@ components:
                 expiresIn:
                     type: string
 tags:
+    - name: AIChatService
+      description: |-
+        AIChatService exposes the Kratos BFF contract used by the frontend.
+
+         The implementation forwards these requests to the downstream FastAPI AI
+         service. The POST SSE endpoint, /api/v1/chat/stream, is registered as a
+         native HTTP handler instead of a generated unary RPC so that streaming flush
+         behavior stays under explicit control.
     - name: ChatService
     - name: DiaryService
     - name: EmotionService

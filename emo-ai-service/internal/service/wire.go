@@ -8,6 +8,7 @@ var ProviderSet = wire.NewSet(
 	NewSecurityService,
 	NewDiaryService,
 	NewChatService,
+	NewAIChatService,
 	NewEmotionService,
 	NewSystemService,
 	NewFileService,

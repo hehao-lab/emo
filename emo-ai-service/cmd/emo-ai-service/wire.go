@@ -19,7 +19,7 @@ import (
 )
 
 // wireApp init kratos application.
-func wireApp(*conf.Server, *conf.Data, *conf.Auth, *slog.Logger) (*kratos.App, func(), error) {
+func wireApp(*conf.Server, *conf.Data, *conf.Auth, *conf.AIService, *slog.Logger) (*kratos.App, func(), error) {
 	panic(wire.Build(
 		data.ProviderSet,
 		auth.ProviderSet,

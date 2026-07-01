@@ -1,0 +1,145 @@
+syntax = "proto3";
+
+package aichat.v1;
+
+option go_package = "emo-ai-service/api/aichat/v1;aichatv1";
+
+import "google/api/annotations.proto";
+
+// AIChatService exposes the Kratos BFF contract used by the frontend.
+//
+// The implementation forwards these requests to the downstream FastAPI AI
+// service. The POST SSE endpoint, /api/v1/chat/stream, is registered as a
+// native HTTP handler instead of a generated unary RPC so that streaming flush
+// behavior stays under explicit control.
+service AIChatService {
+  // Health proxies the downstream FastAPI health endpoint.
+  rpc Health(HealthRequest) returns (HealthReply) {
+    option (google.api.http) = {
+      get: "/api/v1/health"
+    };
+  }
+
+  // CreateConversation creates a new conversation for the authenticated user.
+  rpc CreateConversation(CreateConversationRequest) returns (Conversation) {
+    option (google.api.http) = {
+      post: "/api/v1/conversations"
+      body: "*"
+    };
+  }
+
+  // ListConversations returns conversations owned by the authenticated user.
+  rpc ListConversations(ListConversationsRequest) returns (ConversationSet) {
+    option (google.api.http) = {
+      get: "/api/v1/conversations"
+    };
+  }
+
+  // ListMessages returns messages in one conversation owned by the user.
+  rpc ListMessages(ListMessagesRequest) returns (MessageSet) {
+    option (google.api.http) = {
+      get: "/api/v1/conversations/{conversation_id}/messages"
+    };
+  }
+
+  // Chat sends a non-streaming chat request and waits for the full AI answer.
+  rpc Chat(ChatRequest) returns (ChatReply) {
+    option (google.api.http) = {
+      post: "/api/v1/chat"
+      body: "*"
+    };
+  }
+
+  // CreateKnowledgeDocument uploads text knowledge into the user's knowledge base.
+  rpc CreateKnowledgeDocument(CreateKnowledgeDocumentRequest) returns (KnowledgeDocument) {
+    option (google.api.http) = {
+      post: "/api/v1/knowledge/documents"
+      body: "*"
+    };
+  }
+
+  // ListKnowledgeDocuments returns the user's knowledge base documents.
+  rpc ListKnowledgeDocuments(ListKnowledgeDocumentsRequest) returns (KnowledgeDocumentSet) {
+    option (google.api.http) = {
+      get: "/api/v1/knowledge/documents"
+    };
+  }
+}
+
+message HealthRequest {}
+
+message HealthReply {
+  string status = 1;
+}
+
+// Conversation mirrors the FastAPI conversation DTO.
+message Conversation {
+  string id = 1;
+  string title = 2;
+  string created_at = 3;
+  string updated_at = 4;
+}
+
+message ConversationSet {
+  repeated Conversation items = 1;
+}
+
+// Message mirrors the FastAPI message DTO.
+message Message {
+  string id = 1;
+  string conversation_id = 2;
+  string role = 3;
+  string content = 4;
+  int32 sequence = 5;
+  optional string model_name = 6;
+  string created_at = 7;
+}
+
+message MessageSet {
+  repeated Message items = 1;
+}
+
+// KnowledgeDocument mirrors a stored knowledge document summary.
+message KnowledgeDocument {
+  string id = 1;
+  string title = 2;
+  optional string source = 3;
+  int32 chunk_count = 4;
+  string created_at = 5;
+}
+
+message KnowledgeDocumentSet {
+  repeated KnowledgeDocument items = 1;
+}
+
+message CreateConversationRequest {
+  string title = 1;
+}
+
+message ListConversationsRequest {}
+
+message ListMessagesRequest {
+  string conversation_id = 1;
+}
+
+// ChatRequest is shared by the streaming and non-streaming chat APIs.
+message ChatRequest {
+  optional string conversation_id = 1;
+  string message = 2;
+  optional string system_prompt = 3;
+}
+
+// ChatReply is returned by the non-streaming chat API after persistence is done.
+message ChatReply {
+  Conversation conversation = 1;
+  Message user_message = 2;
+  Message assistant_message = 3;
+}
+
+message CreateKnowledgeDocumentRequest {
+  string title = 1;
+  string content = 2;
+  optional string source = 3;
+}
+
+message ListKnowledgeDocumentsRequest {}

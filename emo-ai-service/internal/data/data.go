@@ -25,6 +25,7 @@ var ProviderSet = wire.NewSet(
 	NewDiaryRepo,
 	NewChatRepo,
 	NewAIClient,
+	NewAIChatRepo,
 	NewEmotionRepo,
 	NewEmotionAnalyzer,
 	NewSystemRepo,

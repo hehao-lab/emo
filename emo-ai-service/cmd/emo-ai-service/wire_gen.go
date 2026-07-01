@@ -24,7 +24,7 @@ import (
 // Injectors from wire.go:
 
 // wireApp init kratos application.
-func wireApp(confServer *conf.Server, confData *conf.Data, confAuth *conf.Auth, logger *slog.Logger) (*kratos.App, func(), error) {
+func wireApp(confServer *conf.Server, confData *conf.Data, confAuth *conf.Auth, aiService *conf.AIService, logger *slog.Logger) (*kratos.App, func(), error) {
 	grpcServer := server.NewGRPCServer(confServer)
 	tokenManager := auth.NewTokenManager(confAuth)
 	dataData, cleanup, err := data.NewData(confData)
@@ -50,6 +50,9 @@ func wireApp(confServer *conf.Server, confData *conf.Data, confAuth *conf.Auth, 
 	aiClient := data.NewAIClient(dataData)
 	chatUsecase := biz.NewChatUsecase(chatRepo, aiClient)
 	chatService := service.NewChatService(chatUsecase)
+	aiChatRepo := data.NewAIChatRepo(aiService)
+	aiChatUsecase := biz.NewAIChatUsecase(aiChatRepo)
+	aiChatService := service.NewAIChatService(aiChatUsecase, tokenManager)
 	emotionRepo := data.NewEmotionRepo(dataData)
 	emotionAnalyzer := data.NewEmotionAnalyzer(dataData)
 	emotionUsecase := biz.NewEmotionUsecase(emotionRepo, emotionAnalyzer)
@@ -60,7 +63,7 @@ func wireApp(confServer *conf.Server, confData *conf.Data, confAuth *conf.Auth, 
 	fileRepo := data.NewFileRepo(dataData)
 	fileUsecase := biz.NewFileUsecase(fileRepo)
 	fileService := service.NewFileService(fileUsecase)
-	httpServer := server.NewHTTPServer(confServer, tokenManager, userService, profileService, securityService, diaryService, chatService, emotionService, systemService, fileService)
+	httpServer := server.NewHTTPServer(confServer, tokenManager, userService, profileService, securityService, diaryService, chatService, aiChatService, emotionService, systemService, fileService)
 	app := newApp(logger, grpcServer, httpServer)
 	return app, func() {
 		cleanup()

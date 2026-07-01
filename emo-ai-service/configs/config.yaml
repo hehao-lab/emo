@@ -2,7 +2,7 @@ server:
   http:
     network: tcp
     addr: 0.0.0.0:8000
-    timeout: 30s
+    timeout: 0s
   grpc:
     network: tcp
     addr: 0.0.0.0:9000
@@ -21,3 +21,6 @@ auth:
   access_token_ttl: 7200s
   refresh_token_ttl: 2592000s
   issuer: emo-ai-service
+ai_service:
+  base_url: http://192.168.31.155:8000
+  timeout: 120s

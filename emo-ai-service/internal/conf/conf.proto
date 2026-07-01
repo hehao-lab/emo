@@ -9,6 +9,8 @@ message Bootstrap {
   Server server = 1;
   Data data = 2;
   Auth auth = 3;
+  // ai_service configures the downstream FastAPI AI service used by the BFF.
+  AIService ai_service = 4;
 }
 
 message Server {
@@ -46,4 +48,11 @@ message Auth {
   google.protobuf.Duration access_token_ttl = 2;
   google.protobuf.Duration refresh_token_ttl = 3;
   string issuer = 4;
+}
+
+message AIService {
+  // base_url is the FastAPI service root, for example http://127.0.0.1:8000.
+  string base_url = 1;
+  // timeout applies to normal JSON requests. SSE uses request cancellation instead.
+  google.protobuf.Duration timeout = 2;
 }

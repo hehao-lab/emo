@@ -1,6 +1,7 @@
 package server
 
 import (
+	aichatv1 "emo-ai-service/api/aichat/v1"
 	chatv1 "emo-ai-service/api/chat/v1"
 	diaryv1 "emo-ai-service/api/diary/v1"
 	emotionv1 "emo-ai-service/api/emotion/v1"
@@ -26,6 +27,7 @@ func NewHTTPServer(
 	securitySvc *service.SecurityService,
 	diarySvc *service.DiaryService,
 	chatSvc *service.ChatService,
+	aiChatSvc *service.AIChatService,
 	emotionSvc *service.EmotionService,
 	systemSvc *service.SystemService,
 	fileSvc *service.FileService,
@@ -40,6 +42,7 @@ func NewHTTPServer(
 		systemv1.OperationSystemServiceListPublicConfigs: true,
 		systemv1.OperationSystemServiceGetLatestVersion:  true,
 		systemv1.OperationSystemServiceListAnnouncements: true,
+		aichatv1.OperationAIChatServiceHealth:            true,
 	}
 	var opts = []http.ServerOption{
 		http.Filter(corsFilter),
@@ -63,6 +66,8 @@ func NewHTTPServer(
 	securityv1.RegisterSecurityServiceHTTPServer(srv, securitySvc)
 	diaryv1.RegisterDiaryServiceHTTPServer(srv, diarySvc)
 	chatv1.RegisterChatServiceHTTPServer(srv, chatSvc)
+	aichatv1.RegisterAIChatServiceHTTPServer(srv, aiChatSvc)
+	srv.HandleFunc("/api/v1/chat/stream", aiChatSvc.StreamChatHTTP)
 	emotionv1.RegisterEmotionServiceHTTPServer(srv, emotionSvc)
 	systemv1.RegisterSystemServiceHTTPServer(srv, systemSvc)
 	filev1.RegisterFileServiceHTTPServer(srv, fileSvc)
@@ -77,8 +82,8 @@ func corsFilter(next nethttp.Handler) nethttp.Handler {
 			w.Header().Set("Vary", "Origin")
 		}
 		w.Header().Set("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE,OPTIONS")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type,Authorization,X-Device-ID,X-Device-Name")
-		w.Header().Set("Access-Control-Expose-Headers", "Content-Length")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type,Authorization,Accept,X-User-Id,X-Device-ID,X-Device-Name")
+		w.Header().Set("Access-Control-Expose-Headers", "Content-Length,Content-Type")
 		if r.Method == nethttp.MethodOptions {
 			w.WriteHeader(nethttp.StatusNoContent)
 			return
