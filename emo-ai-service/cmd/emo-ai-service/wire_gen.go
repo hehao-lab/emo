@@ -33,7 +33,9 @@ func wireApp(confServer *conf.Server, confData *conf.Data, confAuth *conf.Auth, 
 	}
 	userRepo := data.NewUserRepo(dataData)
 	securityRepo := data.NewSecurityRepo(dataData)
-	userUsecase := biz.NewUserUsecase(userRepo, securityRepo, tokenManager)
+	verificationCodeRepo := data.NewVerificationCodeRepo(dataData)
+	emailSender := data.NewEmailSender()
+	userUsecase := biz.NewUserUsecase(userRepo, securityRepo, verificationCodeRepo, emailSender, tokenManager)
 	userService := service.NewUserService(userUsecase)
 	profileRepo := data.NewProfileRepo(dataData)
 	profileUsecase := biz.NewProfileUsecase(profileRepo)

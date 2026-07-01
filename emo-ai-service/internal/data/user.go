@@ -15,7 +15,7 @@ type UserModel struct {
 	Username     string         `gorm:"type:varchar(64);uniqueIndex;not null;comment:登录用户名"`
 	PasswordHash string         `gorm:"type:varchar(255);not null;comment:密码哈希值"`
 	Phone        string         `gorm:"type:varchar(20);uniqueIndex;comment:手机号"`
-	Email        string         `gorm:"type:varchar(128);index;comment:邮箱"`
+	Email        string         `gorm:"type:varchar(128);uniqueIndex;comment:邮箱"`
 	Avatar       string         `gorm:"type:varchar(512);default:'';comment:头像地址"`
 	Roles        string         `gorm:"type:json;not null;comment:角色列表JSON"`
 	Status       int32          `gorm:"not null;default:1;comment:账号状态 1正常 2冻结 3注销"`
@@ -26,6 +26,13 @@ type UserModel struct {
 }
 
 func (UserModel) TableName() string { return "users" }
+
+func migrateLegacyUserPasswordColumn(db *gorm.DB) error {
+	if !db.Migrator().HasColumn(&UserModel{}, "password") {
+		return nil
+	}
+	return db.Migrator().DropColumn(&UserModel{}, "password")
+}
 
 type UserProfileModel struct {
 	ID         int64          `gorm:"primaryKey;autoIncrement;comment:资料ID"`
@@ -90,6 +97,30 @@ func (r *userRepoImpl) Create(ctx context.Context, u *biz.User) (*biz.User, erro
 func (r *userRepoImpl) FindByUsername(ctx context.Context, username string) (*biz.User, error) {
 	var model UserModel
 	err := r.db.WithContext(ctx).Where("username = ?", username).First(&model).Error
+	if err == gorm.ErrRecordNotFound {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	return toBizUser(&model), nil
+}
+
+func (r *userRepoImpl) FindByPhone(ctx context.Context, phone string) (*biz.User, error) {
+	var model UserModel
+	err := r.db.WithContext(ctx).Where("phone = ?", phone).First(&model).Error
+	if err == gorm.ErrRecordNotFound {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	return toBizUser(&model), nil
+}
+
+func (r *userRepoImpl) FindByEmail(ctx context.Context, email string) (*biz.User, error) {
+	var model UserModel
+	err := r.db.WithContext(ctx).Where("email = ?", email).First(&model).Error
 	if err == gorm.ErrRecordNotFound {
 		return nil, nil
 	}
@@ -202,7 +233,6 @@ func toBizUser(model *UserModel) *biz.User {
 	return &biz.User{
 		ID:           model.ID,
 		Username:     model.Username,
-		Password:     model.PasswordHash,
 		PasswordHash: model.PasswordHash,
 		Phone:        model.Phone,
 		Email:        model.Email,

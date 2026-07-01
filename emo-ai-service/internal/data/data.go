@@ -1,10 +1,15 @@
 package data
 
 import (
+	"context"
+	"time"
+
 	"emo-ai-service/internal/conf"
 
 	"github.com/go-kratos/kratos/v3/log"
 	"github.com/google/wire"
+	"github.com/redis/go-redis/v9"
+	"google.golang.org/protobuf/types/known/durationpb"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
@@ -12,6 +17,8 @@ import (
 var ProviderSet = wire.NewSet(
 	NewData,
 	NewUserRepo,
+	NewVerificationCodeRepo,
+	NewEmailSender,
 	NewProfileRepo,
 	NewUserAccountRepo,
 	NewSecurityRepo,
@@ -25,7 +32,8 @@ var ProviderSet = wire.NewSet(
 )
 
 type Data struct {
-	db *gorm.DB
+	db  *gorm.DB
+	rdb *redis.Client
 }
 
 func NewData(c *conf.Data) (*Data, func(), error) {
@@ -58,7 +66,15 @@ func NewData(c *conf.Data) (*Data, func(), error) {
 	); err != nil {
 		return nil, nil, err
 	}
+	if err := migrateLegacyUserPasswordColumn(db); err != nil {
+		return nil, nil, err
+	}
 	if err := applyTableComments(db); err != nil {
+		return nil, nil, err
+	}
+
+	rdb := newRedisClient(c.GetRedis())
+	if err := rdb.Ping(context.Background()).Err(); err != nil {
 		return nil, nil, err
 	}
 
@@ -68,6 +84,38 @@ func NewData(c *conf.Data) (*Data, func(), error) {
 		if sqlDB != nil {
 			sqlDB.Close()
 		}
+		if rdb != nil {
+			_ = rdb.Close()
+		}
 	}
-	return &Data{db: db}, cleanup, nil
+	return &Data{db: db, rdb: rdb}, cleanup, nil
+}
+
+func newRedisClient(c *conf.Data_Redis) *redis.Client {
+	if c == nil {
+		c = &conf.Data_Redis{}
+	}
+	network := c.GetNetwork()
+	if network == "" {
+		network = "tcp"
+	}
+	addr := c.GetAddr()
+	if addr == "" {
+		addr = "127.0.0.1:6379"
+	}
+	readTimeout := protoDurationOrDefault(c.GetReadTimeout(), 3*time.Second)
+	writeTimeout := protoDurationOrDefault(c.GetWriteTimeout(), 3*time.Second)
+	return redis.NewClient(&redis.Options{
+		Network:      network,
+		Addr:         addr,
+		ReadTimeout:  readTimeout,
+		WriteTimeout: writeTimeout,
+	})
+}
+
+func protoDurationOrDefault(d *durationpb.Duration, fallback time.Duration) time.Duration {
+	if d == nil || d.AsDuration() <= 0 {
+		return fallback
+	}
+	return d.AsDuration()
 }

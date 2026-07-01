@@ -802,6 +802,43 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/system.v1.AppVersion'
+    /v1/users/info:
+        get:
+            tags:
+                - UserService
+            description: Get user info by user id.
+            operationId: UserService_GetUserInfo
+            parameters:
+                - name: userId
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/user.v1.GetUserInfoResponse'
+    /v1/users/login:
+        post:
+            tags:
+                - UserService
+            description: Login with phone number and password.
+            operationId: UserService_Login
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/user.v1.LoginRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/user.v1.LoginResponse'
     /v1/users/me:
         get:
             tags:
@@ -853,6 +890,44 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/profile.v1.UserProfile'
+    /v1/users/register:
+        post:
+            tags:
+                - UserService
+            description: Register after verifying the email code.
+            operationId: UserService_Register
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/user.v1.RegisterRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/user.v1.RegisterResponse'
+    /v1/users/register/email-code:
+        post:
+            tags:
+                - UserService
+            description: Send a registration verification code to an email address.
+            operationId: UserService_SendRegisterEmailCode
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/user.v1.SendRegisterEmailCodeRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/user.v1.SendRegisterEmailCodeResponse'
 components:
     schemas:
         chat.v1.ChatContextSummary:
@@ -1651,6 +1726,112 @@ components:
                     type: string
                 description:
                     type: string
+        user.v1.GetUserInfoResponse:
+            type: object
+            properties:
+                userId:
+                    type: string
+                username:
+                    type: string
+                avatar:
+                    type: string
+                roles:
+                    type: array
+                    items:
+                        type: string
+                phone:
+                    type: string
+                email:
+                    type: string
+                address:
+                    type: string
+                introduction:
+                    type: string
+                gender:
+                    type: string
+                birthday:
+                    type: string
+                company:
+                    type: string
+                position:
+                    type: string
+                education:
+                    type: string
+                industry:
+                    type: string
+                interest:
+                    type: string
+                location:
+                    type: string
+                language:
+                    type: string
+                country:
+                    type: string
+        user.v1.LoginRequest:
+            required:
+                - phone
+                - password
+            type: object
+            properties:
+                phone:
+                    type: string
+                password:
+                    type: string
+        user.v1.LoginResponse:
+            type: object
+            properties:
+                accessToken:
+                    type: string
+                refreshToken:
+                    type: string
+                expiresAt:
+                    type: string
+                userId:
+                    type: string
+                username:
+                    type: string
+                avatar:
+                    type: string
+                roles:
+                    type: array
+                    items:
+                        type: string
+        user.v1.RegisterRequest:
+            required:
+                - username
+                - password
+                - phone
+                - email
+                - verificationCode
+            type: object
+            properties:
+                username:
+                    type: string
+                password:
+                    type: string
+                phone:
+                    type: string
+                email:
+                    type: string
+                verificationCode:
+                    type: string
+        user.v1.RegisterResponse:
+            type: object
+            properties:
+                userId:
+                    type: string
+        user.v1.SendRegisterEmailCodeRequest:
+            required:
+                - email
+            type: object
+            properties:
+                email:
+                    type: string
+        user.v1.SendRegisterEmailCodeResponse:
+            type: object
+            properties:
+                expiresIn:
+                    type: string
 tags:
     - name: ChatService
     - name: DiaryService
@@ -1659,3 +1840,4 @@ tags:
     - name: ProfileService
     - name: SecurityService
     - name: SystemService
+    - name: UserService

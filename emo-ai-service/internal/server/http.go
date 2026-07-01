@@ -12,6 +12,7 @@ import (
 	"emo-ai-service/internal/auth"
 	"emo-ai-service/internal/conf"
 	"emo-ai-service/internal/service"
+	nethttp "net/http"
 
 	"github.com/go-kratos/kratos/v3/middleware/recovery"
 	"github.com/go-kratos/kratos/v3/transport/http"
@@ -30,6 +31,7 @@ func NewHTTPServer(
 	fileSvc *service.FileService,
 ) *http.Server {
 	publicOperations := map[string]bool{
+		userv1.OperationUserServiceSendRegisterEmailCode: true,
 		userv1.OperationUserServiceRegister:              true,
 		userv1.OperationUserServiceLogin:                 true,
 		securityv1.OperationSecurityServiceRefreshToken:  true,
@@ -40,6 +42,7 @@ func NewHTTPServer(
 		systemv1.OperationSystemServiceListAnnouncements: true,
 	}
 	var opts = []http.ServerOption{
+		http.Filter(corsFilter),
 		http.Middleware(
 			recovery.Recovery(),
 			auth.ServerMiddleware(tokenManager, publicOperations),
@@ -64,4 +67,22 @@ func NewHTTPServer(
 	systemv1.RegisterSystemServiceHTTPServer(srv, systemSvc)
 	filev1.RegisterFileServiceHTTPServer(srv, fileSvc)
 	return srv
+}
+
+func corsFilter(next nethttp.Handler) nethttp.Handler {
+	return nethttp.HandlerFunc(func(w nethttp.ResponseWriter, r *nethttp.Request) {
+		origin := r.Header.Get("Origin")
+		if origin != "" {
+			w.Header().Set("Access-Control-Allow-Origin", origin)
+			w.Header().Set("Vary", "Origin")
+		}
+		w.Header().Set("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE,OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type,Authorization,X-Device-ID,X-Device-Name")
+		w.Header().Set("Access-Control-Expose-Headers", "Content-Length")
+		if r.Method == nethttp.MethodOptions {
+			w.WriteHeader(nethttp.StatusNoContent)
+			return
+		}
+		next.ServeHTTP(w, r)
+	})
 }

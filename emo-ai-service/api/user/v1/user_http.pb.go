@@ -17,20 +17,47 @@ var _ = new(context.Context)
 
 const _ = http.SupportPackageIsVersion3
 
+const OperationUserServiceGetUserInfo = "/user.v1.UserService/GetUserInfo"
 const OperationUserServiceLogin = "/user.v1.UserService/Login"
 const OperationUserServiceRegister = "/user.v1.UserService/Register"
+const OperationUserServiceSendRegisterEmailCode = "/user.v1.UserService/SendRegisterEmailCode"
 
 type UserServiceHTTPServer interface {
-	// Login 登录
+	// GetUserInfo Get user info by user id.
+	GetUserInfo(context.Context, *GetUserInfoRequest) (*GetUserInfoResponse, error)
+	// Login Login with phone number and password.
 	Login(context.Context, *LoginRequest) (*LoginResponse, error)
-	// Register注册
+	// Register Register after verifying the email code.
 	Register(context.Context, *RegisterRequest) (*RegisterResponse, error)
+	// SendRegisterEmailCode Send a registration verification code to an email address.
+	SendRegisterEmailCode(context.Context, *SendRegisterEmailCodeRequest) (*SendRegisterEmailCodeResponse, error)
 }
 
 func RegisterUserServiceHTTPServer(s *http.Server, srv UserServiceHTTPServer) {
 	r := s.Route("/")
+	r.Handle("POST", "/v1/users/register/email-code", _UserService_SendRegisterEmailCode0_HTTP_Handler(srv))
 	r.Handle("POST", "/v1/users/register", _UserService_Register0_HTTP_Handler(srv))
 	r.Handle("POST", "/v1/users/login", _UserService_Login0_HTTP_Handler(srv))
+	r.Handle("GET", "/v1/users/info", _UserService_GetUserInfo0_HTTP_Handler(srv))
+}
+
+func _UserService_SendRegisterEmailCode0_HTTP_Handler(srv UserServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in SendRegisterEmailCodeRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationUserServiceSendRegisterEmailCode)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.SendRegisterEmailCode(ctx, req.(*SendRegisterEmailCodeRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*SendRegisterEmailCodeResponse)
+		return ctx.Result(200, reply)
+	}
 }
 
 func _UserService_Register0_HTTP_Handler(srv UserServiceHTTPServer) func(ctx http.Context) error {
@@ -71,11 +98,34 @@ func _UserService_Login0_HTTP_Handler(srv UserServiceHTTPServer) func(ctx http.C
 	}
 }
 
+func _UserService_GetUserInfo0_HTTP_Handler(srv UserServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetUserInfoRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationUserServiceGetUserInfo)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetUserInfo(ctx, req.(*GetUserInfoRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*GetUserInfoResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
 type UserServiceHTTPClient interface {
-	// Login 登录
+	// GetUserInfo Get user info by user id.
+	GetUserInfo(ctx context.Context, req *GetUserInfoRequest, opts ...http.CallOption) (rsp *GetUserInfoResponse, err error)
+	// Login Login with phone number and password.
 	Login(ctx context.Context, req *LoginRequest, opts ...http.CallOption) (rsp *LoginResponse, err error)
-	// Register注册
+	// Register Register after verifying the email code.
 	Register(ctx context.Context, req *RegisterRequest, opts ...http.CallOption) (rsp *RegisterResponse, err error)
+	// SendRegisterEmailCode Send a registration verification code to an email address.
+	SendRegisterEmailCode(ctx context.Context, req *SendRegisterEmailCodeRequest, opts ...http.CallOption) (rsp *SendRegisterEmailCodeResponse, err error)
 }
 
 type UserServiceHTTPClientImpl struct {
@@ -86,7 +136,24 @@ func NewUserServiceHTTPClient(client *http.Client) UserServiceHTTPClient {
 	return &UserServiceHTTPClientImpl{client}
 }
 
-// Login 登录
+// GetUserInfo Get user info by user id.
+func (c *UserServiceHTTPClientImpl) GetUserInfo(ctx context.Context, in *GetUserInfoRequest, opts ...http.CallOption) (*GetUserInfoResponse, error) {
+	var out GetUserInfoResponse
+	pattern := "/v1/users/info"
+	path := http.BuildPath(pattern, in, http.WithQueryParams())
+	opts = append([]http.CallOption{
+		http.Accept("application/protojson"),
+		http.Operation(OperationUserServiceGetUserInfo),
+		http.PathTemplate(pattern),
+	}, opts...)
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// Login Login with phone number and password.
 func (c *UserServiceHTTPClientImpl) Login(ctx context.Context, in *LoginRequest, opts ...http.CallOption) (*LoginResponse, error) {
 	var out LoginResponse
 	pattern := "/v1/users/login"
@@ -104,7 +171,7 @@ func (c *UserServiceHTTPClientImpl) Login(ctx context.Context, in *LoginRequest,
 	return &out, nil
 }
 
-// Register注册
+// Register Register after verifying the email code.
 func (c *UserServiceHTTPClientImpl) Register(ctx context.Context, in *RegisterRequest, opts ...http.CallOption) (*RegisterResponse, error) {
 	var out RegisterResponse
 	pattern := "/v1/users/register"
@@ -113,6 +180,24 @@ func (c *UserServiceHTTPClientImpl) Register(ctx context.Context, in *RegisterRe
 		http.Accept("application/protojson"),
 		http.ContentType("application/protojson"),
 		http.Operation(OperationUserServiceRegister),
+		http.PathTemplate(pattern),
+	}, opts...)
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// SendRegisterEmailCode Send a registration verification code to an email address.
+func (c *UserServiceHTTPClientImpl) SendRegisterEmailCode(ctx context.Context, in *SendRegisterEmailCodeRequest, opts ...http.CallOption) (*SendRegisterEmailCodeResponse, error) {
+	var out SendRegisterEmailCodeResponse
+	pattern := "/v1/users/register/email-code"
+	path := http.BuildPath(pattern, in)
+	opts = append([]http.CallOption{
+		http.Accept("application/protojson"),
+		http.ContentType("application/protojson"),
+		http.Operation(OperationUserServiceSendRegisterEmailCode),
 		http.PathTemplate(pattern),
 	}, opts...)
 	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)

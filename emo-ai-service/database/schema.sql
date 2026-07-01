@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS users (
   updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   deleted_at DATETIME NULL COMMENT '软删除时间',
   INDEX idx_users_deleted_at (deleted_at),
-  INDEX idx_users_email (email)
+  UNIQUE KEY idx_users_email (email)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户账号表';
 
 CREATE TABLE IF NOT EXISTS user_profiles (

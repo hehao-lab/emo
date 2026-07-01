@@ -2,68 +2,137 @@ package biz
 
 import (
 	"context"
+	"errors"
 	"testing"
+	"time"
 )
 
-type mockUserRepo struct{}
+type mockUserRepo struct {
+	usernameUser *User
+	phoneUser    *User
+	emailUser    *User
+	created      *User
+}
 
 func (m *mockUserRepo) Create(ctx context.Context, u *User) (*User, error) {
+	m.created = u
 	return &User{
-		ID:       1,
-		Username: u.Username,
-		Password: u.Password,
-		Phone:    u.Phone,
+		ID:           1,
+		Username:     u.Username,
+		PasswordHash: u.PasswordHash,
+		Phone:        u.Phone,
+		Email:        u.Email,
+		Roles:        u.Roles,
+		Status:       u.Status,
 	}, nil
 }
+
+func (m *mockUserRepo) FindByID(ctx context.Context, id int64) (*User, error) {
+	return nil, nil
+}
+
 func (m *mockUserRepo) FindByUsername(ctx context.Context, username string) (*User, error) {
-	return nil, nil // 模拟不存在用户（注册场景）
+	return m.usernameUser, nil
+}
+
+func (m *mockUserRepo) FindByPhone(ctx context.Context, phone string) (*User, error) {
+	return m.phoneUser, nil
+}
+
+func (m *mockUserRepo) FindByEmail(ctx context.Context, email string) (*User, error) {
+	return m.emailUser, nil
+}
+
+type mockVerificationCodeRepo struct {
+	codes   map[string]string
+	deleted string
+}
+
+func (m *mockVerificationCodeRepo) Save(ctx context.Context, scene, target, code string, ttl time.Duration) error {
+	if m.codes == nil {
+		m.codes = map[string]string{}
+	}
+	m.codes[verificationCodeTestKey(scene, target)] = code
+	return nil
+}
+
+func (m *mockVerificationCodeRepo) Get(ctx context.Context, scene, target string) (string, error) {
+	return m.codes[verificationCodeTestKey(scene, target)], nil
+}
+
+func (m *mockVerificationCodeRepo) Delete(ctx context.Context, scene, target string) error {
+	m.deleted = verificationCodeTestKey(scene, target)
+	delete(m.codes, m.deleted)
+	return nil
 }
 
 func TestUserUsecase_Register(t *testing.T) {
-	type fields struct {
-		repo UserRepo
-	}
-	type args struct {
-		ctx      context.Context
-		username string
-		password string
-		phone    string
-	}
-	tests := []struct {
-		name    string
-		fields  fields
-		args    args
-		want    int64
-		wantErr bool
-	}{
-		{
-			name: "success",
-			fields: fields{
-				repo: &mockUserRepo{},
-			},
-			args: args{
-				ctx:      context.Background(),
-				username: "test",
-				password: "<PASSWORD>",
-				phone:    "1234567890",
-			},
-			want:    1,
-			wantErr: false,
+	ctx := context.Background()
+	codes := &mockVerificationCodeRepo{
+		codes: map[string]string{
+			verificationCodeTestKey(VerificationSceneRegisterEmail, "test@example.com"): "123456",
 		},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			uc := &UserUsecase{
-				repo: tt.fields.repo,
-			}
-			got, err := uc.Register(tt.args.ctx, tt.args.username, tt.args.password, tt.args.phone)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("Register() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if got != tt.want {
-				t.Errorf("Register() got = %v, want %v", got, tt.want)
-			}
-		})
+	repo := &mockUserRepo{}
+	uc := &UserUsecase{repo: repo, verificationCodes: codes}
+
+	got, err := uc.Register(ctx, " test ", "password123", " 13800138000 ", " Test@Example.COM ", " 123456 ")
+	if err != nil {
+		t.Fatalf("Register() error = %v", err)
 	}
+	if got != 1 {
+		t.Fatalf("Register() got = %v, want 1", got)
+	}
+	if repo.created == nil {
+		t.Fatal("Register() did not create user")
+	}
+	if repo.created.Username != "test" {
+		t.Fatalf("created username = %q, want test", repo.created.Username)
+	}
+	if repo.created.Phone != "13800138000" {
+		t.Fatalf("created phone = %q, want 13800138000", repo.created.Phone)
+	}
+	if repo.created.Email != "test@example.com" {
+		t.Fatalf("created email = %q, want test@example.com", repo.created.Email)
+	}
+	if repo.created.PasswordHash == "" || repo.created.PasswordHash == "password123" {
+		t.Fatal("created password hash was not generated")
+	}
+	if codes.deleted != verificationCodeTestKey(VerificationSceneRegisterEmail, "test@example.com") {
+		t.Fatalf("deleted code key = %q, want register email key", codes.deleted)
+	}
+}
+
+func TestUserUsecase_RegisterCodeMismatch(t *testing.T) {
+	ctx := context.Background()
+	uc := &UserUsecase{
+		repo: &mockUserRepo{},
+		verificationCodes: &mockVerificationCodeRepo{
+			codes: map[string]string{
+				verificationCodeTestKey(VerificationSceneRegisterEmail, "test@example.com"): "123456",
+			},
+		},
+	}
+
+	_, err := uc.Register(ctx, "test", "password123", "13800138000", "test@example.com", "654321")
+	if !errors.Is(err, ErrCodeMismatch) {
+		t.Fatalf("Register() error = %v, want ErrCodeMismatch", err)
+	}
+}
+
+func TestUserUsecase_RegisterCodeExpired(t *testing.T) {
+	ctx := context.Background()
+	uc := &UserUsecase{
+		repo:              &mockUserRepo{},
+		verificationCodes: &mockVerificationCodeRepo{codes: map[string]string{}},
+	}
+
+	_, err := uc.Register(ctx, "test", "password123", "13800138000", "test@example.com", "123456")
+	if !errors.Is(err, ErrCodeExpired) {
+		t.Fatalf("Register() error = %v, want ErrCodeExpired", err)
+	}
+}
+
+func verificationCodeTestKey(scene, target string) string {
+	return scene + ":" + target
 }
