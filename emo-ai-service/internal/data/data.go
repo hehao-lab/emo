@@ -2,6 +2,7 @@ package data
 
 import (
 	"context"
+	"os"
 	"time"
 
 	"emo-ai-service/internal/conf"
@@ -46,6 +47,9 @@ func NewData(c *conf.Data) (*Data, func(), error) {
 	if err := db.AutoMigrate(
 		&UserModel{},
 		&UserProfileModel{},
+		&PersonalProfileModel{},
+		&TargetProfileModel{},
+		&ImportantRecordModel{},
 		&AuthRefreshTokenModel{},
 		&LoginLogModel{},
 		&SecurityEventModel{},
@@ -109,6 +113,7 @@ func newRedisClient(c *conf.Data_Redis) *redis.Client {
 	return redis.NewClient(&redis.Options{
 		Network:      network,
 		Addr:         addr,
+		Password:     os.Getenv("EMO_REDIS_PASSWORD"),
 		ReadTimeout:  readTimeout,
 		WriteTimeout: writeTimeout,
 	})

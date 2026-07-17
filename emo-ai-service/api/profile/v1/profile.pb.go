@@ -390,6 +390,978 @@ func (x *UpdateAvatarRequest) GetAvatarUrl() string {
 	return ""
 }
 
+type PersonalProfile struct {
+	state              protoimpl.MessageState `protogen:"open.v1"`
+	Id                 int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	UserId             int64                  `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Age                int32                  `protobuf:"varint,3,opt,name=age,proto3" json:"age,omitempty"`
+	Gender             string                 `protobuf:"bytes,4,opt,name=gender,proto3" json:"gender,omitempty"`
+	Mbti               string                 `protobuf:"bytes,5,opt,name=mbti,proto3" json:"mbti,omitempty"`
+	RelationshipStatus string                 `protobuf:"bytes,6,opt,name=relationship_status,json=relationshipStatus,proto3" json:"relationship_status,omitempty"`
+	PersonalitySummary string                 `protobuf:"bytes,7,opt,name=personality_summary,json=personalitySummary,proto3" json:"personality_summary,omitempty"`
+	CreatedAt          int64                  `protobuf:"varint,8,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt          int64                  `protobuf:"varint,9,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	unknownFields      protoimpl.UnknownFields
+	sizeCache          protoimpl.SizeCache
+}
+
+func (x *PersonalProfile) Reset() {
+	*x = PersonalProfile{}
+	mi := &file_profile_v1_profile_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PersonalProfile) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PersonalProfile) ProtoMessage() {}
+
+func (x *PersonalProfile) ProtoReflect() protoreflect.Message {
+	mi := &file_profile_v1_profile_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PersonalProfile.ProtoReflect.Descriptor instead.
+func (*PersonalProfile) Descriptor() ([]byte, []int) {
+	return file_profile_v1_profile_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *PersonalProfile) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *PersonalProfile) GetUserId() int64 {
+	if x != nil {
+		return x.UserId
+	}
+	return 0
+}
+
+func (x *PersonalProfile) GetAge() int32 {
+	if x != nil {
+		return x.Age
+	}
+	return 0
+}
+
+func (x *PersonalProfile) GetGender() string {
+	if x != nil {
+		return x.Gender
+	}
+	return ""
+}
+
+func (x *PersonalProfile) GetMbti() string {
+	if x != nil {
+		return x.Mbti
+	}
+	return ""
+}
+
+func (x *PersonalProfile) GetRelationshipStatus() string {
+	if x != nil {
+		return x.RelationshipStatus
+	}
+	return ""
+}
+
+func (x *PersonalProfile) GetPersonalitySummary() string {
+	if x != nil {
+		return x.PersonalitySummary
+	}
+	return ""
+}
+
+func (x *PersonalProfile) GetCreatedAt() int64 {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return 0
+}
+
+func (x *PersonalProfile) GetUpdatedAt() int64 {
+	if x != nil {
+		return x.UpdatedAt
+	}
+	return 0
+}
+
+type GetPersonalProfileRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetPersonalProfileRequest) Reset() {
+	*x = GetPersonalProfileRequest{}
+	mi := &file_profile_v1_profile_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetPersonalProfileRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetPersonalProfileRequest) ProtoMessage() {}
+
+func (x *GetPersonalProfileRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_profile_v1_profile_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetPersonalProfileRequest.ProtoReflect.Descriptor instead.
+func (*GetPersonalProfileRequest) Descriptor() ([]byte, []int) {
+	return file_profile_v1_profile_proto_rawDescGZIP(), []int{5}
+}
+
+type SavePersonalProfileRequest struct {
+	state              protoimpl.MessageState `protogen:"open.v1"`
+	Age                int32                  `protobuf:"varint,1,opt,name=age,proto3" json:"age,omitempty"`
+	Gender             string                 `protobuf:"bytes,2,opt,name=gender,proto3" json:"gender,omitempty"`
+	Mbti               string                 `protobuf:"bytes,3,opt,name=mbti,proto3" json:"mbti,omitempty"`
+	RelationshipStatus string                 `protobuf:"bytes,4,opt,name=relationship_status,json=relationshipStatus,proto3" json:"relationship_status,omitempty"`
+	PersonalitySummary string                 `protobuf:"bytes,5,opt,name=personality_summary,json=personalitySummary,proto3" json:"personality_summary,omitempty"`
+	unknownFields      protoimpl.UnknownFields
+	sizeCache          protoimpl.SizeCache
+}
+
+func (x *SavePersonalProfileRequest) Reset() {
+	*x = SavePersonalProfileRequest{}
+	mi := &file_profile_v1_profile_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SavePersonalProfileRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SavePersonalProfileRequest) ProtoMessage() {}
+
+func (x *SavePersonalProfileRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_profile_v1_profile_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SavePersonalProfileRequest.ProtoReflect.Descriptor instead.
+func (*SavePersonalProfileRequest) Descriptor() ([]byte, []int) {
+	return file_profile_v1_profile_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *SavePersonalProfileRequest) GetAge() int32 {
+	if x != nil {
+		return x.Age
+	}
+	return 0
+}
+
+func (x *SavePersonalProfileRequest) GetGender() string {
+	if x != nil {
+		return x.Gender
+	}
+	return ""
+}
+
+func (x *SavePersonalProfileRequest) GetMbti() string {
+	if x != nil {
+		return x.Mbti
+	}
+	return ""
+}
+
+func (x *SavePersonalProfileRequest) GetRelationshipStatus() string {
+	if x != nil {
+		return x.RelationshipStatus
+	}
+	return ""
+}
+
+func (x *SavePersonalProfileRequest) GetPersonalitySummary() string {
+	if x != nil {
+		return x.PersonalitySummary
+	}
+	return ""
+}
+
+type TargetProfile struct {
+	state                protoimpl.MessageState `protogen:"open.v1"`
+	Id                   int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	UserId               int64                  `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	PersonalProfileId    int64                  `protobuf:"varint,3,opt,name=personal_profile_id,json=personalProfileId,proto3" json:"personal_profile_id,omitempty"`
+	Name                 string                 `protobuf:"bytes,4,opt,name=name,proto3" json:"name,omitempty"`
+	Age                  int32                  `protobuf:"varint,5,opt,name=age,proto3" json:"age,omitempty"`
+	Gender               string                 `protobuf:"bytes,6,opt,name=gender,proto3" json:"gender,omitempty"`
+	CurrentRelationship  string                 `protobuf:"bytes,7,opt,name=current_relationship,json=currentRelationship,proto3" json:"current_relationship,omitempty"`
+	InteractionFrequency string                 `protobuf:"bytes,8,opt,name=interaction_frequency,json=interactionFrequency,proto3" json:"interaction_frequency,omitempty"`
+	RelationshipGoal     string                 `protobuf:"bytes,9,opt,name=relationship_goal,json=relationshipGoal,proto3" json:"relationship_goal,omitempty"`
+	PersonalityTraits    string                 `protobuf:"bytes,10,opt,name=personality_traits,json=personalityTraits,proto3" json:"personality_traits,omitempty"`
+	RecentInteraction    string                 `protobuf:"bytes,11,opt,name=recent_interaction,json=recentInteraction,proto3" json:"recent_interaction,omitempty"`
+	CreatedAt            int64                  `protobuf:"varint,12,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt            int64                  `protobuf:"varint,13,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	Mbti                 string                 `protobuf:"bytes,14,opt,name=mbti,proto3" json:"mbti,omitempty"`
+	unknownFields        protoimpl.UnknownFields
+	sizeCache            protoimpl.SizeCache
+}
+
+func (x *TargetProfile) Reset() {
+	*x = TargetProfile{}
+	mi := &file_profile_v1_profile_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *TargetProfile) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*TargetProfile) ProtoMessage() {}
+
+func (x *TargetProfile) ProtoReflect() protoreflect.Message {
+	mi := &file_profile_v1_profile_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use TargetProfile.ProtoReflect.Descriptor instead.
+func (*TargetProfile) Descriptor() ([]byte, []int) {
+	return file_profile_v1_profile_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *TargetProfile) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *TargetProfile) GetUserId() int64 {
+	if x != nil {
+		return x.UserId
+	}
+	return 0
+}
+
+func (x *TargetProfile) GetPersonalProfileId() int64 {
+	if x != nil {
+		return x.PersonalProfileId
+	}
+	return 0
+}
+
+func (x *TargetProfile) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *TargetProfile) GetAge() int32 {
+	if x != nil {
+		return x.Age
+	}
+	return 0
+}
+
+func (x *TargetProfile) GetGender() string {
+	if x != nil {
+		return x.Gender
+	}
+	return ""
+}
+
+func (x *TargetProfile) GetCurrentRelationship() string {
+	if x != nil {
+		return x.CurrentRelationship
+	}
+	return ""
+}
+
+func (x *TargetProfile) GetInteractionFrequency() string {
+	if x != nil {
+		return x.InteractionFrequency
+	}
+	return ""
+}
+
+func (x *TargetProfile) GetRelationshipGoal() string {
+	if x != nil {
+		return x.RelationshipGoal
+	}
+	return ""
+}
+
+func (x *TargetProfile) GetPersonalityTraits() string {
+	if x != nil {
+		return x.PersonalityTraits
+	}
+	return ""
+}
+
+func (x *TargetProfile) GetRecentInteraction() string {
+	if x != nil {
+		return x.RecentInteraction
+	}
+	return ""
+}
+
+func (x *TargetProfile) GetCreatedAt() int64 {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return 0
+}
+
+func (x *TargetProfile) GetUpdatedAt() int64 {
+	if x != nil {
+		return x.UpdatedAt
+	}
+	return 0
+}
+
+func (x *TargetProfile) GetMbti() string {
+	if x != nil {
+		return x.Mbti
+	}
+	return ""
+}
+
+type ListTargetProfilesRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListTargetProfilesRequest) Reset() {
+	*x = ListTargetProfilesRequest{}
+	mi := &file_profile_v1_profile_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListTargetProfilesRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListTargetProfilesRequest) ProtoMessage() {}
+
+func (x *ListTargetProfilesRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_profile_v1_profile_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListTargetProfilesRequest.ProtoReflect.Descriptor instead.
+func (*ListTargetProfilesRequest) Descriptor() ([]byte, []int) {
+	return file_profile_v1_profile_proto_rawDescGZIP(), []int{8}
+}
+
+type ListTargetProfilesResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Targets       []*TargetProfile       `protobuf:"bytes,1,rep,name=targets,proto3" json:"targets,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListTargetProfilesResponse) Reset() {
+	*x = ListTargetProfilesResponse{}
+	mi := &file_profile_v1_profile_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListTargetProfilesResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListTargetProfilesResponse) ProtoMessage() {}
+
+func (x *ListTargetProfilesResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_profile_v1_profile_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListTargetProfilesResponse.ProtoReflect.Descriptor instead.
+func (*ListTargetProfilesResponse) Descriptor() ([]byte, []int) {
+	return file_profile_v1_profile_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *ListTargetProfilesResponse) GetTargets() []*TargetProfile {
+	if x != nil {
+		return x.Targets
+	}
+	return nil
+}
+
+type SaveTargetProfileRequest struct {
+	state                protoimpl.MessageState `protogen:"open.v1"`
+	Id                   int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Name                 string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Age                  int32                  `protobuf:"varint,3,opt,name=age,proto3" json:"age,omitempty"`
+	Gender               string                 `protobuf:"bytes,4,opt,name=gender,proto3" json:"gender,omitempty"`
+	CurrentRelationship  string                 `protobuf:"bytes,5,opt,name=current_relationship,json=currentRelationship,proto3" json:"current_relationship,omitempty"`
+	InteractionFrequency string                 `protobuf:"bytes,6,opt,name=interaction_frequency,json=interactionFrequency,proto3" json:"interaction_frequency,omitempty"`
+	RelationshipGoal     string                 `protobuf:"bytes,7,opt,name=relationship_goal,json=relationshipGoal,proto3" json:"relationship_goal,omitempty"`
+	PersonalityTraits    string                 `protobuf:"bytes,8,opt,name=personality_traits,json=personalityTraits,proto3" json:"personality_traits,omitempty"`
+	RecentInteraction    string                 `protobuf:"bytes,9,opt,name=recent_interaction,json=recentInteraction,proto3" json:"recent_interaction,omitempty"`
+	Mbti                 string                 `protobuf:"bytes,10,opt,name=mbti,proto3" json:"mbti,omitempty"`
+	unknownFields        protoimpl.UnknownFields
+	sizeCache            protoimpl.SizeCache
+}
+
+func (x *SaveTargetProfileRequest) Reset() {
+	*x = SaveTargetProfileRequest{}
+	mi := &file_profile_v1_profile_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SaveTargetProfileRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SaveTargetProfileRequest) ProtoMessage() {}
+
+func (x *SaveTargetProfileRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_profile_v1_profile_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SaveTargetProfileRequest.ProtoReflect.Descriptor instead.
+func (*SaveTargetProfileRequest) Descriptor() ([]byte, []int) {
+	return file_profile_v1_profile_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *SaveTargetProfileRequest) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *SaveTargetProfileRequest) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *SaveTargetProfileRequest) GetAge() int32 {
+	if x != nil {
+		return x.Age
+	}
+	return 0
+}
+
+func (x *SaveTargetProfileRequest) GetGender() string {
+	if x != nil {
+		return x.Gender
+	}
+	return ""
+}
+
+func (x *SaveTargetProfileRequest) GetCurrentRelationship() string {
+	if x != nil {
+		return x.CurrentRelationship
+	}
+	return ""
+}
+
+func (x *SaveTargetProfileRequest) GetInteractionFrequency() string {
+	if x != nil {
+		return x.InteractionFrequency
+	}
+	return ""
+}
+
+func (x *SaveTargetProfileRequest) GetRelationshipGoal() string {
+	if x != nil {
+		return x.RelationshipGoal
+	}
+	return ""
+}
+
+func (x *SaveTargetProfileRequest) GetPersonalityTraits() string {
+	if x != nil {
+		return x.PersonalityTraits
+	}
+	return ""
+}
+
+func (x *SaveTargetProfileRequest) GetRecentInteraction() string {
+	if x != nil {
+		return x.RecentInteraction
+	}
+	return ""
+}
+
+func (x *SaveTargetProfileRequest) GetMbti() string {
+	if x != nil {
+		return x.Mbti
+	}
+	return ""
+}
+
+type ImportantRecord struct {
+	state             protoimpl.MessageState `protogen:"open.v1"`
+	Id                int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	UserId            int64                  `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	PersonalProfileId int64                  `protobuf:"varint,3,opt,name=personal_profile_id,json=personalProfileId,proto3" json:"personal_profile_id,omitempty"`
+	TargetProfileId   int64                  `protobuf:"varint,4,opt,name=target_profile_id,json=targetProfileId,proto3" json:"target_profile_id,omitempty"`
+	Title             string                 `protobuf:"bytes,5,opt,name=title,proto3" json:"title,omitempty"`
+	RecordTime        string                 `protobuf:"bytes,6,opt,name=record_time,json=recordTime,proto3" json:"record_time,omitempty"`
+	EventDescription  string                 `protobuf:"bytes,7,opt,name=event_description,json=eventDescription,proto3" json:"event_description,omitempty"`
+	Resolution        string                 `protobuf:"bytes,8,opt,name=resolution,proto3" json:"resolution,omitempty"`
+	ConcernPoint      string                 `protobuf:"bytes,9,opt,name=concern_point,json=concernPoint,proto3" json:"concern_point,omitempty"`
+	Satisfaction      string                 `protobuf:"bytes,10,opt,name=satisfaction,proto3" json:"satisfaction,omitempty"`
+	CreatedAt         int64                  `protobuf:"varint,11,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt         int64                  `protobuf:"varint,12,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
+}
+
+func (x *ImportantRecord) Reset() {
+	*x = ImportantRecord{}
+	mi := &file_profile_v1_profile_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ImportantRecord) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ImportantRecord) ProtoMessage() {}
+
+func (x *ImportantRecord) ProtoReflect() protoreflect.Message {
+	mi := &file_profile_v1_profile_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ImportantRecord.ProtoReflect.Descriptor instead.
+func (*ImportantRecord) Descriptor() ([]byte, []int) {
+	return file_profile_v1_profile_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *ImportantRecord) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *ImportantRecord) GetUserId() int64 {
+	if x != nil {
+		return x.UserId
+	}
+	return 0
+}
+
+func (x *ImportantRecord) GetPersonalProfileId() int64 {
+	if x != nil {
+		return x.PersonalProfileId
+	}
+	return 0
+}
+
+func (x *ImportantRecord) GetTargetProfileId() int64 {
+	if x != nil {
+		return x.TargetProfileId
+	}
+	return 0
+}
+
+func (x *ImportantRecord) GetTitle() string {
+	if x != nil {
+		return x.Title
+	}
+	return ""
+}
+
+func (x *ImportantRecord) GetRecordTime() string {
+	if x != nil {
+		return x.RecordTime
+	}
+	return ""
+}
+
+func (x *ImportantRecord) GetEventDescription() string {
+	if x != nil {
+		return x.EventDescription
+	}
+	return ""
+}
+
+func (x *ImportantRecord) GetResolution() string {
+	if x != nil {
+		return x.Resolution
+	}
+	return ""
+}
+
+func (x *ImportantRecord) GetConcernPoint() string {
+	if x != nil {
+		return x.ConcernPoint
+	}
+	return ""
+}
+
+func (x *ImportantRecord) GetSatisfaction() string {
+	if x != nil {
+		return x.Satisfaction
+	}
+	return ""
+}
+
+func (x *ImportantRecord) GetCreatedAt() int64 {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return 0
+}
+
+func (x *ImportantRecord) GetUpdatedAt() int64 {
+	if x != nil {
+		return x.UpdatedAt
+	}
+	return 0
+}
+
+type ListImportantRecordsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	TargetId      int64                  `protobuf:"varint,1,opt,name=target_id,json=targetId,proto3" json:"target_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListImportantRecordsRequest) Reset() {
+	*x = ListImportantRecordsRequest{}
+	mi := &file_profile_v1_profile_proto_msgTypes[12]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListImportantRecordsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListImportantRecordsRequest) ProtoMessage() {}
+
+func (x *ListImportantRecordsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_profile_v1_profile_proto_msgTypes[12]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListImportantRecordsRequest.ProtoReflect.Descriptor instead.
+func (*ListImportantRecordsRequest) Descriptor() ([]byte, []int) {
+	return file_profile_v1_profile_proto_rawDescGZIP(), []int{12}
+}
+
+func (x *ListImportantRecordsRequest) GetTargetId() int64 {
+	if x != nil {
+		return x.TargetId
+	}
+	return 0
+}
+
+type ListImportantRecordsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Records       []*ImportantRecord     `protobuf:"bytes,1,rep,name=records,proto3" json:"records,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListImportantRecordsResponse) Reset() {
+	*x = ListImportantRecordsResponse{}
+	mi := &file_profile_v1_profile_proto_msgTypes[13]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListImportantRecordsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListImportantRecordsResponse) ProtoMessage() {}
+
+func (x *ListImportantRecordsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_profile_v1_profile_proto_msgTypes[13]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListImportantRecordsResponse.ProtoReflect.Descriptor instead.
+func (*ListImportantRecordsResponse) Descriptor() ([]byte, []int) {
+	return file_profile_v1_profile_proto_rawDescGZIP(), []int{13}
+}
+
+func (x *ListImportantRecordsResponse) GetRecords() []*ImportantRecord {
+	if x != nil {
+		return x.Records
+	}
+	return nil
+}
+
+type SaveImportantRecordRequest struct {
+	state            protoimpl.MessageState `protogen:"open.v1"`
+	Id               int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	TargetProfileId  int64                  `protobuf:"varint,2,opt,name=target_profile_id,json=targetProfileId,proto3" json:"target_profile_id,omitempty"`
+	Title            string                 `protobuf:"bytes,3,opt,name=title,proto3" json:"title,omitempty"`
+	RecordTime       string                 `protobuf:"bytes,4,opt,name=record_time,json=recordTime,proto3" json:"record_time,omitempty"`
+	EventDescription string                 `protobuf:"bytes,5,opt,name=event_description,json=eventDescription,proto3" json:"event_description,omitempty"`
+	Resolution       string                 `protobuf:"bytes,6,opt,name=resolution,proto3" json:"resolution,omitempty"`
+	ConcernPoint     string                 `protobuf:"bytes,7,opt,name=concern_point,json=concernPoint,proto3" json:"concern_point,omitempty"`
+	Satisfaction     string                 `protobuf:"bytes,8,opt,name=satisfaction,proto3" json:"satisfaction,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
+}
+
+func (x *SaveImportantRecordRequest) Reset() {
+	*x = SaveImportantRecordRequest{}
+	mi := &file_profile_v1_profile_proto_msgTypes[14]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SaveImportantRecordRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SaveImportantRecordRequest) ProtoMessage() {}
+
+func (x *SaveImportantRecordRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_profile_v1_profile_proto_msgTypes[14]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SaveImportantRecordRequest.ProtoReflect.Descriptor instead.
+func (*SaveImportantRecordRequest) Descriptor() ([]byte, []int) {
+	return file_profile_v1_profile_proto_rawDescGZIP(), []int{14}
+}
+
+func (x *SaveImportantRecordRequest) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *SaveImportantRecordRequest) GetTargetProfileId() int64 {
+	if x != nil {
+		return x.TargetProfileId
+	}
+	return 0
+}
+
+func (x *SaveImportantRecordRequest) GetTitle() string {
+	if x != nil {
+		return x.Title
+	}
+	return ""
+}
+
+func (x *SaveImportantRecordRequest) GetRecordTime() string {
+	if x != nil {
+		return x.RecordTime
+	}
+	return ""
+}
+
+func (x *SaveImportantRecordRequest) GetEventDescription() string {
+	if x != nil {
+		return x.EventDescription
+	}
+	return ""
+}
+
+func (x *SaveImportantRecordRequest) GetResolution() string {
+	if x != nil {
+		return x.Resolution
+	}
+	return ""
+}
+
+func (x *SaveImportantRecordRequest) GetConcernPoint() string {
+	if x != nil {
+		return x.ConcernPoint
+	}
+	return ""
+}
+
+func (x *SaveImportantRecordRequest) GetSatisfaction() string {
+	if x != nil {
+		return x.Satisfaction
+	}
+	return ""
+}
+
+type DeleteImportantRecordRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteImportantRecordRequest) Reset() {
+	*x = DeleteImportantRecordRequest{}
+	mi := &file_profile_v1_profile_proto_msgTypes[15]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteImportantRecordRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteImportantRecordRequest) ProtoMessage() {}
+
+func (x *DeleteImportantRecordRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_profile_v1_profile_proto_msgTypes[15]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteImportantRecordRequest.ProtoReflect.Descriptor instead.
+func (*DeleteImportantRecordRequest) Descriptor() ([]byte, []int) {
+	return file_profile_v1_profile_proto_rawDescGZIP(), []int{15}
+}
+
+func (x *DeleteImportantRecordRequest) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+type DeleteImportantRecordResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Ok            bool                   `protobuf:"varint,1,opt,name=ok,proto3" json:"ok,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteImportantRecordResponse) Reset() {
+	*x = DeleteImportantRecordResponse{}
+	mi := &file_profile_v1_profile_proto_msgTypes[16]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteImportantRecordResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteImportantRecordResponse) ProtoMessage() {}
+
+func (x *DeleteImportantRecordResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_profile_v1_profile_proto_msgTypes[16]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteImportantRecordResponse.ProtoReflect.Descriptor instead.
+func (*DeleteImportantRecordResponse) Descriptor() ([]byte, []int) {
+	return file_profile_v1_profile_proto_rawDescGZIP(), []int{16}
+}
+
+func (x *DeleteImportantRecordResponse) GetOk() bool {
+	if x != nil {
+		return x.Ok
+	}
+	return false
+}
+
 var File_profile_v1_profile_proto protoreflect.FileDescriptor
 
 const file_profile_v1_profile_proto_rawDesc = "" +
@@ -437,11 +1409,110 @@ const file_profile_v1_profile_proto_rawDesc = "" +
 	" \x01(\tR\btimezone\"4\n" +
 	"\x13UpdateAvatarRequest\x12\x1d\n" +
 	"\n" +
-	"avatar_url\x18\x01 \x01(\tR\tavatarUrl2\xb9\x02\n" +
+	"avatar_url\x18\x01 \x01(\tR\tavatarUrl\"\x98\x02\n" +
+	"\x0fPersonalProfile\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x17\n" +
+	"\auser_id\x18\x02 \x01(\x03R\x06userId\x12\x10\n" +
+	"\x03age\x18\x03 \x01(\x05R\x03age\x12\x16\n" +
+	"\x06gender\x18\x04 \x01(\tR\x06gender\x12\x12\n" +
+	"\x04mbti\x18\x05 \x01(\tR\x04mbti\x12/\n" +
+	"\x13relationship_status\x18\x06 \x01(\tR\x12relationshipStatus\x12/\n" +
+	"\x13personality_summary\x18\a \x01(\tR\x12personalitySummary\x12\x1d\n" +
+	"\n" +
+	"created_at\x18\b \x01(\x03R\tcreatedAt\x12\x1d\n" +
+	"\n" +
+	"updated_at\x18\t \x01(\x03R\tupdatedAt\"\x1b\n" +
+	"\x19GetPersonalProfileRequest\"\xbc\x01\n" +
+	"\x1aSavePersonalProfileRequest\x12\x10\n" +
+	"\x03age\x18\x01 \x01(\x05R\x03age\x12\x16\n" +
+	"\x06gender\x18\x02 \x01(\tR\x06gender\x12\x12\n" +
+	"\x04mbti\x18\x03 \x01(\tR\x04mbti\x12/\n" +
+	"\x13relationship_status\x18\x04 \x01(\tR\x12relationshipStatus\x12/\n" +
+	"\x13personality_summary\x18\x05 \x01(\tR\x12personalitySummary\"\xeb\x03\n" +
+	"\rTargetProfile\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x17\n" +
+	"\auser_id\x18\x02 \x01(\x03R\x06userId\x12.\n" +
+	"\x13personal_profile_id\x18\x03 \x01(\x03R\x11personalProfileId\x12\x12\n" +
+	"\x04name\x18\x04 \x01(\tR\x04name\x12\x10\n" +
+	"\x03age\x18\x05 \x01(\x05R\x03age\x12\x16\n" +
+	"\x06gender\x18\x06 \x01(\tR\x06gender\x121\n" +
+	"\x14current_relationship\x18\a \x01(\tR\x13currentRelationship\x123\n" +
+	"\x15interaction_frequency\x18\b \x01(\tR\x14interactionFrequency\x12+\n" +
+	"\x11relationship_goal\x18\t \x01(\tR\x10relationshipGoal\x12-\n" +
+	"\x12personality_traits\x18\n" +
+	" \x01(\tR\x11personalityTraits\x12-\n" +
+	"\x12recent_interaction\x18\v \x01(\tR\x11recentInteraction\x12\x1d\n" +
+	"\n" +
+	"created_at\x18\f \x01(\x03R\tcreatedAt\x12\x1d\n" +
+	"\n" +
+	"updated_at\x18\r \x01(\x03R\tupdatedAt\x12\x12\n" +
+	"\x04mbti\x18\x0e \x01(\tR\x04mbti\"\x1b\n" +
+	"\x19ListTargetProfilesRequest\"Q\n" +
+	"\x1aListTargetProfilesResponse\x123\n" +
+	"\atargets\x18\x01 \x03(\v2\x19.profile.v1.TargetProfileR\atargets\"\xef\x02\n" +
+	"\x18SaveTargetProfileRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12\x10\n" +
+	"\x03age\x18\x03 \x01(\x05R\x03age\x12\x16\n" +
+	"\x06gender\x18\x04 \x01(\tR\x06gender\x121\n" +
+	"\x14current_relationship\x18\x05 \x01(\tR\x13currentRelationship\x123\n" +
+	"\x15interaction_frequency\x18\x06 \x01(\tR\x14interactionFrequency\x12+\n" +
+	"\x11relationship_goal\x18\a \x01(\tR\x10relationshipGoal\x12-\n" +
+	"\x12personality_traits\x18\b \x01(\tR\x11personalityTraits\x12-\n" +
+	"\x12recent_interaction\x18\t \x01(\tR\x11recentInteraction\x12\x12\n" +
+	"\x04mbti\x18\n" +
+	" \x01(\tR\x04mbti\"\xa1\x03\n" +
+	"\x0fImportantRecord\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x17\n" +
+	"\auser_id\x18\x02 \x01(\x03R\x06userId\x12.\n" +
+	"\x13personal_profile_id\x18\x03 \x01(\x03R\x11personalProfileId\x12*\n" +
+	"\x11target_profile_id\x18\x04 \x01(\x03R\x0ftargetProfileId\x12\x14\n" +
+	"\x05title\x18\x05 \x01(\tR\x05title\x12\x1f\n" +
+	"\vrecord_time\x18\x06 \x01(\tR\n" +
+	"recordTime\x12+\n" +
+	"\x11event_description\x18\a \x01(\tR\x10eventDescription\x12\x1e\n" +
+	"\n" +
+	"resolution\x18\b \x01(\tR\n" +
+	"resolution\x12#\n" +
+	"\rconcern_point\x18\t \x01(\tR\fconcernPoint\x12\"\n" +
+	"\fsatisfaction\x18\n" +
+	" \x01(\tR\fsatisfaction\x12\x1d\n" +
+	"\n" +
+	"created_at\x18\v \x01(\x03R\tcreatedAt\x12\x1d\n" +
+	"\n" +
+	"updated_at\x18\f \x01(\x03R\tupdatedAt\":\n" +
+	"\x1bListImportantRecordsRequest\x12\x1b\n" +
+	"\ttarget_id\x18\x01 \x01(\x03R\btargetId\"U\n" +
+	"\x1cListImportantRecordsResponse\x125\n" +
+	"\arecords\x18\x01 \x03(\v2\x1b.profile.v1.ImportantRecordR\arecords\"\xa5\x02\n" +
+	"\x1aSaveImportantRecordRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12*\n" +
+	"\x11target_profile_id\x18\x02 \x01(\x03R\x0ftargetProfileId\x12\x14\n" +
+	"\x05title\x18\x03 \x01(\tR\x05title\x12\x1f\n" +
+	"\vrecord_time\x18\x04 \x01(\tR\n" +
+	"recordTime\x12+\n" +
+	"\x11event_description\x18\x05 \x01(\tR\x10eventDescription\x12\x1e\n" +
+	"\n" +
+	"resolution\x18\x06 \x01(\tR\n" +
+	"resolution\x12#\n" +
+	"\rconcern_point\x18\a \x01(\tR\fconcernPoint\x12\"\n" +
+	"\fsatisfaction\x18\b \x01(\tR\fsatisfaction\".\n" +
+	"\x1cDeleteImportantRecordRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\"/\n" +
+	"\x1dDeleteImportantRecordResponse\x12\x0e\n" +
+	"\x02ok\x18\x01 \x01(\bR\x02ok2\xae\n" +
+	"\n" +
 	"\x0eProfileService\x12P\n" +
 	"\x05GetMe\x12\x18.profile.v1.GetMeRequest\x1a\x17.profile.v1.UserProfile\"\x14\x82\xd3\xe4\x93\x02\x0e\x12\f/v1/users/me\x12k\n" +
 	"\rUpdateProfile\x12 .profile.v1.UpdateProfileRequest\x1a\x17.profile.v1.UserProfile\"\x1f\x82\xd3\xe4\x93\x02\x19:\x01*2\x14/v1/users/me/profile\x12h\n" +
-	"\fUpdateAvatar\x12\x1f.profile.v1.UpdateAvatarRequest\x1a\x17.profile.v1.UserProfile\"\x1e\x82\xd3\xe4\x93\x02\x18:\x01*\x1a\x13/v1/users/me/avatarB\"Z emo-ai-service/api/profile/v1;v1b\x06proto3"
+	"\fUpdateAvatar\x12\x1f.profile.v1.UpdateAvatarRequest\x1a\x17.profile.v1.UserProfile\"\x1e\x82\xd3\xe4\x93\x02\x18:\x01*\x1a\x13/v1/users/me/avatar\x12w\n" +
+	"\x12GetPersonalProfile\x12%.profile.v1.GetPersonalProfileRequest\x1a\x1b.profile.v1.PersonalProfile\"\x1d\x82\xd3\xe4\x93\x02\x17\x12\x15/v1/profiles/personal\x12|\n" +
+	"\x13SavePersonalProfile\x12&.profile.v1.SavePersonalProfileRequest\x1a\x1b.profile.v1.PersonalProfile\" \x82\xd3\xe4\x93\x02\x1a:\x01*\x1a\x15/v1/profiles/personal\x12\x81\x01\n" +
+	"\x12ListTargetProfiles\x12%.profile.v1.ListTargetProfilesRequest\x1a&.profile.v1.ListTargetProfilesResponse\"\x1c\x82\xd3\xe4\x93\x02\x16\x12\x14/v1/profiles/targets\x12\x95\x01\n" +
+	"\x11SaveTargetProfile\x12$.profile.v1.SaveTargetProfileRequest\x1a\x19.profile.v1.TargetProfile\"?\x82\xd3\xe4\x93\x029:\x01*Z\x1e:\x01*\x1a\x19/v1/profiles/targets/{id}\"\x14/v1/profiles/targets\x12\x91\x01\n" +
+	"\x14ListImportantRecords\x12'.profile.v1.ListImportantRecordsRequest\x1a(.profile.v1.ListImportantRecordsResponse\"&\x82\xd3\xe4\x93\x02 \x12\x1e/v1/profiles/important-records\x12\xaf\x01\n" +
+	"\x13SaveImportantRecord\x12&.profile.v1.SaveImportantRecordRequest\x1a\x1b.profile.v1.ImportantRecord\"S\x82\xd3\xe4\x93\x02M:\x01*Z(:\x01*\x1a#/v1/profiles/important-records/{id}\"\x1e/v1/profiles/important-records\x12\x99\x01\n" +
+	"\x15DeleteImportantRecord\x12(.profile.v1.DeleteImportantRecordRequest\x1a).profile.v1.DeleteImportantRecordResponse\"+\x82\xd3\xe4\x93\x02%*#/v1/profiles/important-records/{id}B\"Z emo-ai-service/api/profile/v1;v1b\x06proto3"
 
 var (
 	file_profile_v1_profile_proto_rawDescOnce sync.Once
@@ -455,25 +1526,54 @@ func file_profile_v1_profile_proto_rawDescGZIP() []byte {
 	return file_profile_v1_profile_proto_rawDescData
 }
 
-var file_profile_v1_profile_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
+var file_profile_v1_profile_proto_msgTypes = make([]protoimpl.MessageInfo, 17)
 var file_profile_v1_profile_proto_goTypes = []any{
-	(*GetMeRequest)(nil),         // 0: profile.v1.GetMeRequest
-	(*UserProfile)(nil),          // 1: profile.v1.UserProfile
-	(*UpdateProfileRequest)(nil), // 2: profile.v1.UpdateProfileRequest
-	(*UpdateAvatarRequest)(nil),  // 3: profile.v1.UpdateAvatarRequest
+	(*GetMeRequest)(nil),                  // 0: profile.v1.GetMeRequest
+	(*UserProfile)(nil),                   // 1: profile.v1.UserProfile
+	(*UpdateProfileRequest)(nil),          // 2: profile.v1.UpdateProfileRequest
+	(*UpdateAvatarRequest)(nil),           // 3: profile.v1.UpdateAvatarRequest
+	(*PersonalProfile)(nil),               // 4: profile.v1.PersonalProfile
+	(*GetPersonalProfileRequest)(nil),     // 5: profile.v1.GetPersonalProfileRequest
+	(*SavePersonalProfileRequest)(nil),    // 6: profile.v1.SavePersonalProfileRequest
+	(*TargetProfile)(nil),                 // 7: profile.v1.TargetProfile
+	(*ListTargetProfilesRequest)(nil),     // 8: profile.v1.ListTargetProfilesRequest
+	(*ListTargetProfilesResponse)(nil),    // 9: profile.v1.ListTargetProfilesResponse
+	(*SaveTargetProfileRequest)(nil),      // 10: profile.v1.SaveTargetProfileRequest
+	(*ImportantRecord)(nil),               // 11: profile.v1.ImportantRecord
+	(*ListImportantRecordsRequest)(nil),   // 12: profile.v1.ListImportantRecordsRequest
+	(*ListImportantRecordsResponse)(nil),  // 13: profile.v1.ListImportantRecordsResponse
+	(*SaveImportantRecordRequest)(nil),    // 14: profile.v1.SaveImportantRecordRequest
+	(*DeleteImportantRecordRequest)(nil),  // 15: profile.v1.DeleteImportantRecordRequest
+	(*DeleteImportantRecordResponse)(nil), // 16: profile.v1.DeleteImportantRecordResponse
 }
 var file_profile_v1_profile_proto_depIdxs = []int32{
-	0, // 0: profile.v1.ProfileService.GetMe:input_type -> profile.v1.GetMeRequest
-	2, // 1: profile.v1.ProfileService.UpdateProfile:input_type -> profile.v1.UpdateProfileRequest
-	3, // 2: profile.v1.ProfileService.UpdateAvatar:input_type -> profile.v1.UpdateAvatarRequest
-	1, // 3: profile.v1.ProfileService.GetMe:output_type -> profile.v1.UserProfile
-	1, // 4: profile.v1.ProfileService.UpdateProfile:output_type -> profile.v1.UserProfile
-	1, // 5: profile.v1.ProfileService.UpdateAvatar:output_type -> profile.v1.UserProfile
-	3, // [3:6] is the sub-list for method output_type
-	0, // [0:3] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	7,  // 0: profile.v1.ListTargetProfilesResponse.targets:type_name -> profile.v1.TargetProfile
+	11, // 1: profile.v1.ListImportantRecordsResponse.records:type_name -> profile.v1.ImportantRecord
+	0,  // 2: profile.v1.ProfileService.GetMe:input_type -> profile.v1.GetMeRequest
+	2,  // 3: profile.v1.ProfileService.UpdateProfile:input_type -> profile.v1.UpdateProfileRequest
+	3,  // 4: profile.v1.ProfileService.UpdateAvatar:input_type -> profile.v1.UpdateAvatarRequest
+	5,  // 5: profile.v1.ProfileService.GetPersonalProfile:input_type -> profile.v1.GetPersonalProfileRequest
+	6,  // 6: profile.v1.ProfileService.SavePersonalProfile:input_type -> profile.v1.SavePersonalProfileRequest
+	8,  // 7: profile.v1.ProfileService.ListTargetProfiles:input_type -> profile.v1.ListTargetProfilesRequest
+	10, // 8: profile.v1.ProfileService.SaveTargetProfile:input_type -> profile.v1.SaveTargetProfileRequest
+	12, // 9: profile.v1.ProfileService.ListImportantRecords:input_type -> profile.v1.ListImportantRecordsRequest
+	14, // 10: profile.v1.ProfileService.SaveImportantRecord:input_type -> profile.v1.SaveImportantRecordRequest
+	15, // 11: profile.v1.ProfileService.DeleteImportantRecord:input_type -> profile.v1.DeleteImportantRecordRequest
+	1,  // 12: profile.v1.ProfileService.GetMe:output_type -> profile.v1.UserProfile
+	1,  // 13: profile.v1.ProfileService.UpdateProfile:output_type -> profile.v1.UserProfile
+	1,  // 14: profile.v1.ProfileService.UpdateAvatar:output_type -> profile.v1.UserProfile
+	4,  // 15: profile.v1.ProfileService.GetPersonalProfile:output_type -> profile.v1.PersonalProfile
+	4,  // 16: profile.v1.ProfileService.SavePersonalProfile:output_type -> profile.v1.PersonalProfile
+	9,  // 17: profile.v1.ProfileService.ListTargetProfiles:output_type -> profile.v1.ListTargetProfilesResponse
+	7,  // 18: profile.v1.ProfileService.SaveTargetProfile:output_type -> profile.v1.TargetProfile
+	13, // 19: profile.v1.ProfileService.ListImportantRecords:output_type -> profile.v1.ListImportantRecordsResponse
+	11, // 20: profile.v1.ProfileService.SaveImportantRecord:output_type -> profile.v1.ImportantRecord
+	16, // 21: profile.v1.ProfileService.DeleteImportantRecord:output_type -> profile.v1.DeleteImportantRecordResponse
+	12, // [12:22] is the sub-list for method output_type
+	2,  // [2:12] is the sub-list for method input_type
+	2,  // [2:2] is the sub-list for extension type_name
+	2,  // [2:2] is the sub-list for extension extendee
+	0,  // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_profile_v1_profile_proto_init() }
@@ -487,7 +1587,7 @@ func file_profile_v1_profile_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_profile_v1_profile_proto_rawDesc), len(file_profile_v1_profile_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   4,
+			NumMessages:   17,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

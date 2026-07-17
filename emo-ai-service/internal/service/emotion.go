@@ -2,19 +2,24 @@ package service
 
 import (
 	"context"
+	"encoding/json"
+	"net/http"
+	"strings"
 
 	v1 "emo-ai-service/api/emotion/v1"
+	"emo-ai-service/internal/auth"
 	"emo-ai-service/internal/biz"
 
 	kerrors "github.com/go-kratos/kratos/v3/errors"
 )
 
 type EmotionService struct {
-	uc *biz.EmotionUsecase
+	uc           *biz.EmotionUsecase
+	tokenManager *auth.TokenManager
 }
 
-func NewEmotionService(uc *biz.EmotionUsecase) *EmotionService {
-	return &EmotionService{uc: uc}
+func NewEmotionService(uc *biz.EmotionUsecase, tokenManager *auth.TokenManager) *EmotionService {
+	return &EmotionService{uc: uc, tokenManager: tokenManager}
 }
 
 var _ v1.EmotionServiceHTTPServer = (*EmotionService)(nil)
@@ -128,4 +133,132 @@ func toEmotionDTO(analysis *biz.EmotionAnalysis) *v1.EmotionAnalysis {
 		dims = append(dims, &v1.EmotionDimensionScore{Dimension: item.Dimension, Score: item.Score})
 	}
 	return &v1.EmotionAnalysis{Id: analysis.ID, UserId: analysis.UserID, SourceType: analysis.SourceType, SourceId: analysis.SourceID, PrimaryEmotion: analysis.PrimaryEmotion, Sentiment: analysis.Sentiment, SentimentScore: analysis.SentimentScore, StressScore: analysis.StressScore, AnxietyScore: analysis.AnxietyScore, DepressionRiskScore: analysis.DepressionRiskScore, EnergyScore: analysis.EnergyScore, Confidence: analysis.Confidence, Summary: analysis.Summary, Advice: analysis.Advice, RiskLevel: analysis.RiskLevel, Model: analysis.Model, Dimensions: dims, RawResultJson: analysis.RawResultJSON, CreatedAt: analysis.CreatedAt.Unix()}
+}
+
+type relationshipHealthReportDTO struct {
+	PersonalPortrait *personalPortraitReportDTO     `json:"personal_portrait"`
+	TargetReports    []*targetRelationshipReportDTO `json:"target_reports"`
+}
+
+type personalPortraitReportDTO struct {
+	Title               string   `json:"title"`
+	Summary             string   `json:"summary"`
+	Traits              []string `json:"traits"`
+	RelationshipPattern string   `json:"relationship_pattern"`
+	RiskNotes           []string `json:"risk_notes"`
+	Suggestions         []string `json:"suggestions"`
+}
+
+type targetRelationshipReportDTO struct {
+	TargetID          int64    `json:"target_id"`
+	TargetName        string   `json:"target_name"`
+	RelationshipLabel string   `json:"relationship_label"`
+	HealthScore       int32    `json:"health_score"`
+	HealthLevel       string   `json:"health_level"`
+	Summary           string   `json:"summary"`
+	Evidence          []string `json:"evidence"`
+	RiskNotes         []string `json:"risk_notes"`
+	Suggestions       []string `json:"suggestions"`
+	GeneratedAt       string   `json:"generated_at"`
+}
+
+func (s *EmotionService) RelationshipHealthReportHTTP(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+
+	userID, err := s.userIDFromHTTPRequest(r)
+	if err != nil {
+		writeJSONError(w, err)
+		return
+	}
+
+	report, err := s.uc.RelationshipHealthReport(r.Context(), userID)
+	if err != nil {
+		writeJSONError(w, err)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	_ = json.NewEncoder(w).Encode(toRelationshipHealthReportDTO(report))
+}
+
+func (s *EmotionService) userIDFromHTTPRequest(r *http.Request) (int64, error) {
+	if s.tokenManager == nil {
+		return 0, kerrors.Unauthorized("UNAUTHORIZED", "login required")
+	}
+
+	token := emotionBearerToken(r.Header.Get("Authorization"))
+	if token == "" {
+		return 0, kerrors.Unauthorized("UNAUTHORIZED", "missing access token")
+	}
+
+	claims, err := s.tokenManager.Parse(token)
+	if err != nil || claims.UserID <= 0 {
+		return 0, kerrors.Unauthorized("UNAUTHORIZED", "invalid access token")
+	}
+
+	return claims.UserID, nil
+}
+
+func toRelationshipHealthReportDTO(report *biz.RelationshipHealthReport) *relationshipHealthReportDTO {
+	if report == nil {
+		return &relationshipHealthReportDTO{
+			PersonalPortrait: &personalPortraitReportDTO{},
+			TargetReports:    []*targetRelationshipReportDTO{},
+		}
+	}
+
+	targets := make([]*targetRelationshipReportDTO, 0, len(report.TargetReports))
+	for _, target := range report.TargetReports {
+		targets = append(targets, toTargetRelationshipReportDTO(target))
+	}
+
+	return &relationshipHealthReportDTO{
+		PersonalPortrait: toPersonalPortraitReportDTO(report.PersonalPortrait),
+		TargetReports:    targets,
+	}
+}
+
+func toPersonalPortraitReportDTO(report *biz.PersonalPortraitReport) *personalPortraitReportDTO {
+	if report == nil {
+		return &personalPortraitReportDTO{}
+	}
+
+	return &personalPortraitReportDTO{
+		Title:               report.Title,
+		Summary:             report.Summary,
+		Traits:              report.Traits,
+		RelationshipPattern: report.RelationshipPattern,
+		RiskNotes:           report.RiskNotes,
+		Suggestions:         report.Suggestions,
+	}
+}
+
+func toTargetRelationshipReportDTO(report *biz.TargetRelationshipHealthReport) *targetRelationshipReportDTO {
+	if report == nil {
+		return &targetRelationshipReportDTO{}
+	}
+
+	return &targetRelationshipReportDTO{
+		TargetID:          report.TargetID,
+		TargetName:        report.TargetName,
+		RelationshipLabel: report.RelationshipLabel,
+		HealthScore:       report.HealthScore,
+		HealthLevel:       report.HealthLevel,
+		Summary:           report.Summary,
+		Evidence:          report.Evidence,
+		RiskNotes:         report.RiskNotes,
+		Suggestions:       report.Suggestions,
+		GeneratedAt:       report.GeneratedAt.Format("2006-01-02T15:04:05Z07:00"),
+	}
+}
+
+func emotionBearerToken(value string) string {
+	parts := strings.Fields(value)
+	if len(parts) == 2 && strings.EqualFold(parts[0], "Bearer") {
+		return parts[1]
+	}
+	return ""
 }

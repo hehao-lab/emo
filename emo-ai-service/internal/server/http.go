@@ -69,6 +69,7 @@ func NewHTTPServer(
 	aichatv1.RegisterAIChatServiceHTTPServer(srv, aiChatSvc)
 	srv.HandleFunc("/api/v1/chat/stream", aiChatSvc.StreamChatHTTP)
 	emotionv1.RegisterEmotionServiceHTTPServer(srv, emotionSvc)
+	srv.HandleFunc("/v1/emotion/reports/relationship-health", emotionSvc.RelationshipHealthReportHTTP)
 	systemv1.RegisterSystemServiceHTTPServer(srv, systemSvc)
 	filev1.RegisterFileServiceHTTPServer(srv, fileSvc)
 	return srv

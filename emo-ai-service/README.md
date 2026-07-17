@@ -109,8 +109,26 @@ go test ./...
 
 ## Run Locally
 
+Create the local database first. Tables are migrated automatically on startup.
+
+```sql
+CREATE DATABASE emo_ai DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+```
+
+The default local MySQL DSN in `configs/config.yaml` is:
+
+```text
+root:root123456@tcp(127.0.0.1:3306)/emo_ai?charset=utf8mb4&parseTime=True&loc=Local
+```
+
+If your local MySQL password or user is different, override it for this shell:
+
+```powershell
+$env:EMO_DATABASE_SOURCE="root:<your-password>@tcp(127.0.0.1:3306)/emo_ai?charset=utf8mb4&parseTime=True&loc=Local"
+```
+
 ```bash
-go run ./cmd/server -conf ./configs
+go run ./cmd/emo-ai-service -conf ./configs
 ```
 
 Default local ports are configured in `configs/config.yaml`:

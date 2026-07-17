@@ -6,16 +6,17 @@ import (
 )
 
 type ChatSession struct {
-	ID            int64
-	UserID        int64
-	Title         string
-	Scenario      string
-	Status        string
-	Summary       string
-	MessageCount  int32
-	LastMessageAt time.Time
-	CreatedAt     time.Time
-	UpdatedAt     time.Time
+	ID                     int64
+	UserID                 int64
+	Title                  string
+	Scenario               string
+	Status                 string
+	Summary                string
+	UpstreamConversationID string
+	MessageCount           int32
+	LastMessageAt          time.Time
+	CreatedAt              time.Time
+	UpdatedAt              time.Time
 }
 
 type ChatMessage struct {
@@ -74,6 +75,7 @@ type ChatRepo interface {
 	ListMessages(ctx context.Context, userID, sessionID int64, page, pageSize int32) ([]*ChatMessage, int64, error)
 	RecentMessages(ctx context.Context, sessionID int64, limit int) ([]*ChatMessage, error)
 	TouchSession(ctx context.Context, sessionID int64, lastMessageAt time.Time, deltaCount int) error
+	BindSessionUpstream(ctx context.Context, sessionID int64, upstreamConversationID string) error
 	CreateFeedback(ctx context.Context, feedback *ChatFeedback) (*ChatFeedback, error)
 	CreateSummary(ctx context.Context, summary *ChatContextSummary) (*ChatContextSummary, error)
 }

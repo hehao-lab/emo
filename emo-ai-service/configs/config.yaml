@@ -10,17 +10,17 @@ server:
 data:
   database:
     driver: mysql
-    source: root:root123456@tcp(127.0.0.1:3306)/emo_ai?charset=utf8mb4&parseTime=True&loc=Local
+    source: ${EMO_DATABASE_SOURCE:root:1234@tcp(127.0.0.1:3306)/emo_ai?charset=utf8mb4&parseTime=True&loc=Local}
   redis:
     network: tcp
-    addr: 127.0.0.1:6379
+    addr: ${EMO_REDIS_ADDR:127.0.0.1:6379}
     read_timeout: 3s
     write_timeout: 3s
 auth:
-  jwt_secret: please-change-this-secret-in-production
+  jwt_secret: ${EMO_JWT_SECRET:please-change-this-secret-in-production}
   access_token_ttl: 7200s
   refresh_token_ttl: 2592000s
   issuer: emo-ai-service
 ai_service:
-  base_url: http://192.168.31.155:8000
+  base_url: ${EMO_AI_SERVICE_BASE_URL:http://192.168.31.155:8000}
   timeout: 120s

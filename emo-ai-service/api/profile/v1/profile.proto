@@ -29,6 +29,59 @@ service ProfileService {
       body: "*"
     };
   }
+
+  rpc GetPersonalProfile(GetPersonalProfileRequest) returns (PersonalProfile) {
+    option (google.api.http) = {
+      get: "/v1/profiles/personal"
+    };
+  }
+
+  rpc SavePersonalProfile(SavePersonalProfileRequest) returns (PersonalProfile) {
+    option (google.api.http) = {
+      put: "/v1/profiles/personal"
+      body: "*"
+    };
+  }
+
+  rpc ListTargetProfiles(ListTargetProfilesRequest) returns (ListTargetProfilesResponse) {
+    option (google.api.http) = {
+      get: "/v1/profiles/targets"
+    };
+  }
+
+  rpc SaveTargetProfile(SaveTargetProfileRequest) returns (TargetProfile) {
+    option (google.api.http) = {
+      post: "/v1/profiles/targets"
+      body: "*"
+      additional_bindings {
+        put: "/v1/profiles/targets/{id}"
+        body: "*"
+      }
+    };
+  }
+
+  rpc ListImportantRecords(ListImportantRecordsRequest) returns (ListImportantRecordsResponse) {
+    option (google.api.http) = {
+      get: "/v1/profiles/important-records"
+    };
+  }
+
+  rpc SaveImportantRecord(SaveImportantRecordRequest) returns (ImportantRecord) {
+    option (google.api.http) = {
+      post: "/v1/profiles/important-records"
+      body: "*"
+      additional_bindings {
+        put: "/v1/profiles/important-records/{id}"
+        body: "*"
+      }
+    };
+  }
+
+  rpc DeleteImportantRecord(DeleteImportantRecordRequest) returns (DeleteImportantRecordResponse) {
+    option (google.api.http) = {
+      delete: "/v1/profiles/important-records/{id}"
+    };
+  }
 }
 
 message GetMeRequest {}
@@ -68,4 +121,104 @@ message UpdateProfileRequest {
 
 message UpdateAvatarRequest {
   string avatar_url = 1;
+}
+
+message PersonalProfile {
+  int64 id = 1;
+  int64 user_id = 2;
+  int32 age = 3;
+  string gender = 4;
+  string mbti = 5;
+  string relationship_status = 6;
+  string personality_summary = 7;
+  int64 created_at = 8;
+  int64 updated_at = 9;
+}
+
+message GetPersonalProfileRequest {}
+
+message SavePersonalProfileRequest {
+  int32 age = 1;
+  string gender = 2;
+  string mbti = 3;
+  string relationship_status = 4;
+  string personality_summary = 5;
+}
+
+message TargetProfile {
+  int64 id = 1;
+  int64 user_id = 2;
+  int64 personal_profile_id = 3;
+  string name = 4;
+  int32 age = 5;
+  string gender = 6;
+  string current_relationship = 7;
+  string interaction_frequency = 8;
+  string relationship_goal = 9;
+  string personality_traits = 10;
+  string recent_interaction = 11;
+  int64 created_at = 12;
+  int64 updated_at = 13;
+  string mbti = 14;
+}
+
+message ListTargetProfilesRequest {}
+
+message ListTargetProfilesResponse {
+  repeated TargetProfile targets = 1;
+}
+
+message SaveTargetProfileRequest {
+  int64 id = 1;
+  string name = 2;
+  int32 age = 3;
+  string gender = 4;
+  string current_relationship = 5;
+  string interaction_frequency = 6;
+  string relationship_goal = 7;
+  string personality_traits = 8;
+  string recent_interaction = 9;
+  string mbti = 10;
+}
+
+message ImportantRecord {
+  int64 id = 1;
+  int64 user_id = 2;
+  int64 personal_profile_id = 3;
+  int64 target_profile_id = 4;
+  string title = 5;
+  string record_time = 6;
+  string event_description = 7;
+  string resolution = 8;
+  string concern_point = 9;
+  string satisfaction = 10;
+  int64 created_at = 11;
+  int64 updated_at = 12;
+}
+
+message ListImportantRecordsRequest {
+  int64 target_id = 1;
+}
+
+message ListImportantRecordsResponse {
+  repeated ImportantRecord records = 1;
+}
+
+message SaveImportantRecordRequest {
+  int64 id = 1;
+  int64 target_profile_id = 2;
+  string title = 3;
+  string record_time = 4;
+  string event_description = 5;
+  string resolution = 6;
+  string concern_point = 7;
+  string satisfaction = 8;
+}
+
+message DeleteImportantRecordRequest {
+  int64 id = 1;
+}
+
+message DeleteImportantRecordResponse {
+  bool ok = 1;
 }

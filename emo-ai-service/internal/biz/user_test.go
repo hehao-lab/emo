@@ -5,6 +5,11 @@ import (
 	"errors"
 	"testing"
 	"time"
+
+	"emo-ai-service/internal/auth"
+	"emo-ai-service/internal/conf"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 type mockUserRepo struct {
@@ -12,6 +17,7 @@ type mockUserRepo struct {
 	phoneUser    *User
 	emailUser    *User
 	created      *User
+	updatedHash  string
 }
 
 func (m *mockUserRepo) Create(ctx context.Context, u *User) (*User, error) {
@@ -41,6 +47,11 @@ func (m *mockUserRepo) FindByPhone(ctx context.Context, phone string) (*User, er
 
 func (m *mockUserRepo) FindByEmail(ctx context.Context, email string) (*User, error) {
 	return m.emailUser, nil
+}
+
+func (m *mockUserRepo) UpdatePassword(ctx context.Context, userID int64, passwordHash string) error {
+	m.updatedHash = passwordHash
+	return nil
 }
 
 type mockVerificationCodeRepo struct {
@@ -130,6 +141,68 @@ func TestUserUsecase_RegisterCodeExpired(t *testing.T) {
 	_, err := uc.Register(ctx, "test", "password123", "13800138000", "test@example.com", "123456")
 	if !errors.Is(err, ErrCodeExpired) {
 		t.Fatalf("Register() error = %v, want ErrCodeExpired", err)
+	}
+}
+
+func TestUserUsecase_LoginAcceptsUsernameAccount(t *testing.T) {
+	ctx := context.Background()
+	passwordHash, err := bcrypt.GenerateFromPassword([]byte("123456"), bcrypt.MinCost)
+	if err != nil {
+		t.Fatalf("GenerateFromPassword() error = %v", err)
+	}
+	repo := &mockUserRepo{
+		usernameUser: &User{
+			ID:           7,
+			Username:     "testuser",
+			PasswordHash: string(passwordHash),
+			Phone:        "13800138000",
+			Email:        "test@example.com",
+			Roles:        []string{"user"},
+		},
+	}
+	uc := &UserUsecase{
+		repo:        repo,
+		tokenManger: auth.NewTokenManager(&conf.Auth{}),
+	}
+
+	result, err := uc.Login(ctx, " testuser ", "123456", LoginMeta{})
+	if err != nil {
+		t.Fatalf("Login() error = %v", err)
+	}
+	if result.UserID != 7 {
+		t.Fatalf("Login() userID = %d, want 7", result.UserID)
+	}
+}
+
+func TestUserUsecase_LoginAcceptsLegacyPlainPasswordAndUpgradesHash(t *testing.T) {
+	ctx := context.Background()
+	repo := &mockUserRepo{
+		phoneUser: &User{
+			ID:           8,
+			Username:     "legacy",
+			PasswordHash: "123456",
+			Phone:        "13800138001",
+			Email:        "legacy@example.com",
+			Roles:        []string{"user"},
+		},
+	}
+	uc := &UserUsecase{
+		repo:        repo,
+		tokenManger: auth.NewTokenManager(&conf.Auth{}),
+	}
+
+	result, err := uc.Login(ctx, "13800138001", "123456", LoginMeta{})
+	if err != nil {
+		t.Fatalf("Login() error = %v", err)
+	}
+	if result.UserID != 8 {
+		t.Fatalf("Login() userID = %d, want 8", result.UserID)
+	}
+	if repo.updatedHash == "" || repo.updatedHash == "123456" {
+		t.Fatalf("updated password hash = %q, want a bcrypt hash", repo.updatedHash)
+	}
+	if err := bcrypt.CompareHashAndPassword([]byte(repo.updatedHash), []byte("123456")); err != nil {
+		t.Fatalf("updated password hash does not verify: %v", err)
 	}
 }
 

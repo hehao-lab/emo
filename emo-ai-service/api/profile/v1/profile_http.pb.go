@@ -17,13 +17,27 @@ var _ = new(context.Context)
 
 const _ = http.SupportPackageIsVersion3
 
+const OperationProfileServiceDeleteImportantRecord = "/profile.v1.ProfileService/DeleteImportantRecord"
 const OperationProfileServiceGetMe = "/profile.v1.ProfileService/GetMe"
+const OperationProfileServiceGetPersonalProfile = "/profile.v1.ProfileService/GetPersonalProfile"
+const OperationProfileServiceListImportantRecords = "/profile.v1.ProfileService/ListImportantRecords"
+const OperationProfileServiceListTargetProfiles = "/profile.v1.ProfileService/ListTargetProfiles"
+const OperationProfileServiceSaveImportantRecord = "/profile.v1.ProfileService/SaveImportantRecord"
+const OperationProfileServiceSavePersonalProfile = "/profile.v1.ProfileService/SavePersonalProfile"
+const OperationProfileServiceSaveTargetProfile = "/profile.v1.ProfileService/SaveTargetProfile"
 const OperationProfileServiceUpdateAvatar = "/profile.v1.ProfileService/UpdateAvatar"
 const OperationProfileServiceUpdateProfile = "/profile.v1.ProfileService/UpdateProfile"
 
 type ProfileServiceHTTPServer interface {
+	DeleteImportantRecord(context.Context, *DeleteImportantRecordRequest) (*DeleteImportantRecordResponse, error)
 	// GetMe 获取当前登录用户的账号信息和个人资料，用于“我的页面”展示。
 	GetMe(context.Context, *GetMeRequest) (*UserProfile, error)
+	GetPersonalProfile(context.Context, *GetPersonalProfileRequest) (*PersonalProfile, error)
+	ListImportantRecords(context.Context, *ListImportantRecordsRequest) (*ListImportantRecordsResponse, error)
+	ListTargetProfiles(context.Context, *ListTargetProfilesRequest) (*ListTargetProfilesResponse, error)
+	SaveImportantRecord(context.Context, *SaveImportantRecordRequest) (*ImportantRecord, error)
+	SavePersonalProfile(context.Context, *SavePersonalProfileRequest) (*PersonalProfile, error)
+	SaveTargetProfile(context.Context, *SaveTargetProfileRequest) (*TargetProfile, error)
 	// UpdateAvatar 修改当前登录用户头像地址，并返回最新个人资料。
 	UpdateAvatar(context.Context, *UpdateAvatarRequest) (*UserProfile, error)
 	// UpdateProfile 修改当前登录用户的个人资料，包括昵称、邮箱、生日、简介、地区等。
@@ -35,6 +49,15 @@ func RegisterProfileServiceHTTPServer(s *http.Server, srv ProfileServiceHTTPServ
 	r.Handle("GET", "/v1/users/me", _ProfileService_GetMe0_HTTP_Handler(srv))
 	r.Handle("PATCH", "/v1/users/me/profile", _ProfileService_UpdateProfile0_HTTP_Handler(srv))
 	r.Handle("PUT", "/v1/users/me/avatar", _ProfileService_UpdateAvatar0_HTTP_Handler(srv))
+	r.Handle("GET", "/v1/profiles/personal", _ProfileService_GetPersonalProfile0_HTTP_Handler(srv))
+	r.Handle("PUT", "/v1/profiles/personal", _ProfileService_SavePersonalProfile0_HTTP_Handler(srv))
+	r.Handle("GET", "/v1/profiles/targets", _ProfileService_ListTargetProfiles0_HTTP_Handler(srv))
+	r.Handle("PUT", "/v1/profiles/targets/{id}", _ProfileService_SaveTargetProfile0_HTTP_Handler(srv))
+	r.Handle("POST", "/v1/profiles/targets", _ProfileService_SaveTargetProfile1_HTTP_Handler(srv))
+	r.Handle("GET", "/v1/profiles/important-records", _ProfileService_ListImportantRecords0_HTTP_Handler(srv))
+	r.Handle("PUT", "/v1/profiles/important-records/{id}", _ProfileService_SaveImportantRecord0_HTTP_Handler(srv))
+	r.Handle("POST", "/v1/profiles/important-records", _ProfileService_SaveImportantRecord1_HTTP_Handler(srv))
+	r.Handle("DELETE", "/v1/profiles/important-records/{id}", _ProfileService_DeleteImportantRecord0_HTTP_Handler(srv))
 }
 
 func _ProfileService_GetMe0_HTTP_Handler(srv ProfileServiceHTTPServer) func(ctx http.Context) error {
@@ -94,9 +117,196 @@ func _ProfileService_UpdateAvatar0_HTTP_Handler(srv ProfileServiceHTTPServer) fu
 	}
 }
 
+func _ProfileService_GetPersonalProfile0_HTTP_Handler(srv ProfileServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetPersonalProfileRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationProfileServiceGetPersonalProfile)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetPersonalProfile(ctx, req.(*GetPersonalProfileRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*PersonalProfile)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _ProfileService_SavePersonalProfile0_HTTP_Handler(srv ProfileServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in SavePersonalProfileRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationProfileServiceSavePersonalProfile)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.SavePersonalProfile(ctx, req.(*SavePersonalProfileRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*PersonalProfile)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _ProfileService_ListTargetProfiles0_HTTP_Handler(srv ProfileServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in ListTargetProfilesRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationProfileServiceListTargetProfiles)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ListTargetProfiles(ctx, req.(*ListTargetProfilesRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*ListTargetProfilesResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _ProfileService_SaveTargetProfile0_HTTP_Handler(srv ProfileServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in SaveTargetProfileRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationProfileServiceSaveTargetProfile)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.SaveTargetProfile(ctx, req.(*SaveTargetProfileRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*TargetProfile)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _ProfileService_SaveTargetProfile1_HTTP_Handler(srv ProfileServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in SaveTargetProfileRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationProfileServiceSaveTargetProfile)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.SaveTargetProfile(ctx, req.(*SaveTargetProfileRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*TargetProfile)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _ProfileService_ListImportantRecords0_HTTP_Handler(srv ProfileServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in ListImportantRecordsRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationProfileServiceListImportantRecords)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ListImportantRecords(ctx, req.(*ListImportantRecordsRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*ListImportantRecordsResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _ProfileService_SaveImportantRecord0_HTTP_Handler(srv ProfileServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in SaveImportantRecordRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationProfileServiceSaveImportantRecord)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.SaveImportantRecord(ctx, req.(*SaveImportantRecordRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*ImportantRecord)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _ProfileService_SaveImportantRecord1_HTTP_Handler(srv ProfileServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in SaveImportantRecordRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationProfileServiceSaveImportantRecord)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.SaveImportantRecord(ctx, req.(*SaveImportantRecordRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*ImportantRecord)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _ProfileService_DeleteImportantRecord0_HTTP_Handler(srv ProfileServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in DeleteImportantRecordRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationProfileServiceDeleteImportantRecord)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.DeleteImportantRecord(ctx, req.(*DeleteImportantRecordRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*DeleteImportantRecordResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
 type ProfileServiceHTTPClient interface {
+	DeleteImportantRecord(ctx context.Context, req *DeleteImportantRecordRequest, opts ...http.CallOption) (rsp *DeleteImportantRecordResponse, err error)
 	// GetMe 获取当前登录用户的账号信息和个人资料，用于“我的页面”展示。
 	GetMe(ctx context.Context, req *GetMeRequest, opts ...http.CallOption) (rsp *UserProfile, err error)
+	GetPersonalProfile(ctx context.Context, req *GetPersonalProfileRequest, opts ...http.CallOption) (rsp *PersonalProfile, err error)
+	ListImportantRecords(ctx context.Context, req *ListImportantRecordsRequest, opts ...http.CallOption) (rsp *ListImportantRecordsResponse, err error)
+	ListTargetProfiles(ctx context.Context, req *ListTargetProfilesRequest, opts ...http.CallOption) (rsp *ListTargetProfilesResponse, err error)
+	SaveImportantRecord(ctx context.Context, req *SaveImportantRecordRequest, opts ...http.CallOption) (rsp *ImportantRecord, err error)
+	SavePersonalProfile(ctx context.Context, req *SavePersonalProfileRequest, opts ...http.CallOption) (rsp *PersonalProfile, err error)
+	SaveTargetProfile(ctx context.Context, req *SaveTargetProfileRequest, opts ...http.CallOption) (rsp *TargetProfile, err error)
 	// UpdateAvatar 修改当前登录用户头像地址，并返回最新个人资料。
 	UpdateAvatar(ctx context.Context, req *UpdateAvatarRequest, opts ...http.CallOption) (rsp *UserProfile, err error)
 	// UpdateProfile 修改当前登录用户的个人资料，包括昵称、邮箱、生日、简介、地区等。
@@ -111,6 +321,22 @@ func NewProfileServiceHTTPClient(client *http.Client) ProfileServiceHTTPClient {
 	return &ProfileServiceHTTPClientImpl{client}
 }
 
+func (c *ProfileServiceHTTPClientImpl) DeleteImportantRecord(ctx context.Context, in *DeleteImportantRecordRequest, opts ...http.CallOption) (*DeleteImportantRecordResponse, error) {
+	var out DeleteImportantRecordResponse
+	pattern := "/v1/profiles/important-records/{id}"
+	path := http.BuildPath(pattern, in, http.WithQueryParams())
+	opts = append([]http.CallOption{
+		http.Accept("application/protojson"),
+		http.Operation(OperationProfileServiceDeleteImportantRecord),
+		http.PathTemplate(pattern),
+	}, opts...)
+	err := c.cc.Invoke(ctx, "DELETE", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
 // GetMe 获取当前登录用户的账号信息和个人资料，用于“我的页面”展示。
 func (c *ProfileServiceHTTPClientImpl) GetMe(ctx context.Context, in *GetMeRequest, opts ...http.CallOption) (*UserProfile, error) {
 	var out UserProfile
@@ -122,6 +348,105 @@ func (c *ProfileServiceHTTPClientImpl) GetMe(ctx context.Context, in *GetMeReque
 		http.PathTemplate(pattern),
 	}, opts...)
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *ProfileServiceHTTPClientImpl) GetPersonalProfile(ctx context.Context, in *GetPersonalProfileRequest, opts ...http.CallOption) (*PersonalProfile, error) {
+	var out PersonalProfile
+	pattern := "/v1/profiles/personal"
+	path := http.BuildPath(pattern, in, http.WithQueryParams())
+	opts = append([]http.CallOption{
+		http.Accept("application/protojson"),
+		http.Operation(OperationProfileServiceGetPersonalProfile),
+		http.PathTemplate(pattern),
+	}, opts...)
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *ProfileServiceHTTPClientImpl) ListImportantRecords(ctx context.Context, in *ListImportantRecordsRequest, opts ...http.CallOption) (*ListImportantRecordsResponse, error) {
+	var out ListImportantRecordsResponse
+	pattern := "/v1/profiles/important-records"
+	path := http.BuildPath(pattern, in, http.WithQueryParams())
+	opts = append([]http.CallOption{
+		http.Accept("application/protojson"),
+		http.Operation(OperationProfileServiceListImportantRecords),
+		http.PathTemplate(pattern),
+	}, opts...)
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *ProfileServiceHTTPClientImpl) ListTargetProfiles(ctx context.Context, in *ListTargetProfilesRequest, opts ...http.CallOption) (*ListTargetProfilesResponse, error) {
+	var out ListTargetProfilesResponse
+	pattern := "/v1/profiles/targets"
+	path := http.BuildPath(pattern, in, http.WithQueryParams())
+	opts = append([]http.CallOption{
+		http.Accept("application/protojson"),
+		http.Operation(OperationProfileServiceListTargetProfiles),
+		http.PathTemplate(pattern),
+	}, opts...)
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *ProfileServiceHTTPClientImpl) SaveImportantRecord(ctx context.Context, in *SaveImportantRecordRequest, opts ...http.CallOption) (*ImportantRecord, error) {
+	var out ImportantRecord
+	pattern := "/v1/profiles/important-records"
+	path := http.BuildPath(pattern, in)
+	opts = append([]http.CallOption{
+		http.Accept("application/protojson"),
+		http.ContentType("application/protojson"),
+		http.Operation(OperationProfileServiceSaveImportantRecord),
+		http.PathTemplate(pattern),
+	}, opts...)
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *ProfileServiceHTTPClientImpl) SavePersonalProfile(ctx context.Context, in *SavePersonalProfileRequest, opts ...http.CallOption) (*PersonalProfile, error) {
+	var out PersonalProfile
+	pattern := "/v1/profiles/personal"
+	path := http.BuildPath(pattern, in)
+	opts = append([]http.CallOption{
+		http.Accept("application/protojson"),
+		http.ContentType("application/protojson"),
+		http.Operation(OperationProfileServiceSavePersonalProfile),
+		http.PathTemplate(pattern),
+	}, opts...)
+	err := c.cc.Invoke(ctx, "PUT", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *ProfileServiceHTTPClientImpl) SaveTargetProfile(ctx context.Context, in *SaveTargetProfileRequest, opts ...http.CallOption) (*TargetProfile, error) {
+	var out TargetProfile
+	pattern := "/v1/profiles/targets"
+	path := http.BuildPath(pattern, in)
+	opts = append([]http.CallOption{
+		http.Accept("application/protojson"),
+		http.ContentType("application/protojson"),
+		http.Operation(OperationProfileServiceSaveTargetProfile),
+		http.PathTemplate(pattern),
+	}, opts...)
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
 	if err != nil {
 		return nil, err
 	}

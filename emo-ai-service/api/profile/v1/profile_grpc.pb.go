@@ -19,9 +19,16 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	ProfileService_GetMe_FullMethodName         = "/profile.v1.ProfileService/GetMe"
-	ProfileService_UpdateProfile_FullMethodName = "/profile.v1.ProfileService/UpdateProfile"
-	ProfileService_UpdateAvatar_FullMethodName  = "/profile.v1.ProfileService/UpdateAvatar"
+	ProfileService_GetMe_FullMethodName                 = "/profile.v1.ProfileService/GetMe"
+	ProfileService_UpdateProfile_FullMethodName         = "/profile.v1.ProfileService/UpdateProfile"
+	ProfileService_UpdateAvatar_FullMethodName          = "/profile.v1.ProfileService/UpdateAvatar"
+	ProfileService_GetPersonalProfile_FullMethodName    = "/profile.v1.ProfileService/GetPersonalProfile"
+	ProfileService_SavePersonalProfile_FullMethodName   = "/profile.v1.ProfileService/SavePersonalProfile"
+	ProfileService_ListTargetProfiles_FullMethodName    = "/profile.v1.ProfileService/ListTargetProfiles"
+	ProfileService_SaveTargetProfile_FullMethodName     = "/profile.v1.ProfileService/SaveTargetProfile"
+	ProfileService_ListImportantRecords_FullMethodName  = "/profile.v1.ProfileService/ListImportantRecords"
+	ProfileService_SaveImportantRecord_FullMethodName   = "/profile.v1.ProfileService/SaveImportantRecord"
+	ProfileService_DeleteImportantRecord_FullMethodName = "/profile.v1.ProfileService/DeleteImportantRecord"
 )
 
 // ProfileServiceClient is the client API for ProfileService service.
@@ -34,6 +41,13 @@ type ProfileServiceClient interface {
 	UpdateProfile(ctx context.Context, in *UpdateProfileRequest, opts ...grpc.CallOption) (*UserProfile, error)
 	// 修改当前登录用户头像地址，并返回最新个人资料。
 	UpdateAvatar(ctx context.Context, in *UpdateAvatarRequest, opts ...grpc.CallOption) (*UserProfile, error)
+	GetPersonalProfile(ctx context.Context, in *GetPersonalProfileRequest, opts ...grpc.CallOption) (*PersonalProfile, error)
+	SavePersonalProfile(ctx context.Context, in *SavePersonalProfileRequest, opts ...grpc.CallOption) (*PersonalProfile, error)
+	ListTargetProfiles(ctx context.Context, in *ListTargetProfilesRequest, opts ...grpc.CallOption) (*ListTargetProfilesResponse, error)
+	SaveTargetProfile(ctx context.Context, in *SaveTargetProfileRequest, opts ...grpc.CallOption) (*TargetProfile, error)
+	ListImportantRecords(ctx context.Context, in *ListImportantRecordsRequest, opts ...grpc.CallOption) (*ListImportantRecordsResponse, error)
+	SaveImportantRecord(ctx context.Context, in *SaveImportantRecordRequest, opts ...grpc.CallOption) (*ImportantRecord, error)
+	DeleteImportantRecord(ctx context.Context, in *DeleteImportantRecordRequest, opts ...grpc.CallOption) (*DeleteImportantRecordResponse, error)
 }
 
 type profileServiceClient struct {
@@ -74,6 +88,76 @@ func (c *profileServiceClient) UpdateAvatar(ctx context.Context, in *UpdateAvata
 	return out, nil
 }
 
+func (c *profileServiceClient) GetPersonalProfile(ctx context.Context, in *GetPersonalProfileRequest, opts ...grpc.CallOption) (*PersonalProfile, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(PersonalProfile)
+	err := c.cc.Invoke(ctx, ProfileService_GetPersonalProfile_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *profileServiceClient) SavePersonalProfile(ctx context.Context, in *SavePersonalProfileRequest, opts ...grpc.CallOption) (*PersonalProfile, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(PersonalProfile)
+	err := c.cc.Invoke(ctx, ProfileService_SavePersonalProfile_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *profileServiceClient) ListTargetProfiles(ctx context.Context, in *ListTargetProfilesRequest, opts ...grpc.CallOption) (*ListTargetProfilesResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListTargetProfilesResponse)
+	err := c.cc.Invoke(ctx, ProfileService_ListTargetProfiles_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *profileServiceClient) SaveTargetProfile(ctx context.Context, in *SaveTargetProfileRequest, opts ...grpc.CallOption) (*TargetProfile, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(TargetProfile)
+	err := c.cc.Invoke(ctx, ProfileService_SaveTargetProfile_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *profileServiceClient) ListImportantRecords(ctx context.Context, in *ListImportantRecordsRequest, opts ...grpc.CallOption) (*ListImportantRecordsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListImportantRecordsResponse)
+	err := c.cc.Invoke(ctx, ProfileService_ListImportantRecords_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *profileServiceClient) SaveImportantRecord(ctx context.Context, in *SaveImportantRecordRequest, opts ...grpc.CallOption) (*ImportantRecord, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ImportantRecord)
+	err := c.cc.Invoke(ctx, ProfileService_SaveImportantRecord_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *profileServiceClient) DeleteImportantRecord(ctx context.Context, in *DeleteImportantRecordRequest, opts ...grpc.CallOption) (*DeleteImportantRecordResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DeleteImportantRecordResponse)
+	err := c.cc.Invoke(ctx, ProfileService_DeleteImportantRecord_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ProfileServiceServer is the server API for ProfileService service.
 // All implementations must embed UnimplementedProfileServiceServer
 // for forward compatibility.
@@ -84,6 +168,13 @@ type ProfileServiceServer interface {
 	UpdateProfile(context.Context, *UpdateProfileRequest) (*UserProfile, error)
 	// 修改当前登录用户头像地址，并返回最新个人资料。
 	UpdateAvatar(context.Context, *UpdateAvatarRequest) (*UserProfile, error)
+	GetPersonalProfile(context.Context, *GetPersonalProfileRequest) (*PersonalProfile, error)
+	SavePersonalProfile(context.Context, *SavePersonalProfileRequest) (*PersonalProfile, error)
+	ListTargetProfiles(context.Context, *ListTargetProfilesRequest) (*ListTargetProfilesResponse, error)
+	SaveTargetProfile(context.Context, *SaveTargetProfileRequest) (*TargetProfile, error)
+	ListImportantRecords(context.Context, *ListImportantRecordsRequest) (*ListImportantRecordsResponse, error)
+	SaveImportantRecord(context.Context, *SaveImportantRecordRequest) (*ImportantRecord, error)
+	DeleteImportantRecord(context.Context, *DeleteImportantRecordRequest) (*DeleteImportantRecordResponse, error)
 	mustEmbedUnimplementedProfileServiceServer()
 }
 
@@ -102,6 +193,27 @@ func (UnimplementedProfileServiceServer) UpdateProfile(context.Context, *UpdateP
 }
 func (UnimplementedProfileServiceServer) UpdateAvatar(context.Context, *UpdateAvatarRequest) (*UserProfile, error) {
 	return nil, status.Error(codes.Unimplemented, "method UpdateAvatar not implemented")
+}
+func (UnimplementedProfileServiceServer) GetPersonalProfile(context.Context, *GetPersonalProfileRequest) (*PersonalProfile, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetPersonalProfile not implemented")
+}
+func (UnimplementedProfileServiceServer) SavePersonalProfile(context.Context, *SavePersonalProfileRequest) (*PersonalProfile, error) {
+	return nil, status.Error(codes.Unimplemented, "method SavePersonalProfile not implemented")
+}
+func (UnimplementedProfileServiceServer) ListTargetProfiles(context.Context, *ListTargetProfilesRequest) (*ListTargetProfilesResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListTargetProfiles not implemented")
+}
+func (UnimplementedProfileServiceServer) SaveTargetProfile(context.Context, *SaveTargetProfileRequest) (*TargetProfile, error) {
+	return nil, status.Error(codes.Unimplemented, "method SaveTargetProfile not implemented")
+}
+func (UnimplementedProfileServiceServer) ListImportantRecords(context.Context, *ListImportantRecordsRequest) (*ListImportantRecordsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListImportantRecords not implemented")
+}
+func (UnimplementedProfileServiceServer) SaveImportantRecord(context.Context, *SaveImportantRecordRequest) (*ImportantRecord, error) {
+	return nil, status.Error(codes.Unimplemented, "method SaveImportantRecord not implemented")
+}
+func (UnimplementedProfileServiceServer) DeleteImportantRecord(context.Context, *DeleteImportantRecordRequest) (*DeleteImportantRecordResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method DeleteImportantRecord not implemented")
 }
 func (UnimplementedProfileServiceServer) mustEmbedUnimplementedProfileServiceServer() {}
 func (UnimplementedProfileServiceServer) testEmbeddedByValue()                        {}
@@ -178,6 +290,132 @@ func _ProfileService_UpdateAvatar_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ProfileService_GetPersonalProfile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetPersonalProfileRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProfileServiceServer).GetPersonalProfile(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ProfileService_GetPersonalProfile_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProfileServiceServer).GetPersonalProfile(ctx, req.(*GetPersonalProfileRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ProfileService_SavePersonalProfile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SavePersonalProfileRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProfileServiceServer).SavePersonalProfile(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ProfileService_SavePersonalProfile_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProfileServiceServer).SavePersonalProfile(ctx, req.(*SavePersonalProfileRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ProfileService_ListTargetProfiles_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListTargetProfilesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProfileServiceServer).ListTargetProfiles(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ProfileService_ListTargetProfiles_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProfileServiceServer).ListTargetProfiles(ctx, req.(*ListTargetProfilesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ProfileService_SaveTargetProfile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SaveTargetProfileRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProfileServiceServer).SaveTargetProfile(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ProfileService_SaveTargetProfile_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProfileServiceServer).SaveTargetProfile(ctx, req.(*SaveTargetProfileRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ProfileService_ListImportantRecords_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListImportantRecordsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProfileServiceServer).ListImportantRecords(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ProfileService_ListImportantRecords_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProfileServiceServer).ListImportantRecords(ctx, req.(*ListImportantRecordsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ProfileService_SaveImportantRecord_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SaveImportantRecordRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProfileServiceServer).SaveImportantRecord(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ProfileService_SaveImportantRecord_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProfileServiceServer).SaveImportantRecord(ctx, req.(*SaveImportantRecordRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ProfileService_DeleteImportantRecord_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteImportantRecordRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProfileServiceServer).DeleteImportantRecord(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ProfileService_DeleteImportantRecord_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProfileServiceServer).DeleteImportantRecord(ctx, req.(*DeleteImportantRecordRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ProfileService_ServiceDesc is the grpc.ServiceDesc for ProfileService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -196,6 +434,34 @@ var ProfileService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UpdateAvatar",
 			Handler:    _ProfileService_UpdateAvatar_Handler,
+		},
+		{
+			MethodName: "GetPersonalProfile",
+			Handler:    _ProfileService_GetPersonalProfile_Handler,
+		},
+		{
+			MethodName: "SavePersonalProfile",
+			Handler:    _ProfileService_SavePersonalProfile_Handler,
+		},
+		{
+			MethodName: "ListTargetProfiles",
+			Handler:    _ProfileService_ListTargetProfiles_Handler,
+		},
+		{
+			MethodName: "SaveTargetProfile",
+			Handler:    _ProfileService_SaveTargetProfile_Handler,
+		},
+		{
+			MethodName: "ListImportantRecords",
+			Handler:    _ProfileService_ListImportantRecords_Handler,
+		},
+		{
+			MethodName: "SaveImportantRecord",
+			Handler:    _ProfileService_SaveImportantRecord_Handler,
+		},
+		{
+			MethodName: "DeleteImportantRecord",
+			Handler:    _ProfileService_DeleteImportantRecord_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -10,6 +10,9 @@ import (
 var tableComments = map[string]string{
 	"users":                    "用户账号表",
 	"user_profiles":            "用户资料表",
+	"personal_profiles":        "个人信息表",
+	"target_profiles":          "目标信息表",
+	"important_records":        "重要记录表",
 	"auth_refresh_tokens":      "刷新令牌表",
 	"login_logs":               "登录日志表",
 	"security_events":          "安全事件表",

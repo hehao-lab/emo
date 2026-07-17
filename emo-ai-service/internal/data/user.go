@@ -55,6 +55,24 @@ type UserProfileModel struct {
 
 func (UserProfileModel) TableName() string { return "user_profiles" }
 
+func newUserProfileModel(userID int64) UserProfileModel {
+	profile := UserProfileModel{UserID: userID}
+	normalizeUserProfileModel(&profile)
+	return profile
+}
+
+func normalizeUserProfileModel(profile *UserProfileModel) {
+	if profile == nil {
+		return
+	}
+	if profile.Language == "" {
+		profile.Language = "zh-CN"
+	}
+	if profile.Extra == "" {
+		profile.Extra = "{}"
+	}
+}
+
 type userRepoImpl struct {
 	db *gorm.DB
 }
@@ -180,7 +198,7 @@ func (r *userRepoImpl) UpsertProfile(ctx context.Context, p *biz.UserProfile) (*
 	var profile UserProfileModel
 	err := r.db.WithContext(ctx).Where("user_id = ?", p.UserID).First(&profile).Error
 	if err == gorm.ErrRecordNotFound {
-		profile = UserProfileModel{UserID: p.UserID, Language: "zh-CN"}
+		profile = newUserProfileModel(p.UserID)
 	} else if err != nil {
 		return nil, err
 	}
@@ -219,6 +237,7 @@ func (r *userRepoImpl) UpsertProfile(ctx context.Context, p *biz.UserProfile) (*
 	if p.Timezone != "" {
 		profile.Timezone = p.Timezone
 	}
+	normalizeUserProfileModel(&profile)
 	if profile.ID == 0 {
 		if err := r.db.WithContext(ctx).Create(&profile).Error; err != nil {
 			return nil, err

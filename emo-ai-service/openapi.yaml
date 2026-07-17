@@ -751,6 +751,163 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/diary.v1.MoodTag'
+    /v1/profiles/important-records:
+        get:
+            tags:
+                - ProfileService
+            operationId: ProfileService_ListImportantRecords
+            parameters:
+                - name: targetId
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/profile.v1.ListImportantRecordsResponse'
+        post:
+            tags:
+                - ProfileService
+            operationId: ProfileService_SaveImportantRecord
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/profile.v1.SaveImportantRecordRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/profile.v1.ImportantRecord'
+    /v1/profiles/important-records/{id}:
+        put:
+            tags:
+                - ProfileService
+            operationId: ProfileService_SaveImportantRecord
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/profile.v1.SaveImportantRecordRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/profile.v1.ImportantRecord'
+        delete:
+            tags:
+                - ProfileService
+            operationId: ProfileService_DeleteImportantRecord
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/profile.v1.DeleteImportantRecordResponse'
+    /v1/profiles/personal:
+        get:
+            tags:
+                - ProfileService
+            operationId: ProfileService_GetPersonalProfile
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/profile.v1.PersonalProfile'
+        put:
+            tags:
+                - ProfileService
+            operationId: ProfileService_SavePersonalProfile
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/profile.v1.SavePersonalProfileRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/profile.v1.PersonalProfile'
+    /v1/profiles/targets:
+        get:
+            tags:
+                - ProfileService
+            operationId: ProfileService_ListTargetProfiles
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/profile.v1.ListTargetProfilesResponse'
+        post:
+            tags:
+                - ProfileService
+            operationId: ProfileService_SaveTargetProfile
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/profile.v1.SaveTargetProfileRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/profile.v1.TargetProfile'
+    /v1/profiles/targets/{id}:
+        put:
+            tags:
+                - ProfileService
+            operationId: ProfileService_SaveTargetProfile
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/profile.v1.SaveTargetProfileRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/profile.v1.TargetProfile'
     /v1/security/events:
         get:
             tags:
@@ -1690,6 +1847,163 @@ components:
                 publicUrl:
                     type: string
                 expiresAt:
+                    type: string
+        profile.v1.DeleteImportantRecordResponse:
+            type: object
+            properties:
+                ok:
+                    type: boolean
+        profile.v1.ImportantRecord:
+            type: object
+            properties:
+                id:
+                    type: string
+                userId:
+                    type: string
+                personalProfileId:
+                    type: string
+                targetProfileId:
+                    type: string
+                title:
+                    type: string
+                recordTime:
+                    type: string
+                eventDescription:
+                    type: string
+                resolution:
+                    type: string
+                concernPoint:
+                    type: string
+                satisfaction:
+                    type: string
+                createdAt:
+                    type: string
+                updatedAt:
+                    type: string
+        profile.v1.ListImportantRecordsResponse:
+            type: object
+            properties:
+                records:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/profile.v1.ImportantRecord'
+        profile.v1.ListTargetProfilesResponse:
+            type: object
+            properties:
+                targets:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/profile.v1.TargetProfile'
+        profile.v1.PersonalProfile:
+            type: object
+            properties:
+                id:
+                    type: string
+                userId:
+                    type: string
+                age:
+                    type: integer
+                    format: int32
+                gender:
+                    type: string
+                mbti:
+                    type: string
+                relationshipStatus:
+                    type: string
+                personalitySummary:
+                    type: string
+                createdAt:
+                    type: string
+                updatedAt:
+                    type: string
+        profile.v1.SaveImportantRecordRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+                targetProfileId:
+                    type: string
+                title:
+                    type: string
+                recordTime:
+                    type: string
+                eventDescription:
+                    type: string
+                resolution:
+                    type: string
+                concernPoint:
+                    type: string
+                satisfaction:
+                    type: string
+        profile.v1.SavePersonalProfileRequest:
+            type: object
+            properties:
+                age:
+                    type: integer
+                    format: int32
+                gender:
+                    type: string
+                mbti:
+                    type: string
+                relationshipStatus:
+                    type: string
+                personalitySummary:
+                    type: string
+        profile.v1.SaveTargetProfileRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+                name:
+                    type: string
+                age:
+                    type: integer
+                    format: int32
+                gender:
+                    type: string
+                currentRelationship:
+                    type: string
+                interactionFrequency:
+                    type: string
+                relationshipGoal:
+                    type: string
+                personalityTraits:
+                    type: string
+                recentInteraction:
+                    type: string
+                mbti:
+                    type: string
+        profile.v1.TargetProfile:
+            type: object
+            properties:
+                id:
+                    type: string
+                userId:
+                    type: string
+                personalProfileId:
+                    type: string
+                name:
+                    type: string
+                age:
+                    type: integer
+                    format: int32
+                gender:
+                    type: string
+                currentRelationship:
+                    type: string
+                interactionFrequency:
+                    type: string
+                relationshipGoal:
+                    type: string
+                personalityTraits:
+                    type: string
+                recentInteraction:
+                    type: string
+                createdAt:
+                    type: string
+                updatedAt:
+                    type: string
+                mbti:
                     type: string
         profile.v1.UpdateAvatarRequest:
             type: object

@@ -10,17 +10,18 @@ import (
 )
 
 type ChatSessionModel struct {
-	ID            int64          `gorm:"primaryKey;autoIncrement;comment:聊天会话ID"`
-	UserID        int64          `gorm:"index:idx_user_last;not null;comment:用户ID"`
-	Title         string         `gorm:"type:varchar(128);default:'';comment:会话标题"`
-	Scenario      string         `gorm:"type:varchar(64);default:'emotional_support';comment:咨询场景"`
-	Status        string         `gorm:"type:varchar(16);index;default:'active';comment:会话状态"`
-	Summary       string         `gorm:"type:text;comment:会话摘要"`
-	LastMessageAt *time.Time     `gorm:"index:idx_user_last;comment:最后消息时间"`
-	MessageCount  int32          `gorm:"default:0;comment:消息数量"`
-	CreatedAt     time.Time      `gorm:"autoCreateTime;comment:创建时间"`
-	UpdatedAt     time.Time      `gorm:"autoUpdateTime;comment:更新时间"`
-	DeletedAt     gorm.DeletedAt `gorm:"index;comment:软删除时间"`
+	ID                     int64          `gorm:"primaryKey;autoIncrement;comment:聊天会话ID"`
+	UserID                 int64          `gorm:"index:idx_user_last;not null;comment:用户ID"`
+	Title                  string         `gorm:"type:varchar(128);default:'';comment:会话标题"`
+	Scenario               string         `gorm:"type:varchar(64);default:'emotional_support';comment:咨询场景"`
+	Status                 string         `gorm:"type:varchar(16);index;default:'active';comment:会话状态"`
+	Summary                string         `gorm:"type:text;comment:会话摘要"`
+	UpstreamConversationID string         `gorm:"type:varchar(128);index;default:'';comment:上游AI会话ID"`
+	LastMessageAt          *time.Time     `gorm:"index:idx_user_last;comment:最后消息时间"`
+	MessageCount           int32          `gorm:"default:0;comment:消息数量"`
+	CreatedAt              time.Time      `gorm:"autoCreateTime;comment:创建时间"`
+	UpdatedAt              time.Time      `gorm:"autoUpdateTime;comment:更新时间"`
+	DeletedAt              gorm.DeletedAt `gorm:"index;comment:软删除时间"`
 }
 
 func (ChatSessionModel) TableName() string { return "chat_sessions" }
@@ -81,11 +82,12 @@ func NewChatRepo(d *Data) biz.ChatRepo {
 
 func (r *chatRepoImpl) CreateSession(ctx context.Context, session *biz.ChatSession) (*biz.ChatSession, error) {
 	model := &ChatSessionModel{
-		UserID:   session.UserID,
-		Title:    session.Title,
-		Scenario: session.Scenario,
-		Status:   session.Status,
-		Summary:  session.Summary,
+		UserID:                 session.UserID,
+		Title:                  session.Title,
+		Scenario:               session.Scenario,
+		Status:                 session.Status,
+		Summary:                session.Summary,
+		UpstreamConversationID: session.UpstreamConversationID,
 	}
 	if err := r.db.WithContext(ctx).Create(model).Error; err != nil {
 		return nil, err
@@ -213,6 +215,15 @@ func (r *chatRepoImpl) TouchSession(ctx context.Context, sessionID int64, lastMe
 		Updates(map[string]any{"last_message_at": &lastMessageAt, "message_count": gorm.Expr("message_count + ?", deltaCount)}).Error
 }
 
+func (r *chatRepoImpl) BindSessionUpstream(ctx context.Context, sessionID int64, upstreamConversationID string) error {
+	if upstreamConversationID == "" {
+		return nil
+	}
+
+	return r.db.WithContext(ctx).Model(&ChatSessionModel{}).Where("id = ?", sessionID).
+		Update("upstream_conversation_id", upstreamConversationID).Error
+}
+
 func (r *chatRepoImpl) CreateFeedback(ctx context.Context, feedback *biz.ChatFeedback) (*biz.ChatFeedback, error) {
 	var message ChatMessageModel
 	if err := r.db.WithContext(ctx).Where("id = ? AND user_id = ?", feedback.MessageID, feedback.UserID).First(&message).Error; err != nil {
@@ -253,16 +264,17 @@ func toBizChatSession(model *ChatSessionModel) *biz.ChatSession {
 		last = *model.LastMessageAt
 	}
 	return &biz.ChatSession{
-		ID:            model.ID,
-		UserID:        model.UserID,
-		Title:         model.Title,
-		Scenario:      model.Scenario,
-		Status:        model.Status,
-		Summary:       model.Summary,
-		MessageCount:  model.MessageCount,
-		LastMessageAt: last,
-		CreatedAt:     model.CreatedAt,
-		UpdatedAt:     model.UpdatedAt,
+		ID:                     model.ID,
+		UserID:                 model.UserID,
+		Title:                  model.Title,
+		Scenario:               model.Scenario,
+		Status:                 model.Status,
+		Summary:                model.Summary,
+		UpstreamConversationID: model.UpstreamConversationID,
+		MessageCount:           model.MessageCount,
+		LastMessageAt:          last,
+		CreatedAt:              model.CreatedAt,
+		UpdatedAt:              model.UpdatedAt,
 	}
 }
 

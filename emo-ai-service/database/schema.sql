@@ -35,6 +35,61 @@ CREATE TABLE IF NOT EXISTS user_profiles (
   INDEX idx_user_profiles_deleted_at (deleted_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户资料表';
 
+CREATE TABLE IF NOT EXISTS personal_profiles (
+  id BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '个人信息ID',
+  user_id BIGINT NOT NULL UNIQUE COMMENT '用户ID',
+  age INT DEFAULT 0 COMMENT '年龄',
+  gender VARCHAR(32) DEFAULT '' COMMENT '性别',
+  mbti VARCHAR(16) DEFAULT '' COMMENT 'MBTI人格',
+  relationship_status VARCHAR(128) DEFAULT '' COMMENT '关系说明',
+  personality_summary TEXT NULL COMMENT '性格评价',
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  deleted_at DATETIME NULL COMMENT '软删除时间',
+  INDEX idx_personal_profiles_deleted_at (deleted_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='个人信息表';
+
+CREATE TABLE IF NOT EXISTS target_profiles (
+  id BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '目标信息ID',
+  user_id BIGINT NOT NULL COMMENT '用户ID',
+  personal_profile_id BIGINT NOT NULL COMMENT '个人信息ID',
+  name VARCHAR(128) DEFAULT '' COMMENT '对方称呼',
+  age INT DEFAULT 0 COMMENT '对方年龄',
+  gender VARCHAR(32) DEFAULT '' COMMENT '对方性别',
+  mbti VARCHAR(16) DEFAULT '' COMMENT 'MBTI人格',
+  current_relationship VARCHAR(128) DEFAULT '' COMMENT '当前关系',
+  interaction_frequency VARCHAR(128) DEFAULT '' COMMENT '互动频率',
+  relationship_goal VARCHAR(256) DEFAULT '' COMMENT '关系目标',
+  personality_traits TEXT NULL COMMENT '对方性格与相处特点',
+  recent_interaction TEXT NULL COMMENT '最近一次关键互动',
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  deleted_at DATETIME NULL COMMENT '软删除时间',
+  INDEX idx_target_profiles_user_id (user_id),
+  INDEX idx_target_profiles_personal_profile_id (personal_profile_id),
+  INDEX idx_target_profiles_deleted_at (deleted_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='目标信息表';
+
+CREATE TABLE IF NOT EXISTS important_records (
+  id BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '重要记录ID',
+  user_id BIGINT NOT NULL COMMENT '用户ID',
+  personal_profile_id BIGINT NOT NULL COMMENT '个人信息ID',
+  target_profile_id BIGINT NOT NULL COMMENT '目标信息ID',
+  title VARCHAR(160) NOT NULL COMMENT '标题',
+  record_time VARCHAR(32) DEFAULT '' COMMENT '记录时间',
+  event_description TEXT NULL COMMENT '事件描述',
+  resolution TEXT NULL COMMENT '矛盾解决方式',
+  concern_point TEXT NULL COMMENT '在意的点',
+  satisfaction VARCHAR(32) DEFAULT '' COMMENT '满意度',
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  deleted_at DATETIME NULL COMMENT '软删除时间',
+  INDEX idx_important_records_user_id (user_id),
+  INDEX idx_important_records_personal_profile_id (personal_profile_id),
+  INDEX idx_important_records_target_profile_id (target_profile_id),
+  INDEX idx_important_records_deleted_at (deleted_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='重要记录表';
+
 CREATE TABLE IF NOT EXISTS auth_refresh_tokens (
   id BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '刷新令牌记录ID',
   user_id BIGINT NOT NULL COMMENT '用户ID',
@@ -145,12 +200,14 @@ CREATE TABLE IF NOT EXISTS chat_sessions (
   scenario VARCHAR(64) DEFAULT 'emotional_support' COMMENT '咨询场景',
   status VARCHAR(16) DEFAULT 'active' COMMENT '会话状态',
   summary TEXT NULL COMMENT '会话摘要',
+  upstream_conversation_id VARCHAR(128) DEFAULT '' COMMENT '上游AI会话ID',
   last_message_at DATETIME NULL COMMENT '最后消息时间',
   message_count INT DEFAULT 0 COMMENT '消息数量',
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   deleted_at DATETIME NULL COMMENT '软删除时间',
   INDEX idx_chat_sessions_user_last (user_id, last_message_at),
+  INDEX idx_chat_sessions_upstream_conversation_id (upstream_conversation_id),
   INDEX idx_chat_sessions_status (status),
   INDEX idx_chat_sessions_deleted_at (deleted_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='聊天会话表';

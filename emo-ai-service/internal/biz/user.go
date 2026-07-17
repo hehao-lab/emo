@@ -15,15 +15,17 @@ import (
 )
 
 var (
-	ErrUsernameExists   = errors.New("username already exists")
-	ErrPhoneExists      = errors.New("phone already exists")
-	ErrEmailExists      = errors.New("email already exists")
-	ErrUserNotFound     = errors.New("user not found")
-	ErrPasswordMismatch = errors.New("password mismatch")
-	ErrTokenInvalid     = errors.New("token invalid")
-	ErrPermissionDenied = errors.New("permission denied")
-	ErrCodeExpired      = errors.New("verification code expired")
-	ErrCodeMismatch     = errors.New("verification code mismatch")
+	ErrUsernameExists        = errors.New("username already exists")
+	ErrPhoneExists           = errors.New("phone already exists")
+	ErrEmailExists           = errors.New("email already exists")
+	ErrUserNotFound          = errors.New("user not found")
+	ErrPasswordMismatch      = errors.New("password mismatch")
+	ErrTokenInvalid          = errors.New("token invalid")
+	ErrPermissionDenied      = errors.New("permission denied")
+	ErrCodeExpired           = errors.New("verification code expired")
+	ErrCodeMismatch          = errors.New("verification code mismatch")
+	ErrTargetProfileRequired = errors.New("target profile required")
+	ErrTargetProfileNotFound = errors.New("target profile not found")
 )
 
 const (
@@ -64,6 +66,50 @@ type UserProfile struct {
 	UpdatedAt  time.Time
 }
 
+type PersonalProfile struct {
+	ID                 int64
+	UserID             int64
+	Age                int32
+	Gender             string
+	MBTI               string
+	RelationshipStatus string
+	PersonalitySummary string
+	CreatedAt          time.Time
+	UpdatedAt          time.Time
+}
+
+type TargetProfile struct {
+	ID                   int64
+	UserID               int64
+	PersonalProfileID    int64
+	Name                 string
+	Age                  int32
+	Gender               string
+	MBTI                 string
+	CurrentRelationship  string
+	InteractionFrequency string
+	RelationshipGoal     string
+	PersonalityTraits    string
+	RecentInteraction    string
+	CreatedAt            time.Time
+	UpdatedAt            time.Time
+}
+
+type ImportantRecord struct {
+	ID                int64
+	UserID            int64
+	PersonalProfileID int64
+	TargetProfileID   int64
+	Title             string
+	RecordTime        string
+	EventDescription  string
+	Resolution        string
+	ConcernPoint      string
+	Satisfaction      string
+	CreatedAt         time.Time
+	UpdatedAt         time.Time
+}
+
 type LoginMeta struct {
 	IP         string
 	UserAgent  string
@@ -77,6 +123,7 @@ type UserRepo interface {
 	FindByUsername(ctx context.Context, username string) (*User, error)
 	FindByPhone(ctx context.Context, phone string) (*User, error)
 	FindByEmail(ctx context.Context, email string) (*User, error)
+	UpdatePassword(ctx context.Context, userID int64, passwordHash string) error
 }
 
 type VerificationCodeRepo interface {
@@ -98,6 +145,14 @@ type ProfileRepo interface {
 	FindByID(ctx context.Context, id int64) (*User, error)
 	FindProfile(ctx context.Context, userID int64) (*UserProfile, error)
 	UpsertProfile(ctx context.Context, profile *UserProfile) (*UserProfile, error)
+	FindPersonalProfile(ctx context.Context, userID int64) (*PersonalProfile, error)
+	UpsertPersonalProfile(ctx context.Context, profile *PersonalProfile) (*PersonalProfile, error)
+	ListTargetProfiles(ctx context.Context, userID int64) ([]*TargetProfile, error)
+	GetTargetProfile(ctx context.Context, userID, targetID int64) (*TargetProfile, error)
+	UpsertTargetProfile(ctx context.Context, target *TargetProfile) (*TargetProfile, error)
+	ListImportantRecords(ctx context.Context, userID, targetID int64) ([]*ImportantRecord, error)
+	UpsertImportantRecord(ctx context.Context, record *ImportantRecord) (*ImportantRecord, error)
+	DeleteImportantRecord(ctx context.Context, userID, recordID int64) error
 }
 
 type UserUsecase struct {
@@ -200,18 +255,34 @@ func (uc *UserUsecase) Register(ctx context.Context, username, password, phone, 
 }
 
 func (uc *UserUsecase) Login(ctx context.Context, phone, password string, meta LoginMeta) (*LoginResult, error) {
-	phone = strings.TrimSpace(phone)
-	u, err := uc.repo.FindByPhone(ctx, phone)
+	account := strings.TrimSpace(phone)
+	u, err := uc.repo.FindByPhone(ctx, account)
 	if err != nil {
 		return nil, err
 	}
 	if u == nil {
-		uc.recordLogin(ctx, 0, phone, "password", false, "user_not_found", meta)
+		u, err = uc.repo.FindByUsername(ctx, account)
+		if err != nil {
+			return nil, err
+		}
+	}
+	if u == nil {
+		uc.recordLogin(ctx, 0, account, "password", false, "user_not_found", meta)
 		return nil, ErrUserNotFound
 	}
-	if err := bcrypt.CompareHashAndPassword([]byte(u.PasswordHash), []byte(password)); err != nil {
-		uc.recordLogin(ctx, u.ID, phone, "password", false, "password_mismatch", meta)
-		return nil, ErrPasswordMismatch
+	upgradedHash, err := verifyPassword(u.PasswordHash, password)
+	if err != nil {
+		if errors.Is(err, ErrPasswordMismatch) {
+			uc.recordLogin(ctx, u.ID, account, "password", false, "password_mismatch", meta)
+			return nil, ErrPasswordMismatch
+		}
+		return nil, err
+	}
+	if upgradedHash != "" {
+		if err := uc.repo.UpdatePassword(ctx, u.ID, upgradedHash); err != nil {
+			return nil, err
+		}
+		u.PasswordHash = upgradedHash
 	}
 	pair, err := uc.tokenManger.IssuePair(u.ID, u.Roles)
 	if err != nil {
@@ -232,7 +303,7 @@ func (uc *UserUsecase) Login(ctx context.Context, phone, password string, meta L
 			return nil, err
 		}
 	}
-	uc.recordLogin(ctx, u.ID, phone, "password", true, "", meta)
+	uc.recordLogin(ctx, u.ID, account, "password", true, "", meta)
 	return &LoginResult{
 		AccessToken:  pair.AccessToken,
 		RefreshToken: pair.RefreshToken,
@@ -242,6 +313,20 @@ func (uc *UserUsecase) Login(ctx context.Context, phone, password string, meta L
 		Avatar:       u.Avatar,
 		Roles:        u.Roles,
 	}, nil
+}
+
+func verifyPassword(savedPassword, password string) (string, error) {
+	if err := bcrypt.CompareHashAndPassword([]byte(savedPassword), []byte(password)); err == nil {
+		return "", nil
+	}
+	if savedPassword != password {
+		return "", ErrPasswordMismatch
+	}
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return "", err
+	}
+	return string(hashedPassword), nil
 }
 
 func (uc *UserUsecase) GetUserInfo(ctx context.Context, userID int64) (*User, error) {
@@ -341,4 +426,110 @@ func (uc *ProfileUsecase) UpdateProfile(ctx context.Context, p *UserProfile) (*U
 
 func (uc *ProfileUsecase) UpdateAvatar(ctx context.Context, userID int64, avatarURL string) (*UserProfile, error) {
 	return uc.repo.UpsertProfile(ctx, &UserProfile{UserID: userID, AvatarURL: avatarURL})
+}
+
+func (uc *ProfileUsecase) GetPersonalProfile(ctx context.Context, userID int64) (*PersonalProfile, error) {
+	profile, err := uc.repo.FindPersonalProfile(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+	if profile != nil {
+		return profile, nil
+	}
+	return &PersonalProfile{UserID: userID}, nil
+}
+
+func (uc *ProfileUsecase) SavePersonalProfile(ctx context.Context, userID int64, profile *PersonalProfile) (*PersonalProfile, error) {
+	if profile == nil {
+		profile = &PersonalProfile{}
+	}
+	next := *profile
+	next.UserID = userID
+	next.Gender = strings.TrimSpace(next.Gender)
+	next.MBTI = strings.TrimSpace(next.MBTI)
+	next.RelationshipStatus = strings.TrimSpace(next.RelationshipStatus)
+	next.PersonalitySummary = strings.TrimSpace(next.PersonalitySummary)
+	return uc.repo.UpsertPersonalProfile(ctx, &next)
+}
+
+func (uc *ProfileUsecase) ListTargetProfiles(ctx context.Context, userID int64) ([]*TargetProfile, error) {
+	return uc.repo.ListTargetProfiles(ctx, userID)
+}
+
+func (uc *ProfileUsecase) SaveTargetProfile(ctx context.Context, userID int64, target *TargetProfile) (*TargetProfile, error) {
+	if target == nil {
+		target = &TargetProfile{}
+	}
+	personal, err := uc.ensurePersonalProfile(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+	next := *target
+	next.UserID = userID
+	next.PersonalProfileID = personal.ID
+	next.Name = strings.TrimSpace(next.Name)
+	next.Gender = strings.TrimSpace(next.Gender)
+	next.MBTI = strings.TrimSpace(next.MBTI)
+	next.CurrentRelationship = strings.TrimSpace(next.CurrentRelationship)
+	next.InteractionFrequency = strings.TrimSpace(next.InteractionFrequency)
+	next.RelationshipGoal = strings.TrimSpace(next.RelationshipGoal)
+	next.PersonalityTraits = strings.TrimSpace(next.PersonalityTraits)
+	next.RecentInteraction = strings.TrimSpace(next.RecentInteraction)
+	if next.ID != 0 {
+		existing, err := uc.repo.GetTargetProfile(ctx, userID, next.ID)
+		if err != nil {
+			return nil, err
+		}
+		if existing == nil {
+			return nil, ErrTargetProfileNotFound
+		}
+	}
+	return uc.repo.UpsertTargetProfile(ctx, &next)
+}
+
+func (uc *ProfileUsecase) ListImportantRecords(ctx context.Context, userID, targetID int64) ([]*ImportantRecord, error) {
+	return uc.repo.ListImportantRecords(ctx, userID, targetID)
+}
+
+func (uc *ProfileUsecase) SaveImportantRecord(ctx context.Context, userID int64, record *ImportantRecord) (*ImportantRecord, error) {
+	if record == nil || record.TargetProfileID == 0 {
+		return nil, ErrTargetProfileRequired
+	}
+	target, err := uc.repo.GetTargetProfile(ctx, userID, record.TargetProfileID)
+	if err != nil {
+		return nil, err
+	}
+	if target == nil {
+		return nil, ErrTargetProfileNotFound
+	}
+	personal, err := uc.ensurePersonalProfile(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+	next := *record
+	next.UserID = userID
+	next.PersonalProfileID = personal.ID
+	next.TargetProfileID = target.ID
+	next.Title = strings.TrimSpace(next.Title)
+	next.RecordTime = strings.TrimSpace(next.RecordTime)
+	next.EventDescription = strings.TrimSpace(next.EventDescription)
+	next.Resolution = strings.TrimSpace(next.Resolution)
+	next.ConcernPoint = strings.TrimSpace(next.ConcernPoint)
+	next.Satisfaction = strings.TrimSpace(next.Satisfaction)
+	return uc.repo.UpsertImportantRecord(ctx, &next)
+}
+
+func (uc *ProfileUsecase) DeleteImportantRecord(ctx context.Context, userID, recordID int64) error {
+	return uc.repo.DeleteImportantRecord(ctx, userID, recordID)
+}
+
+func (uc *ProfileUsecase) ensurePersonalProfile(ctx context.Context, userID int64) (*PersonalProfile, error) {
+	profile, err := uc.repo.FindPersonalProfile(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+	if profile != nil {
+		return profile, nil
+	}
+	return uc.repo.UpsertPersonalProfile(ctx, &PersonalProfile{UserID: userID})
 }
