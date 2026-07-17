@@ -327,6 +327,7 @@ CREATE TABLE IF NOT EXISTS app_versions (
   changelog TEXT NULL COMMENT '更新说明',
   min_supported_version VARCHAR(32) DEFAULT '' COMMENT '最低支持版本',
   published_at DATETIME NULL COMMENT '发布时间',
+  status TINYINT NOT NULL DEFAULT 1 COMMENT '版本状态 1启用 0停用',
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   INDEX idx_app_versions_platform (platform),
@@ -368,3 +369,18 @@ CREATE TABLE IF NOT EXISTS file_assets (
   INDEX idx_file_assets_biz_type (biz_type),
   INDEX idx_file_assets_deleted_at (deleted_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='文件资源表';
+
+CREATE TABLE IF NOT EXISTS admin_operation_logs (
+  id BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '管理操作日志ID',
+  admin_user_id BIGINT NOT NULL COMMENT '管理员用户ID',
+  action VARCHAR(64) NOT NULL COMMENT '操作类型',
+  resource_type VARCHAR(64) NOT NULL COMMENT '资源类型',
+  resource_id BIGINT DEFAULT 0 COMMENT '资源ID',
+  detail_json JSON NULL COMMENT '操作详情JSON',
+  ip VARCHAR(64) DEFAULT '' COMMENT '操作IP',
+  user_agent VARCHAR(512) DEFAULT '' COMMENT 'User-Agent',
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  INDEX idx_admin_logs_admin_user_id (admin_user_id),
+  INDEX idx_admin_logs_resource (resource_type, resource_id),
+  INDEX idx_admin_logs_created_at (created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='管理后台操作日志表';

@@ -28,6 +28,9 @@ func (s *SecurityService) RefreshToken(ctx context.Context, req *v1.RefreshToken
 		if errors.Is(err, biz.ErrTokenInvalid) {
 			return nil, kerrors.Unauthorized("INVALID_REFRESH_TOKEN", "refresh token is invalid")
 		}
+		if errors.Is(err, biz.ErrUserDisabled) {
+			return nil, kerrors.New(403, "USER_DISABLED", "user is disabled")
+		}
 		return nil, err
 	}
 	return &v1.RefreshTokenResponse{AccessToken: result.AccessToken, RefreshToken: result.RefreshToken, ExpiresAt: result.ExpiresAt}, nil

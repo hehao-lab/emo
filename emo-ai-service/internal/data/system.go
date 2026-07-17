@@ -31,6 +31,7 @@ type AppVersionModel struct {
 	Changelog           string     `gorm:"type:text;comment:更新说明"`
 	MinSupportedVersion string     `gorm:"type:varchar(32);default:'';comment:最低支持版本"`
 	PublishedAt         *time.Time `gorm:"index;comment:发布时间"`
+	Status              int32      `gorm:"default:1;comment:版本状态 1启用 0停用"`
 	CreatedAt           time.Time  `gorm:"autoCreateTime;comment:创建时间"`
 	UpdatedAt           time.Time  `gorm:"autoUpdateTime;comment:更新时间"`
 }
@@ -99,7 +100,7 @@ func (r *systemRepoImpl) GetLatestVersion(ctx context.Context, platform string) 
 		platform = "web"
 	}
 	var model AppVersionModel
-	err := r.db.WithContext(ctx).Where("platform = ?", platform).Order("build_no desc").First(&model).Error
+	err := r.db.WithContext(ctx).Where("platform = ? AND status = ?", platform, 1).Order("build_no desc").First(&model).Error
 	if err == gorm.ErrRecordNotFound {
 		return nil, nil
 	}

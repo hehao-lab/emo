@@ -24,6 +24,7 @@ var ProviderSet = wire.NewSet(NewTokenManager)
 type contextKey string
 
 const userIDKey contextKey = "auth_user_id"
+const rolesKey contextKey = "auth_roles"
 
 type Claims struct {
 	UserID int64    `json:"uid"`
@@ -136,9 +137,35 @@ func WithUserID(ctx context.Context, userID int64) context.Context {
 	return context.WithValue(ctx, userIDKey, userID)
 }
 
+func WithRoles(ctx context.Context, roles []string) context.Context {
+	return context.WithValue(ctx, rolesKey, roles)
+}
+
+func WithAuth(ctx context.Context, userID int64, roles []string) context.Context {
+	return WithRoles(WithUserID(ctx, userID), roles)
+}
+
 func UserIDFromContext(ctx context.Context) (int64, bool) {
 	userID, ok := ctx.Value(userIDKey).(int64)
 	return userID, ok && userID > 0
+}
+
+func RolesFromContext(ctx context.Context) ([]string, bool) {
+	roles, ok := ctx.Value(rolesKey).([]string)
+	return roles, ok
+}
+
+func HasRole(ctx context.Context, role string) bool {
+	roles, ok := RolesFromContext(ctx)
+	if !ok {
+		return false
+	}
+	for _, item := range roles {
+		if item == role {
+			return true
+		}
+	}
+	return false
 }
 
 func MustUserID(ctx context.Context) (int64, error) {
@@ -168,7 +195,7 @@ func ServerMiddleware(tm *TokenManager, publicOperations map[string]bool) middle
 				if err != nil {
 					return nil, kerrors.Unauthorized("UNAUTHORIZED", "invalid access token")
 				}
-				ctx = WithUserID(ctx, claims.UserID)
+				ctx = WithAuth(ctx, claims.UserID, claims.Roles)
 			}
 			return next(ctx, req)
 		}

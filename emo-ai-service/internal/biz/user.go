@@ -255,34 +255,24 @@ func (uc *UserUsecase) Register(ctx context.Context, username, password, phone, 
 }
 
 func (uc *UserUsecase) Login(ctx context.Context, phone, password string, meta LoginMeta) (*LoginResult, error) {
-	account := strings.TrimSpace(phone)
-	u, err := uc.repo.FindByPhone(ctx, account)
+	phone = strings.TrimSpace(phone)
+	u, err := uc.repo.FindByPhone(ctx, phone)
 	if err != nil {
 		return nil, err
 	}
 	if u == nil {
-		u, err = uc.repo.FindByUsername(ctx, account)
+		u, err = uc.repo.FindByUsername(ctx, phone)
 		if err != nil {
 			return nil, err
 		}
 	}
 	if u == nil {
-		uc.recordLogin(ctx, 0, account, "password", false, "user_not_found", meta)
+		uc.recordLogin(ctx, 0, phone, "password", false, "user_not_found", meta)
 		return nil, ErrUserNotFound
 	}
-	upgradedHash, err := verifyPassword(u.PasswordHash, password)
-	if err != nil {
-		if errors.Is(err, ErrPasswordMismatch) {
-			uc.recordLogin(ctx, u.ID, account, "password", false, "password_mismatch", meta)
-			return nil, ErrPasswordMismatch
-		}
-		return nil, err
-	}
-	if upgradedHash != "" {
-		if err := uc.repo.UpdatePassword(ctx, u.ID, upgradedHash); err != nil {
-			return nil, err
-		}
-		u.PasswordHash = upgradedHash
+	if err := bcrypt.CompareHashAndPassword([]byte(u.PasswordHash), []byte(password)); err != nil {
+		uc.recordLogin(ctx, u.ID, phone, "password", false, "password_mismatch", meta)
+		return nil, ErrPasswordMismatch
 	}
 	pair, err := uc.tokenManger.IssuePair(u.ID, u.Roles)
 	if err != nil {
@@ -303,7 +293,7 @@ func (uc *UserUsecase) Login(ctx context.Context, phone, password string, meta L
 			return nil, err
 		}
 	}
-	uc.recordLogin(ctx, u.ID, account, "password", true, "", meta)
+	uc.recordLogin(ctx, u.ID, phone, "password", true, "", meta)
 	return &LoginResult{
 		AccessToken:  pair.AccessToken,
 		RefreshToken: pair.RefreshToken,

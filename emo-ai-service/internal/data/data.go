@@ -31,6 +31,7 @@ var ProviderSet = wire.NewSet(
 	NewEmotionAnalyzer,
 	NewSystemRepo,
 	NewFileRepo,
+	NewAdminRepo,
 )
 
 type Data struct {
@@ -68,6 +69,7 @@ func NewData(c *conf.Data) (*Data, func(), error) {
 		&AppVersionModel{},
 		&SystemAnnouncementModel{},
 		&FileAssetModel{},
+		&AdminOperationLogModel{},
 	); err != nil {
 		return nil, nil, err
 	}

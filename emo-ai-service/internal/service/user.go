@@ -76,6 +76,9 @@ func (s *UserService) Login(ctx context.Context, req *v1.LoginRequest) (*v1.Logi
 		if errors.Is(err, biz.ErrUserNotFound) || errors.Is(err, biz.ErrPasswordMismatch) {
 			return nil, kerrors.Unauthorized("INVALID_CREDENTIALS", "phone or password is invalid")
 		}
+		if errors.Is(err, biz.ErrUserDisabled) {
+			return nil, kerrors.New(403, "USER_DISABLED", "user is disabled")
+		}
 		return nil, err
 	}
 	return &v1.LoginResponse{

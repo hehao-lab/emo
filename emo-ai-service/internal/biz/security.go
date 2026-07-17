@@ -87,6 +87,9 @@ func (uc *SecurityUsecase) RefreshToken(ctx context.Context, refreshToken string
 	if u == nil {
 		return nil, ErrUserNotFound
 	}
+	if u.Status != 1 {
+		return nil, ErrUserDisabled
+	}
 	if err := uc.repo.RevokeRefreshToken(ctx, token.UserID, token.TokenID, "rotated"); err != nil {
 		return nil, err
 	}
