@@ -10,7 +10,7 @@ server:
 data:
   database:
     driver: mysql
-    source: ${EMO_DATABASE_SOURCE:root:123456@tcp(121.43.33.200:3306)/emo_ai?charset=utf8mb4&parseTime=True&loc=Local}
+    source: ${EMO_DATABASE_SOURCE:root:1234@tcp(120.0.0.13306)/emo_ai?charset=utf8mb4&parseTime=True&loc=Local}
   redis:
     network: tcp
     addr: ${EMO_REDIS_ADDR:127.0.0.1:6379}
