@@ -2,6 +2,7 @@ package data
 
 import (
 	"context"
+	"encoding/json"
 	"time"
 
 	"emo-ai-service/internal/biz"
@@ -139,8 +140,9 @@ func (r *systemRepoImpl) ListAnnouncements(ctx context.Context, platform string)
 }
 
 func trimJSONQuote(value string) string {
-	if len(value) >= 2 && value[0] == '"' && value[len(value)-1] == '"' {
-		return value[1 : len(value)-1]
+	var decoded string
+	if err := json.Unmarshal([]byte(value), &decoded); err == nil {
+		return decoded
 	}
 	return value
 }
