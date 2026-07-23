@@ -24,6 +24,7 @@ var ProviderSet = wire.NewSet(NewTokenManager)
 type contextKey string
 
 const userIDKey contextKey = "auth_user_id"
+const rolesKey contextKey = "auth_roles"
 
 type Claims struct {
 	UserID int64    `json:"uid"`
@@ -136,6 +137,10 @@ func WithUserID(ctx context.Context, userID int64) context.Context {
 	return context.WithValue(ctx, userIDKey, userID)
 }
 
+func WithRoles(ctx context.Context, roles []string) context.Context {
+	return context.WithValue(ctx, rolesKey, append([]string(nil), roles...))
+}
+
 func UserIDFromContext(ctx context.Context) (int64, bool) {
 	userID, ok := ctx.Value(userIDKey).(int64)
 	return userID, ok && userID > 0
@@ -147,6 +152,20 @@ func MustUserID(ctx context.Context) (int64, error) {
 		return 0, kerrors.Unauthorized("UNAUTHORIZED", "login required")
 	}
 	return userID, nil
+}
+
+func RolesFromContext(ctx context.Context) []string {
+	roles, _ := ctx.Value(rolesKey).([]string)
+	return append([]string(nil), roles...)
+}
+
+func IsAdmin(ctx context.Context) bool {
+	for _, role := range RolesFromContext(ctx) {
+		if strings.EqualFold(role, "admin") {
+			return true
+		}
+	}
+	return false
 }
 
 func ServerMiddleware(tm *TokenManager, publicOperations map[string]bool) middleware.Middleware {
@@ -169,6 +188,7 @@ func ServerMiddleware(tm *TokenManager, publicOperations map[string]bool) middle
 					return nil, kerrors.Unauthorized("UNAUTHORIZED", "invalid access token")
 				}
 				ctx = WithUserID(ctx, claims.UserID)
+				ctx = WithRoles(ctx, claims.Roles)
 			}
 			return next(ctx, req)
 		}

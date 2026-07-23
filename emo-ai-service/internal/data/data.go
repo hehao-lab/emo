@@ -31,6 +31,7 @@ var ProviderSet = wire.NewSet(
 	NewEmotionAnalyzer,
 	NewSystemRepo,
 	NewFileRepo,
+	NewAdminRepo,
 )
 
 type Data struct {

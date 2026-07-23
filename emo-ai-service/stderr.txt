@@ -1,0 +1,6 @@
+2026/07/17 11:44:25 maxprocs: Leaving GOMAXPROCS=8: CPU quota undefined
+panic: Error 1045 (28000): Access denied for user 'root'@'localhost' (using password: YES)
+
+goroutine 1 [running]:
+main.main()
+	D:/emo-ai/emo-ai-service/cmd/emo-ai-service/main.go:85 +0x5d1

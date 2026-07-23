@@ -119,6 +119,819 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/aichat.v1.KnowledgeDocument'
+    /v1/admin/chat/sessions:
+        get:
+            tags:
+                - AdminService
+            operationId: AdminService_ListChatSessions
+            parameters:
+                - name: page
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: pageSize
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: userId
+                  in: query
+                  schema:
+                    type: string
+                - name: status
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/admin.v1.ListChatSessionsResponse'
+    /v1/admin/chat/sessions/{sessionId}/messages:
+        get:
+            tags:
+                - AdminService
+            operationId: AdminService_ListChatMessages
+            parameters:
+                - name: sessionId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: page
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: pageSize
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/admin.v1.ListChatMessagesResponse'
+    /v1/admin/dashboard/overview:
+        get:
+            tags:
+                - AdminService
+            operationId: AdminService_GetDashboardOverview
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/admin.v1.DashboardOverview'
+    /v1/admin/dashboard/trends:
+        get:
+            tags:
+                - AdminService
+            operationId: AdminService_GetDashboardTrends
+            parameters:
+                - name: startDate
+                  in: query
+                  schema:
+                    type: string
+                - name: endDate
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/admin.v1.DashboardTrends'
+    /v1/admin/diaries:
+        get:
+            tags:
+                - AdminService
+            operationId: AdminService_ListDiaries
+            parameters:
+                - name: page
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: pageSize
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: keyword
+                  in: query
+                  schema:
+                    type: string
+                - name: userId
+                  in: query
+                  schema:
+                    type: string
+                - name: mood
+                  in: query
+                  schema:
+                    type: string
+                - name: startDate
+                  in: query
+                  schema:
+                    type: string
+                - name: endDate
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/admin.v1.ListDiariesResponse'
+    /v1/admin/diaries/{id}:
+        get:
+            tags:
+                - AdminService
+            operationId: AdminService_GetDiary
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/admin.v1.AdminDiary'
+        delete:
+            tags:
+                - AdminService
+            operationId: AdminService_DeleteDiary
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content: {}
+    /v1/admin/emotion/analyses:
+        get:
+            tags:
+                - AdminService
+            operationId: AdminService_ListEmotionAnalyses
+            parameters:
+                - name: page
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: pageSize
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: userId
+                  in: query
+                  schema:
+                    type: string
+                - name: riskLevel
+                  in: query
+                  schema:
+                    type: string
+                - name: sourceType
+                  in: query
+                  schema:
+                    type: string
+                - name: startDate
+                  in: query
+                  schema:
+                    type: string
+                - name: endDate
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/admin.v1.ListEmotionAnalysesResponse'
+    /v1/admin/emotion/analyses/{id}:
+        get:
+            tags:
+                - AdminService
+            operationId: AdminService_GetEmotionAnalysis
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/admin.v1.AdminEmotionAnalysis'
+    /v1/admin/files:
+        get:
+            tags:
+                - AdminService
+            operationId: AdminService_ListFiles
+            parameters:
+                - name: page
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: pageSize
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: bizType
+                  in: query
+                  schema:
+                    type: string
+                - name: ownerUserId
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/admin.v1.ListFilesResponse'
+    /v1/admin/files/{id}:
+        get:
+            tags:
+                - AdminService
+            operationId: AdminService_GetFile
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/admin.v1.AdminFile'
+        delete:
+            tags:
+                - AdminService
+            operationId: AdminService_DeleteFile
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content: {}
+    /v1/admin/mood-tags:
+        get:
+            tags:
+                - AdminService
+            operationId: AdminService_ListMoodTags
+            parameters:
+                - name: page
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: pageSize
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: keyword
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/admin.v1.ListMoodTagsResponse'
+        post:
+            tags:
+                - AdminService
+            operationId: AdminService_CreateMoodTag
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/admin.v1.CreateMoodTagRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/admin.v1.AdminMoodTag'
+    /v1/admin/mood-tags/{id}:
+        delete:
+            tags:
+                - AdminService
+            operationId: AdminService_DeleteMoodTag
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content: {}
+        patch:
+            tags:
+                - AdminService
+            operationId: AdminService_UpdateMoodTag
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/admin.v1.UpdateMoodTagRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/admin.v1.AdminMoodTag'
+    /v1/admin/security/events:
+        get:
+            tags:
+                - AdminService
+            operationId: AdminService_ListSecurityEvents
+            parameters:
+                - name: page
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: pageSize
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: userId
+                  in: query
+                  schema:
+                    type: string
+                - name: riskLevel
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/admin.v1.ListSecurityEventsResponse'
+    /v1/admin/security/login-logs:
+        get:
+            tags:
+                - AdminService
+            operationId: AdminService_ListLoginLogs
+            parameters:
+                - name: page
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: pageSize
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: userId
+                  in: query
+                  schema:
+                    type: string
+                - name: successOnly
+                  in: query
+                  schema:
+                    type: boolean
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/admin.v1.ListLoginLogsResponse'
+    /v1/admin/system/announcements:
+        get:
+            tags:
+                - AdminService
+            operationId: AdminService_ListAnnouncements
+            parameters:
+                - name: page
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: pageSize
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: platform
+                  in: query
+                  schema:
+                    type: string
+                - name: status
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: filterStatus
+                  in: query
+                  schema:
+                    type: boolean
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/admin.v1.ListAnnouncementsResponse'
+        post:
+            tags:
+                - AdminService
+            operationId: AdminService_CreateAnnouncement
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/admin.v1.CreateAnnouncementRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/admin.v1.AdminAnnouncement'
+    /v1/admin/system/announcements/{id}:
+        delete:
+            tags:
+                - AdminService
+            operationId: AdminService_DeleteAnnouncement
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content: {}
+        patch:
+            tags:
+                - AdminService
+            operationId: AdminService_UpdateAnnouncement
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/admin.v1.UpdateAnnouncementRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/admin.v1.AdminAnnouncement'
+    /v1/admin/system/configs:
+        get:
+            tags:
+                - AdminService
+            operationId: AdminService_ListConfigs
+            parameters:
+                - name: page
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: pageSize
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: keyword
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/admin.v1.ListConfigsResponse'
+        post:
+            tags:
+                - AdminService
+            operationId: AdminService_CreateConfig
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/admin.v1.CreateConfigRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/admin.v1.AdminSystemConfig'
+    /v1/admin/system/configs/{id}:
+        delete:
+            tags:
+                - AdminService
+            operationId: AdminService_DeleteConfig
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content: {}
+        patch:
+            tags:
+                - AdminService
+            operationId: AdminService_UpdateConfig
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/admin.v1.UpdateConfigRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/admin.v1.AdminSystemConfig'
+    /v1/admin/system/versions:
+        get:
+            tags:
+                - AdminService
+            operationId: AdminService_ListVersions
+            parameters:
+                - name: page
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: pageSize
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: platform
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/admin.v1.ListVersionsResponse'
+        post:
+            tags:
+                - AdminService
+            operationId: AdminService_CreateVersion
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/admin.v1.CreateVersionRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/admin.v1.AdminAppVersion'
+    /v1/admin/system/versions/{id}:
+        delete:
+            tags:
+                - AdminService
+            operationId: AdminService_DeleteVersion
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content: {}
+        patch:
+            tags:
+                - AdminService
+            operationId: AdminService_UpdateVersion
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/admin.v1.UpdateVersionRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/admin.v1.AdminAppVersion'
+    /v1/admin/users:
+        get:
+            tags:
+                - AdminService
+            operationId: AdminService_ListUsers
+            parameters:
+                - name: page
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: pageSize
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: keyword
+                  in: query
+                  schema:
+                    type: string
+                - name: status
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: role
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/admin.v1.ListUsersResponse'
+    /v1/admin/users/{userId}:
+        get:
+            tags:
+                - AdminService
+            operationId: AdminService_GetUser
+            parameters:
+                - name: userId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/admin.v1.AdminUser'
+    /v1/admin/users/{userId}/password:
+        patch:
+            tags:
+                - AdminService
+            operationId: AdminService_UpdateUserPassword
+            parameters:
+                - name: userId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/admin.v1.UpdateUserPasswordRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content: {}
+    /v1/admin/users/{userId}/roles:
+        patch:
+            tags:
+                - AdminService
+            operationId: AdminService_UpdateUserRoles
+            parameters:
+                - name: userId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/admin.v1.UpdateUserRolesRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/admin.v1.AdminUser'
+    /v1/admin/users/{userId}/status:
+        patch:
+            tags:
+                - AdminService
+            operationId: AdminService_UpdateUserStatus
+            parameters:
+                - name: userId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/admin.v1.UpdateUserStatusRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/admin.v1.AdminUser'
     /v1/auth/logout:
         post:
             tags:
@@ -1200,6 +2013,655 @@ paths:
                                 $ref: '#/components/schemas/user.v1.SendRegisterEmailCodeResponse'
 components:
     schemas:
+        admin.v1.AdminAnnouncement:
+            type: object
+            properties:
+                id:
+                    type: string
+                title:
+                    type: string
+                content:
+                    type: string
+                targetPlatform:
+                    type: string
+                startAt:
+                    type: string
+                endAt:
+                    type: string
+                status:
+                    type: integer
+                    format: int32
+                createdAt:
+                    type: string
+                updatedAt:
+                    type: string
+        admin.v1.AdminAppVersion:
+            type: object
+            properties:
+                id:
+                    type: string
+                platform:
+                    type: string
+                version:
+                    type: string
+                buildNo:
+                    type: integer
+                    format: int32
+                forceUpdate:
+                    type: boolean
+                downloadUrl:
+                    type: string
+                changelog:
+                    type: string
+                minSupportedVersion:
+                    type: string
+                publishedAt:
+                    type: string
+                createdAt:
+                    type: string
+                updatedAt:
+                    type: string
+        admin.v1.AdminChatMessage:
+            type: object
+            properties:
+                id:
+                    type: string
+                sessionId:
+                    type: string
+                userId:
+                    type: string
+                role:
+                    type: string
+                content:
+                    type: string
+                contentType:
+                    type: string
+                status:
+                    type: string
+                createdAt:
+                    type: string
+        admin.v1.AdminChatSession:
+            type: object
+            properties:
+                id:
+                    type: string
+                userId:
+                    type: string
+                username:
+                    type: string
+                title:
+                    type: string
+                scenario:
+                    type: string
+                status:
+                    type: string
+                summary:
+                    type: string
+                messageCount:
+                    type: integer
+                    format: int32
+                lastMessageAt:
+                    type: string
+                createdAt:
+                    type: string
+                updatedAt:
+                    type: string
+        admin.v1.AdminDiary:
+            type: object
+            properties:
+                id:
+                    type: string
+                userId:
+                    type: string
+                username:
+                    type: string
+                title:
+                    type: string
+                content:
+                    type: string
+                mood:
+                    type: string
+                moodScore:
+                    type: integer
+                    format: int32
+                weather:
+                    type: string
+                location:
+                    type: string
+                occurredOn:
+                    type: string
+                visibility:
+                    type: string
+                tags:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/admin.v1.AdminMoodTag'
+                attachmentUrls:
+                    type: array
+                    items:
+                        type: string
+                analysisId:
+                    type: string
+                createdAt:
+                    type: string
+                updatedAt:
+                    type: string
+        admin.v1.AdminEmotionAnalysis:
+            type: object
+            properties:
+                id:
+                    type: string
+                userId:
+                    type: string
+                username:
+                    type: string
+                sourceType:
+                    type: string
+                sourceId:
+                    type: string
+                primaryEmotion:
+                    type: string
+                sentiment:
+                    type: string
+                sentimentScore:
+                    type: number
+                    format: double
+                stressScore:
+                    type: integer
+                    format: int32
+                anxietyScore:
+                    type: integer
+                    format: int32
+                depressionRiskScore:
+                    type: integer
+                    format: int32
+                energyScore:
+                    type: integer
+                    format: int32
+                confidence:
+                    type: number
+                    format: double
+                summary:
+                    type: string
+                advice:
+                    type: string
+                riskLevel:
+                    type: string
+                model:
+                    type: string
+                dimensions:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/admin.v1.EmotionDimensionScore'
+                createdAt:
+                    type: string
+        admin.v1.AdminFile:
+            type: object
+            properties:
+                id:
+                    type: string
+                ownerUserId:
+                    type: string
+                username:
+                    type: string
+                bizType:
+                    type: string
+                storageProvider:
+                    type: string
+                bucket:
+                    type: string
+                objectKey:
+                    type: string
+                url:
+                    type: string
+                mimeType:
+                    type: string
+                sizeBytes:
+                    type: string
+                checksum:
+                    type: string
+                status:
+                    type: integer
+                    format: int32
+                createdAt:
+                    type: string
+                updatedAt:
+                    type: string
+        admin.v1.AdminLoginLog:
+            type: object
+            properties:
+                id:
+                    type: string
+                userId:
+                    type: string
+                username:
+                    type: string
+                success:
+                    type: boolean
+                failReason:
+                    type: string
+                ip:
+                    type: string
+                userAgent:
+                    type: string
+                deviceId:
+                    type: string
+                location:
+                    type: string
+                createdAt:
+                    type: string
+        admin.v1.AdminMoodTag:
+            type: object
+            properties:
+                id:
+                    type: string
+                name:
+                    type: string
+                color:
+                    type: string
+                icon:
+                    type: string
+                sort:
+                    type: integer
+                    format: int32
+                system:
+                    type: boolean
+                createdAt:
+                    type: string
+                updatedAt:
+                    type: string
+        admin.v1.AdminSecurityEvent:
+            type: object
+            properties:
+                id:
+                    type: string
+                userId:
+                    type: string
+                username:
+                    type: string
+                eventType:
+                    type: string
+                riskLevel:
+                    type: string
+                ip:
+                    type: string
+                userAgent:
+                    type: string
+                metadataJson:
+                    type: string
+                createdAt:
+                    type: string
+        admin.v1.AdminSystemConfig:
+            type: object
+            properties:
+                id:
+                    type: string
+                key:
+                    type: string
+                valueJson:
+                    type: string
+                description:
+                    type: string
+                isPublic:
+                    type: boolean
+                createdAt:
+                    type: string
+                updatedAt:
+                    type: string
+        admin.v1.AdminUser:
+            type: object
+            properties:
+                userId:
+                    type: string
+                username:
+                    type: string
+                phone:
+                    type: string
+                email:
+                    type: string
+                avatar:
+                    type: string
+                roles:
+                    type: array
+                    items:
+                        type: string
+                status:
+                    type: integer
+                    format: int32
+                lastLoginAt:
+                    type: string
+                createdAt:
+                    type: string
+                updatedAt:
+                    type: string
+                profile:
+                    $ref: '#/components/schemas/admin.v1.AdminUserProfile'
+        admin.v1.AdminUserProfile:
+            type: object
+            properties:
+                nickname:
+                    type: string
+                gender:
+                    type: string
+                birthday:
+                    type: string
+                bio:
+                    type: string
+                location:
+                    type: string
+                occupation:
+                    type: string
+                industry:
+                    type: string
+                language:
+                    type: string
+                timezone:
+                    type: string
+        admin.v1.CreateAnnouncementRequest:
+            type: object
+            properties:
+                title:
+                    type: string
+                content:
+                    type: string
+                targetPlatform:
+                    type: string
+                startAt:
+                    type: string
+                endAt:
+                    type: string
+                status:
+                    type: integer
+                    format: int32
+        admin.v1.CreateConfigRequest:
+            type: object
+            properties:
+                key:
+                    type: string
+                valueJson:
+                    type: string
+                description:
+                    type: string
+                isPublic:
+                    type: boolean
+        admin.v1.CreateMoodTagRequest:
+            type: object
+            properties:
+                name:
+                    type: string
+                color:
+                    type: string
+                icon:
+                    type: string
+                sort:
+                    type: integer
+                    format: int32
+        admin.v1.CreateVersionRequest:
+            type: object
+            properties:
+                platform:
+                    type: string
+                version:
+                    type: string
+                buildNo:
+                    type: integer
+                    format: int32
+                forceUpdate:
+                    type: boolean
+                downloadUrl:
+                    type: string
+                changelog:
+                    type: string
+                minSupportedVersion:
+                    type: string
+                publishedAt:
+                    type: string
+        admin.v1.DashboardOverview:
+            type: object
+            properties:
+                userCount:
+                    type: string
+                todayNewUsers:
+                    type: string
+                diaryCount:
+                    type: string
+                todayDiaries:
+                    type: string
+                chatSessionCount:
+                    type: string
+                todayChatMessages:
+                    type: string
+                emotionAnalysisCount:
+                    type: string
+                highRiskAnalysisCount:
+                    type: string
+        admin.v1.DashboardTrendPoint:
+            type: object
+            properties:
+                date:
+                    type: string
+                newUsers:
+                    type: string
+                diaries:
+                    type: string
+                chatMessages:
+                    type: string
+                emotionAnalyses:
+                    type: string
+        admin.v1.DashboardTrends:
+            type: object
+            properties:
+                points:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/admin.v1.DashboardTrendPoint'
+        admin.v1.EmotionDimensionScore:
+            type: object
+            properties:
+                dimension:
+                    type: string
+                score:
+                    type: number
+                    format: double
+        admin.v1.ListAnnouncementsResponse:
+            type: object
+            properties:
+                announcements:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/admin.v1.AdminAnnouncement'
+                total:
+                    type: string
+        admin.v1.ListChatMessagesResponse:
+            type: object
+            properties:
+                messages:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/admin.v1.AdminChatMessage'
+                total:
+                    type: string
+        admin.v1.ListChatSessionsResponse:
+            type: object
+            properties:
+                sessions:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/admin.v1.AdminChatSession'
+                total:
+                    type: string
+        admin.v1.ListConfigsResponse:
+            type: object
+            properties:
+                configs:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/admin.v1.AdminSystemConfig'
+                total:
+                    type: string
+        admin.v1.ListDiariesResponse:
+            type: object
+            properties:
+                diaries:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/admin.v1.AdminDiary'
+                total:
+                    type: string
+        admin.v1.ListEmotionAnalysesResponse:
+            type: object
+            properties:
+                analyses:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/admin.v1.AdminEmotionAnalysis'
+                total:
+                    type: string
+        admin.v1.ListFilesResponse:
+            type: object
+            properties:
+                files:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/admin.v1.AdminFile'
+                total:
+                    type: string
+        admin.v1.ListLoginLogsResponse:
+            type: object
+            properties:
+                logs:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/admin.v1.AdminLoginLog'
+                total:
+                    type: string
+        admin.v1.ListMoodTagsResponse:
+            type: object
+            properties:
+                tags:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/admin.v1.AdminMoodTag'
+                total:
+                    type: string
+        admin.v1.ListSecurityEventsResponse:
+            type: object
+            properties:
+                events:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/admin.v1.AdminSecurityEvent'
+                total:
+                    type: string
+        admin.v1.ListUsersResponse:
+            type: object
+            properties:
+                users:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/admin.v1.AdminUser'
+                total:
+                    type: string
+        admin.v1.ListVersionsResponse:
+            type: object
+            properties:
+                versions:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/admin.v1.AdminAppVersion'
+                total:
+                    type: string
+        admin.v1.UpdateAnnouncementRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+                title:
+                    type: string
+                content:
+                    type: string
+                targetPlatform:
+                    type: string
+                startAt:
+                    type: string
+                endAt:
+                    type: string
+                status:
+                    type: integer
+                    format: int32
+        admin.v1.UpdateConfigRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+                valueJson:
+                    type: string
+                description:
+                    type: string
+                isPublic:
+                    type: boolean
+        admin.v1.UpdateMoodTagRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+                name:
+                    type: string
+                color:
+                    type: string
+                icon:
+                    type: string
+                sort:
+                    type: integer
+                    format: int32
+        admin.v1.UpdateUserPasswordRequest:
+            type: object
+            properties:
+                userId:
+                    type: string
+                password:
+                    type: string
+        admin.v1.UpdateUserRolesRequest:
+            type: object
+            properties:
+                userId:
+                    type: string
+                roles:
+                    type: array
+                    items:
+                        type: string
+        admin.v1.UpdateUserStatusRequest:
+            type: object
+            properties:
+                userId:
+                    type: string
+                status:
+                    type: integer
+                    format: int32
+                reason:
+                    type: string
+        admin.v1.UpdateVersionRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+                platform:
+                    type: string
+                version:
+                    type: string
+                buildNo:
+                    type: integer
+                    format: int32
+                forceUpdate:
+                    type: boolean
+                downloadUrl:
+                    type: string
+                changelog:
+                    type: string
+                minSupportedVersion:
+                    type: string
+                publishedAt:
+                    type: string
         aichat.v1.ChatReply:
             type: object
             properties:
@@ -2374,6 +3836,7 @@ tags:
          service. The POST SSE endpoint, /api/v1/chat/stream, is registered as a
          native HTTP handler instead of a generated unary RPC so that streaming flush
          behavior stays under explicit control.
+    - name: AdminService
     - name: ChatService
     - name: DiaryService
     - name: EmotionService
