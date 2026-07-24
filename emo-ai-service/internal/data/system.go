@@ -70,7 +70,7 @@ func (r *systemRepoImpl) GetAbout(ctx context.Context) (*biz.AboutInfo, error) {
 	}
 	values := map[string]string{}
 	for _, row := range rows {
-		values[row.ConfigKey] = decodeConfigString(row.ConfigValue)
+		values[row.ConfigKey] = trimJSONQuote(row.ConfigValue)
 	}
 	return &biz.AboutInfo{
 		AppName:      values["about.app_name"],

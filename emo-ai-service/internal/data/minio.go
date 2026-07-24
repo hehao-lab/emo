@@ -7,11 +7,13 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"encoding/xml"
 	"fmt"
 	"io"
 	"net/http"
 	"net/url"
 	"os"
+	"path"
 	"sort"
 	"strings"
 	"sync"
@@ -38,6 +40,24 @@ type minioStorage struct {
 
 	mu          sync.Mutex
 	initialized bool
+}
+
+type minioKnowledgeObject struct {
+	ObjectReference string
+	ObjectKey       string
+	Name            string
+	SizeBytes       int64
+	LastModified    time.Time
+}
+
+type minioListBucketResult struct {
+	IsTruncated           bool   `xml:"IsTruncated"`
+	NextContinuationToken string `xml:"NextContinuationToken"`
+	Contents              []struct {
+		Key          string    `xml:"Key"`
+		LastModified time.Time `xml:"LastModified"`
+		Size         int64     `xml:"Size"`
+	} `xml:"Contents"`
 }
 
 func newMinioStorage() *minioStorage {
@@ -90,6 +110,70 @@ func (s *minioStorage) uploadKnowledge(ctx context.Context, objectKey, mimeType 
 		return "", err
 	}
 	return "s3://" + s.bucket + "/" + strings.TrimLeft(objectKey, "/"), nil
+}
+
+func (s *minioStorage) listKnowledgeObjects(ctx context.Context, userID int64) ([]minioKnowledgeObject, error) {
+	if !s.configured() {
+		return nil, fmt.Errorf("minio is not configured")
+	}
+	if userID <= 0 {
+		return nil, fmt.Errorf("invalid knowledge owner")
+	}
+	if err := s.ensureBucket(ctx); err != nil {
+		return nil, err
+	}
+
+	prefix := fmt.Sprintf("knowledge/%d/", userID)
+	objects := make([]minioKnowledgeObject, 0)
+	continuationToken := ""
+	for {
+		query := url.Values{
+			"list-type": {"2"},
+			"max-keys":  {"1000"},
+			"prefix":    {prefix},
+		}
+		if continuationToken != "" {
+			query.Set("continuation-token", continuationToken)
+		}
+
+		resp, err := s.doSigned(ctx, http.MethodGet, s.bucketURL(s.endpoint), query, nil, nil)
+		if err != nil {
+			return nil, err
+		}
+		if resp.StatusCode < http.StatusOK || resp.StatusCode >= http.StatusMultipleChoices {
+			err = minioResponseError("list knowledge objects", resp)
+			resp.Body.Close()
+			return nil, err
+		}
+
+		var result minioListBucketResult
+		err = xml.NewDecoder(resp.Body).Decode(&result)
+		resp.Body.Close()
+		if err != nil {
+			return nil, fmt.Errorf("decode knowledge object list: %w", err)
+		}
+		for _, item := range result.Contents {
+			if item.Key == "" || strings.HasSuffix(item.Key, "/") {
+				continue
+			}
+			objects = append(objects, minioKnowledgeObject{
+				ObjectReference: "s3://" + s.bucket + "/" + strings.TrimLeft(item.Key, "/"),
+				ObjectKey:       item.Key,
+				Name:            path.Base(item.Key),
+				SizeBytes:       item.Size,
+				LastModified:    item.LastModified,
+			})
+		}
+		if !result.IsTruncated || result.NextContinuationToken == "" {
+			break
+		}
+		continuationToken = result.NextContinuationToken
+	}
+
+	sort.SliceStable(objects, func(i, j int) bool {
+		return objects[i].LastModified.After(objects[j].LastModified)
+	})
+	return objects, nil
 }
 
 func (s *minioStorage) uploadObject(ctx context.Context, objectKey, mimeType string, content []byte) error {

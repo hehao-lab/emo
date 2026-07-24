@@ -45,38 +45,42 @@ func NewData(c *conf.Data) (*Data, func(), error) {
 		return nil, nil, err
 	}
 
-	if err := db.AutoMigrate(
-		&UserModel{},
-		&UserProfileModel{},
-		&PersonalProfileModel{},
-		&TargetProfileModel{},
-		&ImportantRecordModel{},
-		&AuthRefreshTokenModel{},
-		&LoginLogModel{},
-		&SecurityEventModel{},
-		&MoodDiaryModel{},
-		&MoodTagModel{},
-		&MoodDiaryTagModel{},
-		&MoodDiaryAttachmentModel{},
-		&ChatSessionModel{},
-		&ChatMessageModel{},
-		&ChatContextSummaryModel{},
-		&ChatFeedbackModel{},
-		&EmotionAnalysisModel{},
-		&EmotionDimensionScoreModel{},
-		&EmotionDailyStatModel{},
-		&SystemConfigModel{},
-		&AppVersionModel{},
-		&SystemAnnouncementModel{},
-		&FileAssetModel{},
-	); err != nil {
-		return nil, nil, err
-	}
-	if err := migrateLegacyUserPasswordColumn(db); err != nil {
-		return nil, nil, err
-	}
-	if err := applyTableComments(db); err != nil {
-		return nil, nil, err
+	if os.Getenv("EMO_SKIP_AUTOMIGRATE") != "true" {
+		if err := db.AutoMigrate(
+			&UserModel{},
+			&UserProfileModel{},
+			&PersonalProfileModel{},
+			&TargetProfileModel{},
+			&ImportantRecordModel{},
+			&AuthRefreshTokenModel{},
+			&LoginLogModel{},
+			&SecurityEventModel{},
+			&MoodDiaryModel{},
+			&MoodTagModel{},
+			&MoodDiaryTagModel{},
+			&MoodDiaryAttachmentModel{},
+			&ChatSessionModel{},
+			&ChatMessageModel{},
+			&ChatContextSummaryModel{},
+			&ChatFeedbackModel{},
+			&EmotionAnalysisModel{},
+			&EmotionDimensionScoreModel{},
+			&EmotionDailyStatModel{},
+			&SystemConfigModel{},
+			&AppVersionModel{},
+			&SystemAnnouncementModel{},
+			&FileAssetModel{},
+		); err != nil {
+			return nil, nil, err
+		}
+		if err := migrateLegacyUserPasswordColumn(db); err != nil {
+			return nil, nil, err
+		}
+		if err := applyTableComments(db); err != nil {
+			return nil, nil, err
+		}
+	} else {
+		log.Info("EMO_SKIP_AUTOMIGRATE=true, skipping auto-migration")
 	}
 
 	rdb := newRedisClient(c.GetRedis())

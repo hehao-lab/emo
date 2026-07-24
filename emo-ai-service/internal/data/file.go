@@ -45,6 +45,27 @@ func (r *fileRepoImpl) UploadKnowledge(ctx context.Context, objectKey, mimeType 
 	return r.knowledgeStorage.uploadKnowledge(ctx, objectKey, mimeType, content)
 }
 
+func (r *fileRepoImpl) ListKnowledgeFiles(ctx context.Context, userID int64) ([]*biz.KnowledgeFile, error) {
+	if r.knowledgeStorage == nil || !r.knowledgeStorage.configured() {
+		return nil, biz.ErrFileStorageMissing
+	}
+	objects, err := r.knowledgeStorage.listKnowledgeObjects(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+	files := make([]*biz.KnowledgeFile, 0, len(objects))
+	for _, object := range objects {
+		files = append(files, &biz.KnowledgeFile{
+			ObjectReference: object.ObjectReference,
+			ObjectKey:       object.ObjectKey,
+			Name:            object.Name,
+			SizeBytes:       object.SizeBytes,
+			LastModified:    object.LastModified,
+		})
+	}
+	return files, nil
+}
+
 func (r *fileRepoImpl) UploadAvatar(ctx context.Context, objectKey, mimeType string, content []byte) (string, error) {
 	if r.storage == nil || !r.storage.configured() {
 		return "", biz.ErrFileStorageMissing

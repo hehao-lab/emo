@@ -3,18 +3,7 @@
     <module name="emo-ai-service" />
     <working_directory value="$PROJECT_DIR$" />
     <envs>
-      <env name="GOARCH" value="amd64" />
-      <env name="GOOS" value="windows" />
-      <env name="GOPROXY" value="https://goproxy.cn,direct" />
-      <env name="GOMODCACHE" value="C:\Users\23624\go\pkg\mod" />
-      <env name="EMO_DATABASE_SOURCE" value="root:1234@tcp(127.0.0.1:3306)/emo_ai?charset=utf8mb4&amp;parseTime=True&amp;loc=Local" />
-      <env name="EMO_REDIS_PASSWORD" value="1234" />
-      <env name="EMO_MINIO_ENDPOINT" value="http://127.0.0.1:19000" />
-      <env name="EMO_MINIO_PUBLIC_ENDPOINT" value="http://127.0.0.1:19000" />
-      <env name="EMO_MINIO_ACCESS_KEY" value="emotion-admin" />
-      <env name="EMO_MINIO_SECRET_KEY" value="EmotionMinio2026Local" />
-      <env name="EMO_MINIO_BUCKET" value="emotion-avatars" />
-      <env name="EMO_MINIO_REGION" value="us-east-1" />
+      <env name="EMO_SKIP_AUTOMIGRATE" value="true" />
     </envs>
     <kind value="PACKAGE" />
     <package value="emo-ai-service/cmd/emo-ai-service" />

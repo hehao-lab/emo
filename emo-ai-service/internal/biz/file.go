@@ -5,9 +5,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"path"
 	"path/filepath"
 	"strings"
 	"time"
+	"unicode"
 
 	"github.com/google/uuid"
 )
@@ -49,12 +51,21 @@ type UploadToken struct {
 	ExpiresAt time.Time
 }
 
+type KnowledgeFile struct {
+	ObjectReference string
+	ObjectKey       string
+	Name            string
+	SizeBytes       int64
+	LastModified    time.Time
+}
+
 type FileRepo interface {
 	CreateFile(ctx context.Context, file *FileAsset) (*FileAsset, error)
 	GetFile(ctx context.Context, userID, id int64) (*FileAsset, error)
 	DeleteFile(ctx context.Context, userID, id int64) error
 	UploadAvatar(ctx context.Context, objectKey, mimeType string, content []byte) (string, error)
 	UploadKnowledge(ctx context.Context, objectKey, mimeType string, content []byte) (string, error)
+	ListKnowledgeFiles(ctx context.Context, userID int64) ([]*KnowledgeFile, error)
 }
 
 func (uc *FileUsecase) UploadKnowledge(ctx context.Context, userID int64, filename, mimeType string, content []byte) (string, error) {
@@ -69,8 +80,36 @@ func (uc *FileUsecase) UploadKnowledge(ctx context.Context, userID int64, filena
 	if strings.TrimSpace(mimeType) == "" {
 		mimeType = "application/octet-stream"
 	}
-	objectKey := fmt.Sprintf("knowledge/%d/%s/%s.%s", userID, time.Now().Format("20060102"), uuid.NewString(), extension)
+	objectKey := fmt.Sprintf(
+		"knowledge/%d/%s/%s/%s",
+		userID,
+		time.Now().Format("20060102"),
+		uuid.NewString(),
+		knowledgeFilename(filename, extension),
+	)
 	return uc.repo.UploadKnowledge(ctx, objectKey, mimeType, bytes.Clone(content))
+}
+
+func (uc *FileUsecase) ListKnowledgeFiles(ctx context.Context, userID int64) ([]*KnowledgeFile, error) {
+	if userID <= 0 {
+		return nil, ErrInvalidKnowledgeFile
+	}
+	return uc.repo.ListKnowledgeFiles(ctx, userID)
+}
+
+func knowledgeFilename(filename, extension string) string {
+	normalized := strings.ReplaceAll(strings.TrimSpace(filename), "\\", "/")
+	name := strings.TrimSpace(path.Base(normalized))
+	name = strings.Map(func(r rune) rune {
+		if unicode.IsControl(r) {
+			return -1
+		}
+		return r
+	}, name)
+	if name == "" || name == "." || name == ".." {
+		return "document." + extension
+	}
+	return name
 }
 
 type FileUsecase struct {

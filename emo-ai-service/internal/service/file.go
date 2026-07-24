@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"strings"
+	"time"
 
 	v1 "emo-ai-service/api/file/v1"
 	"emo-ai-service/internal/auth"
@@ -17,6 +18,35 @@ import (
 
 type FileService struct {
 	uc *biz.FileUsecase
+}
+
+func (s *FileService) ListKnowledgeHTTP(w http.ResponseWriter, r *http.Request, tokenManager *auth.TokenManager) {
+	if r.Method != http.MethodGet {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+	userID, err := authenticatedHTTPUserID(tokenManager, r)
+	if err != nil {
+		writeJSONError(w, err)
+		return
+	}
+	files, err := s.uc.ListKnowledgeFiles(r.Context(), userID)
+	if err != nil {
+		writeJSONError(w, listKnowledgeError(err))
+		return
+	}
+	items := make([]map[string]any, 0, len(files))
+	for _, file := range files {
+		items = append(items, map[string]any{
+			"objectReference": file.ObjectReference,
+			"objectKey":       file.ObjectKey,
+			"name":            file.Name,
+			"sizeBytes":       file.SizeBytes,
+			"lastModified":    file.LastModified.UTC().Format(time.RFC3339),
+		})
+	}
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	_ = json.NewEncoder(w).Encode(map[string]any{"items": items, "total": len(items)})
 }
 
 // UploadAvatarHTTP accepts multipart uploads from uni-app and stores the
@@ -143,6 +173,13 @@ func uploadKnowledgeError(err error) error {
 	default:
 		return err
 	}
+}
+
+func listKnowledgeError(err error) error {
+	if err == biz.ErrFileStorageMissing {
+		return kerrors.InternalServer("FILE_STORAGE_UNAVAILABLE", "knowledge storage is not configured")
+	}
+	return kerrors.InternalServer("FILE_STORAGE_ERROR", "could not list knowledge files")
 }
 
 func NewFileService(uc *biz.FileUsecase) *FileService {

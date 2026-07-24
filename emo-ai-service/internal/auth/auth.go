@@ -146,6 +146,32 @@ func UserIDFromContext(ctx context.Context) (int64, bool) {
 	return userID, ok && userID > 0
 }
 
+// WithRoles stores roles in context.
+func WithRoles(ctx context.Context, roles []string) context.Context {
+	return context.WithValue(ctx, rolesKey, roles)
+}
+
+// RolesFromContext returns roles stored in context.
+func RolesFromContext(ctx context.Context) []string {
+	roles, _ := ctx.Value(rolesKey).([]string)
+	return roles
+}
+
+// HasRole checks whether the context carries a given role (case-insensitive).
+func HasRole(ctx context.Context, wanted string) bool {
+	for _, role := range RolesFromContext(ctx) {
+		if strings.EqualFold(role, wanted) {
+			return true
+		}
+	}
+	return false
+}
+
+// IsAdmin is a convenience shorthand for HasRole(ctx, "admin").
+func IsAdmin(ctx context.Context) bool {
+	return HasRole(ctx, "admin")
+}
+
 func MustUserID(ctx context.Context) (int64, error) {
 	userID, ok := UserIDFromContext(ctx)
 	if !ok {
@@ -174,6 +200,7 @@ func ServerMiddleware(tm *TokenManager, publicOperations map[string]bool) middle
 					return nil, kerrors.Unauthorized("UNAUTHORIZED", "invalid access token")
 				}
 				ctx = WithUserID(ctx, claims.UserID)
+				ctx = WithRoles(ctx, claims.Roles)
 			}
 			return next(ctx, req)
 		}

@@ -83,6 +83,9 @@ func NewHTTPServer(
 	srv.HandleFunc("/v1/files/knowledge", func(w nethttp.ResponseWriter, r *nethttp.Request) {
 		fileSvc.UploadKnowledgeHTTP(w, r, tokenManager)
 	})
+	srv.HandleFunc("/v1/knowledge/files", func(w nethttp.ResponseWriter, r *nethttp.Request) {
+		fileSvc.ListKnowledgeHTTP(w, r, tokenManager)
+	})
 	adminv1.RegisterAdminServiceHTTPServer(srv, adminSvc)
 	return srv
 }
