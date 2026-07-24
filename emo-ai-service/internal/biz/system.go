@@ -59,18 +59,13 @@ func NewSystemUsecase(repo SystemRepo) *SystemUsecase {
 
 func (uc *SystemUsecase) GetAbout(ctx context.Context) (*AboutInfo, error) {
 	info, err := uc.repo.GetAbout(ctx)
-	if err != nil || info != nil {
-		return info, err
+	if err != nil {
+		return nil, err
 	}
-	return &AboutInfo{
-		AppName:      "Emo AI",
-		Company:      "Emo AI Team",
-		Description:  "情感 AI 聊天助手后端服务",
-		PrivacyURL:   "/privacy",
-		TermsURL:     "/terms",
-		ContactEmail: "support@example.com",
-		Website:      "https://example.com",
-	}, nil
+	if info == nil {
+		return &AboutInfo{}, nil
+	}
+	return info, nil
 }
 
 func (uc *SystemUsecase) ListPublicConfigs(ctx context.Context) ([]*PublicConfig, error) {

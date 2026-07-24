@@ -2,6 +2,7 @@ package data
 
 import (
 	"context"
+	"encoding/json"
 	"time"
 
 	"emo-ai-service/internal/biz"
@@ -69,7 +70,7 @@ func (r *systemRepoImpl) GetAbout(ctx context.Context) (*biz.AboutInfo, error) {
 	}
 	values := map[string]string{}
 	for _, row := range rows {
-		values[row.ConfigKey] = trimJSONQuote(row.ConfigValue)
+		values[row.ConfigKey] = decodeConfigString(row.ConfigValue)
 	}
 	return &biz.AboutInfo{
 		AppName:      values["about.app_name"],
@@ -138,9 +139,10 @@ func (r *systemRepoImpl) ListAnnouncements(ctx context.Context, platform string)
 	return out, nil
 }
 
-func trimJSONQuote(value string) string {
-	if len(value) >= 2 && value[0] == '"' && value[len(value)-1] == '"' {
-		return value[1 : len(value)-1]
+func decodeConfigString(value string) string {
+	var decoded string
+	if err := json.Unmarshal([]byte(value), &decoded); err == nil {
+		return decoded
 	}
 	return value
 }

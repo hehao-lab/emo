@@ -74,7 +74,8 @@ func normalizeUserProfileModel(profile *UserProfileModel) {
 }
 
 type userRepoImpl struct {
-	db *gorm.DB
+	db      *gorm.DB
+	storage *minioStorage
 }
 
 func NewUserRepo(d *Data) biz.UserRepo {
@@ -82,7 +83,7 @@ func NewUserRepo(d *Data) biz.UserRepo {
 }
 
 func NewProfileRepo(d *Data) biz.ProfileRepo {
-	return &userRepoImpl{db: d.db}
+	return &userRepoImpl{db: d.db, storage: newMinioStorage()}
 }
 
 func NewUserAccountRepo(d *Data) biz.UserAccountRepo {
@@ -246,6 +247,13 @@ func (r *userRepoImpl) UpsertProfile(ctx context.Context, p *biz.UserProfile) (*
 		return nil, err
 	}
 	return r.FindProfile(ctx, p.UserID)
+}
+
+func (r *userRepoImpl) UpdateAvatar(ctx context.Context, userID int64, avatarURL string) (*biz.UserProfile, error) {
+	if r.storage == nil || !r.storage.ownsAvatarURL(userID, avatarURL) {
+		return nil, biz.ErrInvalidAvatar
+	}
+	return r.UpsertProfile(ctx, &biz.UserProfile{UserID: userID, AvatarURL: avatarURL})
 }
 
 func toBizUser(model *UserModel) *biz.User {

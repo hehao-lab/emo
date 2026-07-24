@@ -7,6 +7,9 @@ import (
 	v1 "emo-ai-service/api/aichat/v1"
 	"emo-ai-service/internal/auth"
 	"emo-ai-service/internal/biz"
+
+	kerrors "github.com/go-kratos/kratos/v3/errors"
+	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 // AIChatService adapts frontend DTOs to biz objects for the AI chat BFF.
@@ -88,12 +91,16 @@ func (s *AIChatService) Chat(ctx context.Context, req *v1.ChatRequest) (*v1.Chat
 	if err != nil {
 		return nil, err
 	}
+	if req.SystemPrompt != nil && !auth.HasRole(ctx, "admin") {
+		return nil, kerrors.Forbidden("SYSTEM_PROMPT_FORBIDDEN", "system prompt is restricted to administrators")
+	}
 	reply, err := s.uc.Chat(ctx, &biz.AIChatRequest{
 		UserID:         userID,
 		UpstreamUserID: upstreamUserID(userID),
 		ConversationID: req.ConversationId,
 		Message:        req.GetMessage(),
 		SystemPrompt:   req.SystemPrompt,
+		ClientRequestID: req.GetClientRequestId(),
 	})
 	if err != nil {
 		return nil, err
@@ -106,17 +113,67 @@ func (s *AIChatService) Chat(ctx context.Context, req *v1.ChatRequest) (*v1.Chat
 }
 
 // CreateKnowledgeDocument indexes a knowledge document for the current user.
-func (s *AIChatService) CreateKnowledgeDocument(ctx context.Context, req *v1.CreateKnowledgeDocumentRequest) (*v1.KnowledgeDocument, error) {
+func (s *AIChatService) CreateKnowledgeDocument(ctx context.Context, req *v1.CreateKnowledgeDocumentRequest) (*v1.CreateKnowledgeDocumentReply, error) {
 	userID, err := currentUserID(ctx)
 	if err != nil {
 		return nil, err
 	}
-	doc, err := s.uc.CreateKnowledgeDocument(ctx, &biz.AICreateKnowledgeDocument{
+	reply, err := s.uc.CreateKnowledgeDocument(ctx, &biz.AICreateKnowledgeDocument{
 		UserID:         userID,
 		UpstreamUserID: upstreamUserID(userID),
 		Title:          req.GetTitle(),
-		Content:        req.GetContent(),
+		Content:        req.Content,
 		Source:         req.Source,
+		ObjectReference: req.ObjectReference,
+		MetadataJSON:   req.GetMetadataJson(),
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &v1.CreateKnowledgeDocumentReply{Id: reply.ID, Status: reply.Status, JobId: reply.JobID}, nil
+}
+
+// ListKnowledgeDocuments returns the current user's knowledge documents.
+func (s *AIChatService) ListKnowledgeDocuments(ctx context.Context, req *v1.ListKnowledgeDocumentsRequest) (*v1.KnowledgeDocumentSet, error) {
+	userID, err := currentUserID(ctx)
+	if err != nil {
+		return nil, err
+	}
+	set, err := s.uc.ListKnowledgeDocuments(ctx, userID, upstreamUserID(userID), biz.AIKnowledgeListOptions{
+		Page: req.GetPage(), PageSize: req.GetPageSize(), Status: req.Status, Query: req.Query, Cursor: req.Cursor,
+	})
+	if err != nil {
+		return nil, err
+	}
+	out := make([]*v1.KnowledgeDocument, 0, len(set.Items))
+	for _, item := range set.Items {
+		out = append(out, toAIKnowledgeDocumentDTO(item))
+	}
+	return &v1.KnowledgeDocumentSet{
+		Items: out, Total: set.Total, NextCursor: set.NextCursor, Page: set.Page, PageSize: set.PageSize,
+	}, nil
+}
+
+func (s *AIChatService) GetKnowledgeDocument(ctx context.Context, req *v1.GetKnowledgeDocumentRequest) (*v1.KnowledgeDocument, error) {
+	userID, err := currentUserID(ctx)
+	if err != nil {
+		return nil, err
+	}
+	doc, err := s.uc.GetKnowledgeDocument(ctx, userID, upstreamUserID(userID), req.GetDocumentId())
+	if err != nil {
+		return nil, err
+	}
+	return toAIKnowledgeDocumentDTO(doc), nil
+}
+
+func (s *AIChatService) UpdateKnowledgeDocument(ctx context.Context, req *v1.UpdateKnowledgeDocumentRequest) (*v1.KnowledgeDocument, error) {
+	userID, err := currentUserID(ctx)
+	if err != nil {
+		return nil, err
+	}
+	doc, err := s.uc.UpdateKnowledgeDocument(ctx, &biz.AIUpdateKnowledgeDocument{
+		UserID: userID, UpstreamUserID: upstreamUserID(userID), DocumentID: req.GetDocumentId(),
+		Title: req.Title, Source: req.Source, MetadataJSON: req.MetadataJson,
 	})
 	if err != nil {
 		return nil, err
@@ -124,24 +181,42 @@ func (s *AIChatService) CreateKnowledgeDocument(ctx context.Context, req *v1.Cre
 	return toAIKnowledgeDocumentDTO(doc), nil
 }
 
-// ListKnowledgeDocuments returns the current user's knowledge documents.
-func (s *AIChatService) ListKnowledgeDocuments(ctx context.Context, _ *v1.ListKnowledgeDocumentsRequest) (*v1.KnowledgeDocumentSet, error) {
+func (s *AIChatService) DeleteKnowledgeDocument(ctx context.Context, req *v1.DeleteKnowledgeDocumentRequest) (*emptypb.Empty, error) {
 	userID, err := currentUserID(ctx)
 	if err != nil {
 		return nil, err
 	}
-	items, err := s.uc.ListKnowledgeDocuments(ctx, userID, upstreamUserID(userID))
+	if err := s.uc.DeleteKnowledgeDocument(ctx, userID, upstreamUserID(userID), req.GetDocumentId()); err != nil {
+		return nil, err
+	}
+	return &emptypb.Empty{}, nil
+}
+
+func (s *AIChatService) ReindexKnowledgeDocument(ctx context.Context, req *v1.ReindexKnowledgeDocumentRequest) (*v1.ReindexKnowledgeDocumentReply, error) {
+	userID, err := currentUserID(ctx)
 	if err != nil {
 		return nil, err
 	}
-	out := make([]*v1.KnowledgeDocument, 0, len(items))
-	for _, item := range items {
-		out = append(out, toAIKnowledgeDocumentDTO(item))
+	reply, err := s.uc.ReindexKnowledgeDocument(ctx, userID, upstreamUserID(userID), req.GetDocumentId())
+	if err != nil {
+		return nil, err
 	}
-	return &v1.KnowledgeDocumentSet{Items: out}, nil
+	return &v1.ReindexKnowledgeDocumentReply{JobId: reply.JobID, Status: reply.Status}, nil
 }
 
-// upstreamUserID is the current mapping from local users to FastAPI X-User-Id.
+func (s *AIChatService) GetKnowledgeJob(ctx context.Context, req *v1.GetKnowledgeJobRequest) (*v1.KnowledgeJob, error) {
+	userID, err := currentUserID(ctx)
+	if err != nil {
+		return nil, err
+	}
+	job, err := s.uc.GetKnowledgeJob(ctx, userID, upstreamUserID(userID), req.GetJobId())
+	if err != nil {
+		return nil, err
+	}
+	return toAIKnowledgeJobDTO(job), nil
+}
+
+// upstreamUserID is an internal representation used to build the signed model-service assertion.
 func upstreamUserID(userID int64) string {
 	return strconv.FormatInt(userID, 10)
 }
@@ -171,6 +246,12 @@ func toAIMessageDTO(in *biz.AIMessage) *v1.Message {
 		Content:        in.Content,
 		Sequence:       in.Sequence,
 		ModelName:      in.ModelName,
+		ProviderRequestId: in.ProviderRequestID,
+		RequestId:      in.RequestID,
+		ClientRequestId: in.ClientRequestID,
+		TurnStatus:     in.TurnStatus,
+		ReferencesJson: in.ReferencesJSON,
+		UsageJson:      in.UsageJSON,
 		CreatedAt:      in.CreatedAt,
 	}
 }
@@ -180,11 +261,38 @@ func toAIKnowledgeDocumentDTO(in *biz.AIKnowledgeDocument) *v1.KnowledgeDocument
 	if in == nil {
 		return nil
 	}
+	chunks := make([]*v1.KnowledgeChunk, 0, len(in.Chunks))
+	for _, chunk := range in.Chunks {
+		chunks = append(chunks, &v1.KnowledgeChunk{Id: chunk.ID, Content: chunk.Content, Sequence: chunk.Sequence})
+	}
 	return &v1.KnowledgeDocument{
 		Id:         in.ID,
 		Title:      in.Title,
 		Source:     in.Source,
 		ChunkCount: in.ChunkCount,
 		CreatedAt:  in.CreatedAt,
+		Status: in.Status,
+		Progress: in.Progress,
+		ErrorCode: in.ErrorCode,
+		ErrorDetail: in.ErrorDetail,
+		IndexVersion: in.IndexVersion,
+		EmbeddingModel: in.EmbeddingModel,
+		EmbeddingDimension: in.EmbeddingDimension,
+		UpdatedAt: in.UpdatedAt,
+		MetadataJson: in.MetadataJSON,
+		Preview: in.Preview,
+		Chunks: chunks,
+	}
+}
+
+func toAIKnowledgeJobDTO(in *biz.AIKnowledgeJob) *v1.KnowledgeJob {
+	if in == nil {
+		return nil
+	}
+	return &v1.KnowledgeJob{
+		Id: in.ID, DocumentId: in.DocumentID, Kind: in.Kind, Status: in.Status,
+		Progress: in.Progress, TargetIndexVersion: in.TargetIndexVersion,
+		ErrorCode: in.ErrorCode, ErrorDetail: in.ErrorDetail,
+		CreatedAt: in.CreatedAt, UpdatedAt: in.UpdatedAt,
 	}
 }

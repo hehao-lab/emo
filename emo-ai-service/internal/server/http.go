@@ -14,6 +14,8 @@ import (
 	"emo-ai-service/internal/conf"
 	"emo-ai-service/internal/service"
 	nethttp "net/http"
+	"os"
+	"strings"
 
 	"github.com/go-kratos/kratos/v3/middleware/recovery"
 	"github.com/go-kratos/kratos/v3/transport/http"
@@ -72,19 +74,45 @@ func NewHTTPServer(
 	srv.HandleFunc("/v1/emotion/reports/relationship-health", emotionSvc.RelationshipHealthReportHTTP)
 	systemv1.RegisterSystemServiceHTTPServer(srv, systemSvc)
 	filev1.RegisterFileServiceHTTPServer(srv, fileSvc)
+	srv.HandleFunc("/v1/files/avatar", func(w nethttp.ResponseWriter, r *nethttp.Request) {
+		fileSvc.UploadAvatarHTTP(w, r, tokenManager)
+	})
 	return srv
 }
 
 func corsFilter(next nethttp.Handler) nethttp.Handler {
+	allowedOrigins := make(map[string]struct{})
+	for _, value := range strings.Split(os.Getenv("EMO_CORS_ALLOWED_ORIGINS"), ",") {
+		if origin := strings.TrimSpace(value); origin != "" {
+			allowedOrigins[origin] = struct{}{}
+		}
+	}
 	return nethttp.HandlerFunc(func(w nethttp.ResponseWriter, r *nethttp.Request) {
 		origin := r.Header.Get("Origin")
 		if origin != "" {
+			_, allowed := allowedOrigins[origin]
+			if !allowed && os.Getenv("EMO_ENV") == "production" {
+				if r.Method == nethttp.MethodOptions {
+					w.WriteHeader(nethttp.StatusForbidden)
+					return
+				}
+				next.ServeHTTP(w, r)
+				return
+			}
+			if !allowed && len(allowedOrigins) > 0 {
+				if r.Method == nethttp.MethodOptions {
+					w.WriteHeader(nethttp.StatusForbidden)
+					return
+				}
+				next.ServeHTTP(w, r)
+				return
+			}
 			w.Header().Set("Access-Control-Allow-Origin", origin)
 			w.Header().Set("Vary", "Origin")
 		}
 		w.Header().Set("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE,OPTIONS")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type,Authorization,Accept,X-User-Id,X-Device-ID,X-Device-Name")
-		w.Header().Set("Access-Control-Expose-Headers", "Content-Length,Content-Type")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type,Authorization,Accept,Idempotency-Key,traceparent,X-Device-ID,X-Device-Name")
+		w.Header().Set("Access-Control-Expose-Headers", "Content-Length,Content-Type,Idempotency-Replayed,traceparent")
 		if r.Method == nethttp.MethodOptions {
 			w.WriteHeader(nethttp.StatusNoContent)
 			return

@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"errors"
+	"os"
 	"strings"
 	"time"
 
@@ -24,6 +25,7 @@ var ProviderSet = wire.NewSet(NewTokenManager)
 type contextKey string
 
 const userIDKey contextKey = "auth_user_id"
+const rolesKey contextKey = "auth_roles"
 
 type Claims struct {
 	UserID int64    `json:"uid"`
@@ -51,6 +53,9 @@ func NewTokenManager(c *conf.Auth) *TokenManager {
 		c = &conf.Auth{}
 	}
 	secret := c.GetJwtSecret()
+	if os.Getenv("EMO_ENV") == "production" && (secret == "" || secret == "please-change-this-secret-in-production") {
+		panic("EMO_JWT_SECRET must be configured in production")
+	}
 	if secret == "" {
 		secret = "please-change-this-secret-in-production"
 	}
@@ -136,6 +141,12 @@ func WithUserID(ctx context.Context, userID int64) context.Context {
 	return context.WithValue(ctx, userIDKey, userID)
 }
 
+// WithRoles carries roles verified from the access token. Request bodies and
+// browser headers must never be trusted for authorization decisions.
+func WithRoles(ctx context.Context, roles []string) context.Context {
+	return context.WithValue(ctx, rolesKey, append([]string(nil), roles...))
+}
+
 func UserIDFromContext(ctx context.Context) (int64, bool) {
 	userID, ok := ctx.Value(userIDKey).(int64)
 	return userID, ok && userID > 0
@@ -147,6 +158,16 @@ func MustUserID(ctx context.Context) (int64, error) {
 		return 0, kerrors.Unauthorized("UNAUTHORIZED", "login required")
 	}
 	return userID, nil
+}
+
+func HasRole(ctx context.Context, wanted string) bool {
+	roles, _ := ctx.Value(rolesKey).([]string)
+	for _, role := range roles {
+		if strings.EqualFold(role, wanted) {
+			return true
+		}
+	}
+	return false
 }
 
 func ServerMiddleware(tm *TokenManager, publicOperations map[string]bool) middleware.Middleware {
@@ -168,7 +189,7 @@ func ServerMiddleware(tm *TokenManager, publicOperations map[string]bool) middle
 				if err != nil {
 					return nil, kerrors.Unauthorized("UNAUTHORIZED", "invalid access token")
 				}
-				ctx = WithUserID(ctx, claims.UserID)
+				ctx = WithRoles(WithUserID(ctx, claims.UserID), claims.Roles)
 			}
 			return next(ctx, req)
 		}

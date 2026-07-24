@@ -35,7 +35,22 @@ type ChatMessage struct {
 	SafetyResultJSON    string
 	Status              string
 	ErrorMessage        string
+	ClientRequestID     *string
+	IdempotencyKey      *string
+	RequestPayloadHash  string
+	RequestID           string
+	Provider            string
+	ProviderRequestID   string
+	ReferencesJSON      string
+	UsageJSON           string
+	CachedTokens        int32
+	CostMicros          int64
 	CreatedAt           time.Time
+}
+
+type ChatDailyUsage struct {
+	TotalTokens int64
+	CostMicros  int64
 }
 
 type ChatFeedback struct {
@@ -72,6 +87,9 @@ type ChatRepo interface {
 	UpdateSession(ctx context.Context, session *ChatSession) (*ChatSession, error)
 	DeleteSession(ctx context.Context, userID, id int64) error
 	CreateMessage(ctx context.Context, message *ChatMessage) (*ChatMessage, error)
+	UpdateMessage(ctx context.Context, message *ChatMessage) (*ChatMessage, error)
+	FindMessagesByIdempotencyKey(ctx context.Context, userID int64, idempotencyKey string) ([]*ChatMessage, error)
+	DailyUsage(ctx context.Context, userID int64, since time.Time) (*ChatDailyUsage, error)
 	ListMessages(ctx context.Context, userID, sessionID int64, page, pageSize int32) ([]*ChatMessage, int64, error)
 	RecentMessages(ctx context.Context, sessionID int64, limit int) ([]*ChatMessage, error)
 	TouchSession(ctx context.Context, sessionID int64, lastMessageAt time.Time, deltaCount int) error

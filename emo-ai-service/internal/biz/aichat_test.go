@@ -99,6 +99,33 @@ func (m *mockChatRepo) CreateMessage(ctx context.Context, message *ChatMessage) 
 	return &out, nil
 }
 
+func (m *mockChatRepo) UpdateMessage(ctx context.Context, message *ChatMessage) (*ChatMessage, error) {
+	for _, existing := range m.messages {
+		if existing.ID != message.ID || existing.UserID != message.UserID {
+			continue
+		}
+		existing.Content = message.Content
+		existing.Model = message.Model
+		existing.Status = message.Status
+		existing.ErrorMessage = message.ErrorMessage
+		existing.ReferencesJSON = message.ReferencesJSON
+		out := *existing
+		return &out, nil
+	}
+	return nil, nil
+}
+
+func (m *mockChatRepo) FindMessagesByRequestID(ctx context.Context, userID int64, clientRequestID string) ([]*ChatMessage, error) {
+	var out []*ChatMessage
+	for _, message := range m.messages {
+		if message.UserID == userID && message.ClientRequestID != nil && *message.ClientRequestID == clientRequestID {
+			copyMessage := *message
+			out = append(out, &copyMessage)
+		}
+	}
+	return out, nil
+}
+
 func (m *mockChatRepo) ListMessages(ctx context.Context, userID, sessionID int64, page, pageSize int32) ([]*ChatMessage, int64, error) {
 	return nil, 0, nil
 }

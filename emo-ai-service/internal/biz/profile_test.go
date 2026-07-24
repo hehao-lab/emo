@@ -38,6 +38,10 @@ func (m *mockProfileRepo) UpsertProfile(ctx context.Context, profile *UserProfil
 	return profile, nil
 }
 
+func (m *mockProfileRepo) UpdateAvatar(ctx context.Context, userID int64, avatarURL string) (*UserProfile, error) {
+	return &UserProfile{UserID: userID, AvatarURL: avatarURL}, nil
+}
+
 func (m *mockProfileRepo) FindPersonalProfile(ctx context.Context, userID int64) (*PersonalProfile, error) {
 	if profile := m.personal[userID]; profile != nil {
 		out := *profile

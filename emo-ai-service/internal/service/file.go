@@ -2,15 +2,91 @@ package service
 
 import (
 	"context"
+	"encoding/json"
+	"io"
+	"net/http"
+	"strings"
 
 	v1 "emo-ai-service/api/file/v1"
+	"emo-ai-service/internal/auth"
 	"emo-ai-service/internal/biz"
 
+	kerrors "github.com/go-kratos/kratos/v3/errors"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 type FileService struct {
 	uc *biz.FileUsecase
+}
+
+// UploadAvatarHTTP accepts multipart uploads from uni-app and stores the
+// image in MinIO. It is a raw handler because protobuf JSON endpoints cannot
+// decode multipart/form-data.
+func (s *FileService) UploadAvatarHTTP(w http.ResponseWriter, r *http.Request, tokenManager *auth.TokenManager) {
+	if r.Method != http.MethodPost {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+	userID, err := authenticatedHTTPUserID(tokenManager, r)
+	if err != nil {
+		writeJSONError(w, err)
+		return
+	}
+	r.Body = http.MaxBytesReader(w, r.Body, biz.MaxAvatarSize+1024*1024)
+	if err := r.ParseMultipartForm(biz.MaxAvatarSize + 1024*1024); err != nil {
+		writeJSONError(w, kerrors.BadRequest("INVALID_AVATAR", "avatar upload must be a multipart file smaller than 5 MB"))
+		return
+	}
+	file, header, err := r.FormFile("file")
+	if err != nil {
+		writeJSONError(w, kerrors.BadRequest("INVALID_AVATAR", "missing avatar file"))
+		return
+	}
+	defer file.Close()
+	content, err := io.ReadAll(io.LimitReader(file, biz.MaxAvatarSize+1))
+	if err != nil {
+		writeJSONError(w, kerrors.BadRequest("INVALID_AVATAR", "could not read avatar file"))
+		return
+	}
+	mimeType := http.DetectContentType(content)
+	token, err := s.uc.UploadAvatar(r.Context(), userID, header.Filename, mimeType, content)
+	if err != nil {
+		writeJSONError(w, uploadAvatarError(err))
+		return
+	}
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(http.StatusCreated)
+	_ = json.NewEncoder(w).Encode(map[string]string{
+		"provider":  token.Provider,
+		"objectKey": token.ObjectKey,
+		"publicUrl": token.PublicURL,
+	})
+}
+
+func authenticatedHTTPUserID(tokenManager *auth.TokenManager, r *http.Request) (int64, error) {
+	if tokenManager == nil {
+		return 0, kerrors.Unauthorized("UNAUTHORIZED", "login required")
+	}
+	parts := strings.Fields(r.Header.Get("Authorization"))
+	if len(parts) != 2 || !strings.EqualFold(parts[0], "Bearer") {
+		return 0, kerrors.Unauthorized("UNAUTHORIZED", "missing access token")
+	}
+	claims, err := tokenManager.Parse(parts[1])
+	if err != nil || claims.UserID <= 0 {
+		return 0, kerrors.Unauthorized("UNAUTHORIZED", "invalid access token")
+	}
+	return claims.UserID, nil
+}
+
+func uploadAvatarError(err error) error {
+	switch err {
+	case biz.ErrInvalidAvatar:
+		return kerrors.BadRequest("INVALID_AVATAR", err.Error())
+	case biz.ErrFileStorageMissing:
+		return kerrors.InternalServer("FILE_STORAGE_UNAVAILABLE", "avatar storage is not configured")
+	default:
+		return err
+	}
 }
 
 func NewFileService(uc *biz.FileUsecase) *FileService {

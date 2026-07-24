@@ -29,8 +29,8 @@ func (ChatSessionModel) TableName() string { return "chat_sessions" }
 type ChatMessageModel struct {
 	ID                  int64     `gorm:"primaryKey;autoIncrement;comment:聊天消息ID"`
 	SessionID           int64     `gorm:"index:idx_session_created;not null;comment:聊天会话ID"`
-	UserID              int64     `gorm:"index;not null;comment:用户ID"`
-	Role                string    `gorm:"type:varchar(16);not null;comment:消息角色 user assistant system tool"`
+	UserID              int64     `gorm:"index;uniqueIndex:idx_chat_message_idempotency,priority:1;not null;comment:用户ID"`
+	Role                string    `gorm:"type:varchar(16);uniqueIndex:idx_chat_message_idempotency,priority:3;not null;comment:消息角色 user assistant system tool"`
 	Content             string    `gorm:"type:text;not null;comment:消息内容"`
 	ContentType         string    `gorm:"type:varchar(32);default:'text';comment:消息内容类型"`
 	Model               string    `gorm:"type:varchar(64);default:'';comment:AI模型名称"`
@@ -42,6 +42,16 @@ type ChatMessageModel struct {
 	SafetyResultJSON    string    `gorm:"type:json;comment:安全检测结果JSON"`
 	Status              string    `gorm:"type:varchar(16);default:'success';comment:消息状态"`
 	ErrorMessage        string    `gorm:"type:varchar(512);default:'';comment:错误信息"`
+	ClientRequestID     *string   `gorm:"type:varchar(128);index;comment:客户端请求ID"`
+	IdempotencyKey      *string   `gorm:"type:varchar(128);uniqueIndex:idx_chat_message_idempotency,priority:2;comment:逻辑聊天轮次幂等键"`
+	RequestPayloadHash  string    `gorm:"type:char(64);default:'';comment:幂等请求载荷哈希"`
+	RequestID           string    `gorm:"type:varchar(128);index;default:'';comment:AI服务请求ID"`
+	Provider            string    `gorm:"type:varchar(64);default:'';comment:模型提供商"`
+	ProviderRequestID   string    `gorm:"type:varchar(128);index;default:'';comment:模型提供商请求ID"`
+	ReferencesJSON      string    `gorm:"type:json;comment:结构化引用"`
+	UsageJSON           string    `gorm:"type:json;comment:模型用量JSON"`
+	CachedTokens        int32     `gorm:"default:0;comment:缓存token数"`
+	CostMicros          int64     `gorm:"default:0;comment:费用微单位"`
 	CreatedAt           time.Time `gorm:"autoCreateTime;index:idx_session_created;comment:创建时间"`
 }
 
@@ -166,11 +176,73 @@ func (r *chatRepoImpl) CreateMessage(ctx context.Context, message *biz.ChatMessa
 		SafetyResultJSON:    jsonObject(message.SafetyResultJSON),
 		Status:              message.Status,
 		ErrorMessage:        message.ErrorMessage,
+		ClientRequestID:     message.ClientRequestID,
+		IdempotencyKey:      message.IdempotencyKey,
+		RequestPayloadHash:  message.RequestPayloadHash,
+		RequestID:           message.RequestID,
+		Provider:            message.Provider,
+		ProviderRequestID:   message.ProviderRequestID,
+		ReferencesJSON:      jsonArray(message.ReferencesJSON),
+		UsageJSON:           jsonObject(message.UsageJSON),
+		CachedTokens:        message.CachedTokens,
+		CostMicros:          message.CostMicros,
 	}
 	if err := r.db.WithContext(ctx).Create(model).Error; err != nil {
 		return nil, err
 	}
 	return toBizChatMessage(model), nil
+}
+
+func (r *chatRepoImpl) UpdateMessage(ctx context.Context, message *biz.ChatMessage) (*biz.ChatMessage, error) {
+	updates := map[string]any{
+		"content": message.Content, "model": message.Model, "status": message.Status,
+		"error_message": message.ErrorMessage, "prompt_tokens": message.PromptTokens,
+		"completion_tokens": message.CompletionTokens, "total_tokens": message.TotalTokens,
+		"latency_ms": message.LatencyMS, "references_json": jsonArray(message.ReferencesJSON),
+		"usage_json": jsonObject(message.UsageJSON), "cached_tokens": message.CachedTokens,
+		"cost_micros": message.CostMicros, "request_id": message.RequestID,
+		"provider": message.Provider, "provider_request_id": message.ProviderRequestID,
+	}
+	if err := r.db.WithContext(ctx).Model(&ChatMessageModel{}).
+		Where("id = ? AND user_id = ?", message.ID, message.UserID).Updates(updates).Error; err != nil {
+		return nil, err
+	}
+	var model ChatMessageModel
+	if err := r.db.WithContext(ctx).Where("id = ? AND user_id = ?", message.ID, message.UserID).First(&model).Error; err != nil {
+		return nil, err
+	}
+	return toBizChatMessage(&model), nil
+}
+
+func (r *chatRepoImpl) FindMessagesByIdempotencyKey(ctx context.Context, userID int64, idempotencyKey string) ([]*biz.ChatMessage, error) {
+	if idempotencyKey == "" {
+		return nil, nil
+	}
+	var models []ChatMessageModel
+	if err := r.db.WithContext(ctx).Where("user_id = ? AND idempotency_key = ?", userID, idempotencyKey).
+		Order("created_at asc, id asc").Find(&models).Error; err != nil {
+		return nil, err
+	}
+	out := make([]*biz.ChatMessage, 0, len(models))
+	for i := range models {
+		out = append(out, toBizChatMessage(&models[i]))
+	}
+	return out, nil
+}
+
+func (r *chatRepoImpl) DailyUsage(ctx context.Context, userID int64, since time.Time) (*biz.ChatDailyUsage, error) {
+	var total struct {
+		TotalTokens int64
+		CostMicros  int64
+	}
+	err := r.db.WithContext(ctx).Model(&ChatMessageModel{}).
+		Select("COALESCE(SUM(total_tokens), 0) AS total_tokens, COALESCE(SUM(cost_micros), 0) AS cost_micros").
+		Where("user_id = ? AND role = ? AND created_at >= ?", userID, "assistant", since).
+		Scan(&total).Error
+	if err != nil {
+		return nil, err
+	}
+	return &biz.ChatDailyUsage{TotalTokens: total.TotalTokens, CostMicros: total.CostMicros}, nil
 }
 
 func (r *chatRepoImpl) ListMessages(ctx context.Context, userID, sessionID int64, page, pageSize int32) ([]*biz.ChatMessage, int64, error) {
@@ -295,6 +367,16 @@ func toBizChatMessage(model *ChatMessageModel) *biz.ChatMessage {
 		SafetyResultJSON:    model.SafetyResultJSON,
 		Status:              model.Status,
 		ErrorMessage:        model.ErrorMessage,
+		ClientRequestID:     model.ClientRequestID,
+		IdempotencyKey:      model.IdempotencyKey,
+		RequestPayloadHash:  model.RequestPayloadHash,
+		RequestID:           model.RequestID,
+		Provider:            model.Provider,
+		ProviderRequestID:   model.ProviderRequestID,
+		ReferencesJSON:      model.ReferencesJSON,
+		UsageJSON:           model.UsageJSON,
+		CachedTokens:        model.CachedTokens,
+		CostMicros:          model.CostMicros,
 		CreatedAt:           model.CreatedAt,
 	}
 }
@@ -302,6 +384,13 @@ func toBizChatMessage(model *ChatMessageModel) *biz.ChatMessage {
 func jsonObject(value string) string {
 	if value == "" {
 		return "{}"
+	}
+	return value
+}
+
+func jsonArray(value string) string {
+	if value == "" {
+		return "[]"
 	}
 	return value
 }

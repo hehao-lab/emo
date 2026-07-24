@@ -5,6 +5,7 @@ package aichat.v1;
 option go_package = "emo-ai-service/api/aichat/v1;aichatv1";
 
 import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
 
 // AIChatService exposes the Kratos BFF contract used by the frontend.
 //
@@ -50,8 +51,8 @@ service AIChatService {
     };
   }
 
-  // CreateKnowledgeDocument uploads text knowledge into the user's knowledge base.
-  rpc CreateKnowledgeDocument(CreateKnowledgeDocumentRequest) returns (KnowledgeDocument) {
+  // CreateKnowledgeDocument queues an object-storage document for indexing.
+  rpc CreateKnowledgeDocument(CreateKnowledgeDocumentRequest) returns (CreateKnowledgeDocumentReply) {
     option (google.api.http) = {
       post: "/api/v1/knowledge/documents"
       body: "*"
@@ -62,6 +63,38 @@ service AIChatService {
   rpc ListKnowledgeDocuments(ListKnowledgeDocumentsRequest) returns (KnowledgeDocumentSet) {
     option (google.api.http) = {
       get: "/api/v1/knowledge/documents"
+    };
+  }
+
+  rpc GetKnowledgeDocument(GetKnowledgeDocumentRequest) returns (KnowledgeDocument) {
+    option (google.api.http) = {
+      get: "/api/v1/knowledge/documents/{document_id}"
+    };
+  }
+
+  rpc UpdateKnowledgeDocument(UpdateKnowledgeDocumentRequest) returns (KnowledgeDocument) {
+    option (google.api.http) = {
+      patch: "/api/v1/knowledge/documents/{document_id}"
+      body: "*"
+    };
+  }
+
+  rpc DeleteKnowledgeDocument(DeleteKnowledgeDocumentRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      delete: "/api/v1/knowledge/documents/{document_id}"
+    };
+  }
+
+  rpc ReindexKnowledgeDocument(ReindexKnowledgeDocumentRequest) returns (ReindexKnowledgeDocumentReply) {
+    option (google.api.http) = {
+      post: "/api/v1/knowledge/documents/{document_id}:reindex"
+      body: "*"
+    };
+  }
+
+  rpc GetKnowledgeJob(GetKnowledgeJobRequest) returns (KnowledgeJob) {
+    option (google.api.http) = {
+      get: "/api/v1/knowledge/jobs/{job_id}"
     };
   }
 }
@@ -93,6 +126,12 @@ message Message {
   int32 sequence = 5;
   optional string model_name = 6;
   string created_at = 7;
+  optional string provider_request_id = 8;
+  optional string request_id = 9;
+  optional string client_request_id = 10;
+  string turn_status = 11;
+  string references_json = 12;
+  string usage_json = 13;
 }
 
 message MessageSet {
@@ -106,10 +145,44 @@ message KnowledgeDocument {
   optional string source = 3;
   int32 chunk_count = 4;
   string created_at = 5;
+  string status = 6;
+  int32 progress = 7;
+  optional string error_code = 8;
+  optional string error_detail = 9;
+  int32 index_version = 10;
+  optional string embedding_model = 11;
+  int32 embedding_dimension = 12;
+  string updated_at = 13;
+  string metadata_json = 14;
+  optional string preview = 15;
+  repeated KnowledgeChunk chunks = 16;
 }
 
 message KnowledgeDocumentSet {
   repeated KnowledgeDocument items = 1;
+  int64 total = 2;
+  optional string next_cursor = 3;
+  int32 page = 4;
+  int32 page_size = 5;
+}
+
+message KnowledgeChunk {
+  string id = 1;
+  string content = 2;
+  int32 sequence = 3;
+}
+
+message KnowledgeJob {
+  string id = 1;
+  string document_id = 2;
+  string kind = 3;
+  string status = 4;
+  int32 progress = 5;
+  int32 target_index_version = 6;
+  optional string error_code = 7;
+  optional string error_detail = 8;
+  string created_at = 9;
+  string updated_at = 10;
 }
 
 message CreateConversationRequest {
@@ -127,6 +200,7 @@ message ChatRequest {
   optional string conversation_id = 1;
   string message = 2;
   optional string system_prompt = 3;
+  optional string client_request_id = 4;
 }
 
 // ChatReply is returned by the non-streaming chat API after persistence is done.
@@ -138,8 +212,50 @@ message ChatReply {
 
 message CreateKnowledgeDocumentRequest {
   string title = 1;
-  string content = 2;
+  optional string content = 2;
   optional string source = 3;
+  optional string object_reference = 4;
+  string metadata_json = 5;
 }
 
-message ListKnowledgeDocumentsRequest {}
+message CreateKnowledgeDocumentReply {
+  string id = 1;
+  string status = 2;
+  string job_id = 3;
+}
+
+message ListKnowledgeDocumentsRequest {
+  int32 page = 1;
+  int32 page_size = 2;
+  optional string status = 3;
+  optional string query = 4;
+  optional string cursor = 5;
+}
+
+message GetKnowledgeDocumentRequest {
+  string document_id = 1;
+}
+
+message UpdateKnowledgeDocumentRequest {
+  string document_id = 1;
+  optional string title = 2;
+  optional string source = 3;
+  optional string metadata_json = 4;
+}
+
+message DeleteKnowledgeDocumentRequest {
+  string document_id = 1;
+}
+
+message ReindexKnowledgeDocumentRequest {
+  string document_id = 1;
+}
+
+message ReindexKnowledgeDocumentReply {
+  string job_id = 1;
+  string status = 2;
+}
+
+message GetKnowledgeJobRequest {
+  string job_id = 1;
+}

@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"encoding/json"
 
 	v1 "emo-ai-service/api/chat/v1"
 	"emo-ai-service/internal/biz"
@@ -158,5 +159,47 @@ func toChatMessageDTO(message *biz.ChatMessage) *v1.ChatMessage {
 	if message == nil {
 		return &v1.ChatMessage{}
 	}
-	return &v1.ChatMessage{Id: message.ID, SessionId: message.SessionID, UserId: message.UserID, Role: message.Role, Content: message.Content, ContentType: message.ContentType, Model: message.Model, PromptTokens: message.PromptTokens, CompletionTokens: message.CompletionTokens, TotalTokens: message.TotalTokens, LatencyMs: message.LatencyMS, EmotionSnapshotJson: message.EmotionSnapshotJSON, SafetyResultJson: message.SafetyResultJSON, Status: message.Status, ErrorMessage: message.ErrorMessage, CreatedAt: message.CreatedAt.Unix()}
+	references := make([]*v1.KnowledgeReference, 0)
+	_ = json.Unmarshal([]byte(message.ReferencesJSON), &references)
+	return &v1.ChatMessage{
+		Id: message.ID, SessionId: message.SessionID, UserId: message.UserID,
+		Role: message.Role, Content: message.Content, ContentType: message.ContentType,
+		Model: message.Model, PromptTokens: message.PromptTokens,
+		CompletionTokens: message.CompletionTokens, TotalTokens: message.TotalTokens,
+		LatencyMs: message.LatencyMS, EmotionSnapshotJson: message.EmotionSnapshotJSON,
+		SafetyResultJson: message.SafetyResultJSON, Status: message.Status,
+		ErrorMessage: message.ErrorMessage, CreatedAt: message.CreatedAt.Unix(),
+		References: references,
+		Usage: &v1.ChatUsage{
+			PromptTokens: message.PromptTokens, CompletionTokens: message.CompletionTokens,
+			TotalTokens: message.TotalTokens, CostMicros: message.CostMicros,
+			CachedTokens: message.CachedTokens,
+		},
+		ClientRequestId: stringValueOrEmpty(message.ClientRequestID),
+		RequestId: message.RequestID, TurnStatus: message.Status,
+		Provider: message.Provider, ProviderRequestId: message.ProviderRequestID,
+		ReferencesJson: jsonArrayOrDefault(message.ReferencesJSON),
+		UsageJson: jsonObjectOrDefault(message.UsageJSON),
+	}
+}
+
+func stringValueOrEmpty(value *string) string {
+	if value == nil {
+		return ""
+	}
+	return *value
+}
+
+func jsonArrayOrDefault(value string) string {
+	if !json.Valid([]byte(value)) {
+		return "[]"
+	}
+	return value
+}
+
+func jsonObjectOrDefault(value string) string {
+	if !json.Valid([]byte(value)) {
+		return "{}"
+	}
+	return value
 }

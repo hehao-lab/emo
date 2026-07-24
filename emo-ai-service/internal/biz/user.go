@@ -145,6 +145,7 @@ type ProfileRepo interface {
 	FindByID(ctx context.Context, id int64) (*User, error)
 	FindProfile(ctx context.Context, userID int64) (*UserProfile, error)
 	UpsertProfile(ctx context.Context, profile *UserProfile) (*UserProfile, error)
+	UpdateAvatar(ctx context.Context, userID int64, avatarURL string) (*UserProfile, error)
 	FindPersonalProfile(ctx context.Context, userID int64) (*PersonalProfile, error)
 	UpsertPersonalProfile(ctx context.Context, profile *PersonalProfile) (*PersonalProfile, error)
 	ListTargetProfiles(ctx context.Context, userID int64) ([]*TargetProfile, error)
@@ -425,7 +426,7 @@ func (uc *ProfileUsecase) UpdateProfile(ctx context.Context, p *UserProfile) (*U
 }
 
 func (uc *ProfileUsecase) UpdateAvatar(ctx context.Context, userID int64, avatarURL string) (*UserProfile, error) {
-	return uc.repo.UpsertProfile(ctx, &UserProfile{UserID: userID, AvatarURL: avatarURL})
+	return uc.repo.UpdateAvatar(ctx, userID, avatarURL)
 }
 
 func (uc *ProfileUsecase) GetPersonalProfile(ctx context.Context, userID int64) (*PersonalProfile, error) {
