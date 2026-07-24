@@ -63,6 +63,51 @@ func (s *FileService) UploadAvatarHTTP(w http.ResponseWriter, r *http.Request, t
 	})
 }
 
+// UploadKnowledgeHTTP stores a private knowledge file and returns only the
+// opaque object reference that the BFF will pass to the AI service.
+func (s *FileService) UploadKnowledgeHTTP(w http.ResponseWriter, r *http.Request, tokenManager *auth.TokenManager) {
+	if r.Method != http.MethodPost {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+	userID, err := authenticatedHTTPUserID(tokenManager, r)
+	if err != nil {
+		writeJSONError(w, err)
+		return
+	}
+	r.Body = http.MaxBytesReader(w, r.Body, biz.MaxKnowledgeFileSize+1024*1024)
+	if err := r.ParseMultipartForm(biz.MaxKnowledgeFileSize + 1024*1024); err != nil {
+		writeJSONError(w, kerrors.BadRequest("INVALID_KNOWLEDGE_FILE", biz.ErrInvalidKnowledgeFile.Error()))
+		return
+	}
+	file, header, err := r.FormFile("file")
+	if err != nil {
+		writeJSONError(w, kerrors.BadRequest("INVALID_KNOWLEDGE_FILE", "missing knowledge file"))
+		return
+	}
+	defer file.Close()
+	content, err := io.ReadAll(io.LimitReader(file, biz.MaxKnowledgeFileSize+1))
+	if err != nil {
+		writeJSONError(w, kerrors.BadRequest("INVALID_KNOWLEDGE_FILE", "could not read knowledge file"))
+		return
+	}
+	mimeType := header.Header.Get("Content-Type")
+	if mimeType == "" {
+		mimeType = http.DetectContentType(content)
+	}
+	objectReference, err := s.uc.UploadKnowledge(r.Context(), userID, header.Filename, mimeType, content)
+	if err != nil {
+		writeJSONError(w, uploadKnowledgeError(err))
+		return
+	}
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(http.StatusCreated)
+	_ = json.NewEncoder(w).Encode(map[string]string{
+		"objectReference": objectReference,
+		"source":          header.Filename,
+	})
+}
+
 func authenticatedHTTPUserID(tokenManager *auth.TokenManager, r *http.Request) (int64, error) {
 	if tokenManager == nil {
 		return 0, kerrors.Unauthorized("UNAUTHORIZED", "login required")
@@ -84,6 +129,17 @@ func uploadAvatarError(err error) error {
 		return kerrors.BadRequest("INVALID_AVATAR", err.Error())
 	case biz.ErrFileStorageMissing:
 		return kerrors.InternalServer("FILE_STORAGE_UNAVAILABLE", "avatar storage is not configured")
+	default:
+		return err
+	}
+}
+
+func uploadKnowledgeError(err error) error {
+	switch err {
+	case biz.ErrInvalidKnowledgeFile:
+		return kerrors.BadRequest("INVALID_KNOWLEDGE_FILE", err.Error())
+	case biz.ErrFileStorageMissing:
+		return kerrors.InternalServer("FILE_STORAGE_UNAVAILABLE", "knowledge storage is not configured")
 	default:
 		return err
 	}

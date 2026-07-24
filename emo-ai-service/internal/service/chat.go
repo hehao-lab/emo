@@ -176,10 +176,10 @@ func toChatMessageDTO(message *biz.ChatMessage) *v1.ChatMessage {
 			CachedTokens: message.CachedTokens,
 		},
 		ClientRequestId: stringValueOrEmpty(message.ClientRequestID),
-		RequestId: message.RequestID, TurnStatus: message.Status,
+		RequestId:       message.RequestID, TurnStatus: message.Status,
 		Provider: message.Provider, ProviderRequestId: message.ProviderRequestID,
 		ReferencesJson: jsonArrayOrDefault(message.ReferencesJSON),
-		UsageJson: jsonObjectOrDefault(message.UsageJSON),
+		UsageJson:      jsonObjectOrDefault(message.UsageJSON),
 	}
 }
 

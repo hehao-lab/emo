@@ -54,14 +54,14 @@ func (s *AIChatService) StreamChatHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	stream, err := s.uc.StreamChat(r.Context(), &biz.AIChatRequest{
-		UserID:         userID,
-		UpstreamUserID: upstreamUserID(userID),
-		ConversationID: req.ConversationId,
-		Message:        req.GetMessage(),
-		SystemPrompt:   req.SystemPrompt,
+		UserID:          userID,
+		UpstreamUserID:  upstreamUserID(userID),
+		ConversationID:  req.ConversationId,
+		Message:         req.GetMessage(),
+		SystemPrompt:    req.SystemPrompt,
 		ClientRequestID: clientRequestID,
-		IdempotencyKey: idempotencyKey,
-		Traceparent:    r.Header.Get("traceparent"),
+		IdempotencyKey:  idempotencyKey,
+		Traceparent:     r.Header.Get("traceparent"),
 	})
 	if err != nil {
 		writeJSONError(w, err)

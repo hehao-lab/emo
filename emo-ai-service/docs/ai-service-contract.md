@@ -137,11 +137,23 @@ The provider does not need to implement users, permissions, `[K1]` mappings,
 document CRUD, vector storage, ingestion progress, application quotas, CORS,
 or backups. Those remain project responsibilities.
 
-## BFF work still gated on this contract
+## BFF deployment settings
 
-The repository now persists a request ID, turn status, and reference JSON for
-streamed messages, but the generated protobuf `chat.v1.ChatMessage` does not
-yet expose `references_json`, `client_request_id`, or the usage fields. Add
-those fields to `api/chat/v1/chat.proto`, run `buf generate`, then map them in
-`internal/service/chat.go`. This is intentionally not hand-edited because the
-repository's generated-code rules prohibit it.
+The BFF exposes structured references and usage on `chat.v1.ChatMessage` and
+also retains their JSON forms for existing stored history. Streaming requests
+forward `Idempotency-Key` and `traceparent`, and terminal stream events persist
+model, provider request, usage, cost, and turn-status fields.
+
+Configure these environment variables before deployment:
+
+```text
+EMO_AI_SERVICE_SHARED_SECRET=<same value configured on AI Service>
+EMO_AI_DAILY_TOKEN_LIMIT=<per-user UTC-day token limit; 0 disables>
+EMO_AI_DAILY_COST_MICROS_LIMIT=<per-user UTC-day cost limit; 0 disables>
+EMO_MINIO_KNOWLEDGE_BUCKET=emotion-knowledge
+```
+
+The knowledge bucket is private. `POST /v1/files/knowledge` returns an opaque
+`s3://bucket/key` reference, which is then sent to
+`POST /api/v1/knowledge/documents`. The AI Service object-storage adapter must
+be configured with access to the same private bucket.

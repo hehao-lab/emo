@@ -9,6 +9,7 @@ package aichatv1
 import (
 	context "context"
 	http "github.com/go-kratos/kratos/v3/transport/http"
+	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -20,18 +21,26 @@ const _ = http.SupportPackageIsVersion3
 const OperationAIChatServiceChat = "/aichat.v1.AIChatService/Chat"
 const OperationAIChatServiceCreateConversation = "/aichat.v1.AIChatService/CreateConversation"
 const OperationAIChatServiceCreateKnowledgeDocument = "/aichat.v1.AIChatService/CreateKnowledgeDocument"
+const OperationAIChatServiceDeleteKnowledgeDocument = "/aichat.v1.AIChatService/DeleteKnowledgeDocument"
+const OperationAIChatServiceGetKnowledgeDocument = "/aichat.v1.AIChatService/GetKnowledgeDocument"
+const OperationAIChatServiceGetKnowledgeJob = "/aichat.v1.AIChatService/GetKnowledgeJob"
 const OperationAIChatServiceHealth = "/aichat.v1.AIChatService/Health"
 const OperationAIChatServiceListConversations = "/aichat.v1.AIChatService/ListConversations"
 const OperationAIChatServiceListKnowledgeDocuments = "/aichat.v1.AIChatService/ListKnowledgeDocuments"
 const OperationAIChatServiceListMessages = "/aichat.v1.AIChatService/ListMessages"
+const OperationAIChatServiceReindexKnowledgeDocument = "/aichat.v1.AIChatService/ReindexKnowledgeDocument"
+const OperationAIChatServiceUpdateKnowledgeDocument = "/aichat.v1.AIChatService/UpdateKnowledgeDocument"
 
 type AIChatServiceHTTPServer interface {
 	// Chat Chat sends a non-streaming chat request and waits for the full AI answer.
 	Chat(context.Context, *ChatRequest) (*ChatReply, error)
 	// CreateConversation CreateConversation creates a new conversation for the authenticated user.
 	CreateConversation(context.Context, *CreateConversationRequest) (*Conversation, error)
-	// CreateKnowledgeDocument CreateKnowledgeDocument uploads text knowledge into the user's knowledge base.
-	CreateKnowledgeDocument(context.Context, *CreateKnowledgeDocumentRequest) (*KnowledgeDocument, error)
+	// CreateKnowledgeDocument CreateKnowledgeDocument queues an object-storage document for indexing.
+	CreateKnowledgeDocument(context.Context, *CreateKnowledgeDocumentRequest) (*CreateKnowledgeDocumentReply, error)
+	DeleteKnowledgeDocument(context.Context, *DeleteKnowledgeDocumentRequest) (*emptypb.Empty, error)
+	GetKnowledgeDocument(context.Context, *GetKnowledgeDocumentRequest) (*KnowledgeDocument, error)
+	GetKnowledgeJob(context.Context, *GetKnowledgeJobRequest) (*KnowledgeJob, error)
 	// Health Health proxies the downstream FastAPI health endpoint.
 	Health(context.Context, *HealthRequest) (*HealthReply, error)
 	// ListConversations ListConversations returns conversations owned by the authenticated user.
@@ -40,6 +49,8 @@ type AIChatServiceHTTPServer interface {
 	ListKnowledgeDocuments(context.Context, *ListKnowledgeDocumentsRequest) (*KnowledgeDocumentSet, error)
 	// ListMessages ListMessages returns messages in one conversation owned by the user.
 	ListMessages(context.Context, *ListMessagesRequest) (*MessageSet, error)
+	ReindexKnowledgeDocument(context.Context, *ReindexKnowledgeDocumentRequest) (*ReindexKnowledgeDocumentReply, error)
+	UpdateKnowledgeDocument(context.Context, *UpdateKnowledgeDocumentRequest) (*KnowledgeDocument, error)
 }
 
 func RegisterAIChatServiceHTTPServer(s *http.Server, srv AIChatServiceHTTPServer) {
@@ -51,6 +62,11 @@ func RegisterAIChatServiceHTTPServer(s *http.Server, srv AIChatServiceHTTPServer
 	r.Handle("POST", "/api/v1/chat", _AIChatService_Chat0_HTTP_Handler(srv))
 	r.Handle("POST", "/api/v1/knowledge/documents", _AIChatService_CreateKnowledgeDocument0_HTTP_Handler(srv))
 	r.Handle("GET", "/api/v1/knowledge/documents", _AIChatService_ListKnowledgeDocuments0_HTTP_Handler(srv))
+	r.Handle("GET", "/api/v1/knowledge/documents/{document_id}", _AIChatService_GetKnowledgeDocument0_HTTP_Handler(srv))
+	r.Handle("PATCH", "/api/v1/knowledge/documents/{document_id}", _AIChatService_UpdateKnowledgeDocument0_HTTP_Handler(srv))
+	r.Handle("DELETE", "/api/v1/knowledge/documents/{document_id}", _AIChatService_DeleteKnowledgeDocument0_HTTP_Handler(srv))
+	r.Handle("POST", "/api/v1/knowledge/documents/{document_id}:reindex", _AIChatService_ReindexKnowledgeDocument0_HTTP_Handler(srv))
+	r.Handle("GET", "/api/v1/knowledge/jobs/{job_id}", _AIChatService_GetKnowledgeJob0_HTTP_Handler(srv))
 }
 
 func _AIChatService_Health0_HTTP_Handler(srv AIChatServiceHTTPServer) func(ctx http.Context) error {
@@ -165,7 +181,7 @@ func _AIChatService_CreateKnowledgeDocument0_HTTP_Handler(srv AIChatServiceHTTPS
 		if err != nil {
 			return err
 		}
-		reply := out.(*KnowledgeDocument)
+		reply := out.(*CreateKnowledgeDocumentReply)
 		return ctx.Result(200, reply)
 	}
 }
@@ -189,13 +205,126 @@ func _AIChatService_ListKnowledgeDocuments0_HTTP_Handler(srv AIChatServiceHTTPSe
 	}
 }
 
+func _AIChatService_GetKnowledgeDocument0_HTTP_Handler(srv AIChatServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetKnowledgeDocumentRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAIChatServiceGetKnowledgeDocument)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetKnowledgeDocument(ctx, req.(*GetKnowledgeDocumentRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*KnowledgeDocument)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _AIChatService_UpdateKnowledgeDocument0_HTTP_Handler(srv AIChatServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in UpdateKnowledgeDocumentRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAIChatServiceUpdateKnowledgeDocument)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.UpdateKnowledgeDocument(ctx, req.(*UpdateKnowledgeDocumentRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*KnowledgeDocument)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _AIChatService_DeleteKnowledgeDocument0_HTTP_Handler(srv AIChatServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in DeleteKnowledgeDocumentRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAIChatServiceDeleteKnowledgeDocument)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.DeleteKnowledgeDocument(ctx, req.(*DeleteKnowledgeDocumentRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*emptypb.Empty)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _AIChatService_ReindexKnowledgeDocument0_HTTP_Handler(srv AIChatServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in ReindexKnowledgeDocumentRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAIChatServiceReindexKnowledgeDocument)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ReindexKnowledgeDocument(ctx, req.(*ReindexKnowledgeDocumentRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*ReindexKnowledgeDocumentReply)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _AIChatService_GetKnowledgeJob0_HTTP_Handler(srv AIChatServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetKnowledgeJobRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAIChatServiceGetKnowledgeJob)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetKnowledgeJob(ctx, req.(*GetKnowledgeJobRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*KnowledgeJob)
+		return ctx.Result(200, reply)
+	}
+}
+
 type AIChatServiceHTTPClient interface {
 	// Chat Chat sends a non-streaming chat request and waits for the full AI answer.
 	Chat(ctx context.Context, req *ChatRequest, opts ...http.CallOption) (rsp *ChatReply, err error)
 	// CreateConversation CreateConversation creates a new conversation for the authenticated user.
 	CreateConversation(ctx context.Context, req *CreateConversationRequest, opts ...http.CallOption) (rsp *Conversation, err error)
-	// CreateKnowledgeDocument CreateKnowledgeDocument uploads text knowledge into the user's knowledge base.
-	CreateKnowledgeDocument(ctx context.Context, req *CreateKnowledgeDocumentRequest, opts ...http.CallOption) (rsp *KnowledgeDocument, err error)
+	// CreateKnowledgeDocument CreateKnowledgeDocument queues an object-storage document for indexing.
+	CreateKnowledgeDocument(ctx context.Context, req *CreateKnowledgeDocumentRequest, opts ...http.CallOption) (rsp *CreateKnowledgeDocumentReply, err error)
+	DeleteKnowledgeDocument(ctx context.Context, req *DeleteKnowledgeDocumentRequest, opts ...http.CallOption) (rsp *emptypb.Empty, err error)
+	GetKnowledgeDocument(ctx context.Context, req *GetKnowledgeDocumentRequest, opts ...http.CallOption) (rsp *KnowledgeDocument, err error)
+	GetKnowledgeJob(ctx context.Context, req *GetKnowledgeJobRequest, opts ...http.CallOption) (rsp *KnowledgeJob, err error)
 	// Health Health proxies the downstream FastAPI health endpoint.
 	Health(ctx context.Context, req *HealthRequest, opts ...http.CallOption) (rsp *HealthReply, err error)
 	// ListConversations ListConversations returns conversations owned by the authenticated user.
@@ -204,6 +333,8 @@ type AIChatServiceHTTPClient interface {
 	ListKnowledgeDocuments(ctx context.Context, req *ListKnowledgeDocumentsRequest, opts ...http.CallOption) (rsp *KnowledgeDocumentSet, err error)
 	// ListMessages ListMessages returns messages in one conversation owned by the user.
 	ListMessages(ctx context.Context, req *ListMessagesRequest, opts ...http.CallOption) (rsp *MessageSet, err error)
+	ReindexKnowledgeDocument(ctx context.Context, req *ReindexKnowledgeDocumentRequest, opts ...http.CallOption) (rsp *ReindexKnowledgeDocumentReply, err error)
+	UpdateKnowledgeDocument(ctx context.Context, req *UpdateKnowledgeDocumentRequest, opts ...http.CallOption) (rsp *KnowledgeDocument, err error)
 }
 
 type AIChatServiceHTTPClientImpl struct {
@@ -250,9 +381,9 @@ func (c *AIChatServiceHTTPClientImpl) CreateConversation(ctx context.Context, in
 	return &out, nil
 }
 
-// CreateKnowledgeDocument CreateKnowledgeDocument uploads text knowledge into the user's knowledge base.
-func (c *AIChatServiceHTTPClientImpl) CreateKnowledgeDocument(ctx context.Context, in *CreateKnowledgeDocumentRequest, opts ...http.CallOption) (*KnowledgeDocument, error) {
-	var out KnowledgeDocument
+// CreateKnowledgeDocument CreateKnowledgeDocument queues an object-storage document for indexing.
+func (c *AIChatServiceHTTPClientImpl) CreateKnowledgeDocument(ctx context.Context, in *CreateKnowledgeDocumentRequest, opts ...http.CallOption) (*CreateKnowledgeDocumentReply, error) {
+	var out CreateKnowledgeDocumentReply
 	pattern := "/api/v1/knowledge/documents"
 	path := http.BuildPath(pattern, in)
 	opts = append([]http.CallOption{
@@ -262,6 +393,54 @@ func (c *AIChatServiceHTTPClientImpl) CreateKnowledgeDocument(ctx context.Contex
 		http.PathTemplate(pattern),
 	}, opts...)
 	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *AIChatServiceHTTPClientImpl) DeleteKnowledgeDocument(ctx context.Context, in *DeleteKnowledgeDocumentRequest, opts ...http.CallOption) (*emptypb.Empty, error) {
+	var out emptypb.Empty
+	pattern := "/api/v1/knowledge/documents/{document_id}"
+	path := http.BuildPath(pattern, in, http.WithQueryParams())
+	opts = append([]http.CallOption{
+		http.Accept("application/protojson"),
+		http.Operation(OperationAIChatServiceDeleteKnowledgeDocument),
+		http.PathTemplate(pattern),
+	}, opts...)
+	err := c.cc.Invoke(ctx, "DELETE", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *AIChatServiceHTTPClientImpl) GetKnowledgeDocument(ctx context.Context, in *GetKnowledgeDocumentRequest, opts ...http.CallOption) (*KnowledgeDocument, error) {
+	var out KnowledgeDocument
+	pattern := "/api/v1/knowledge/documents/{document_id}"
+	path := http.BuildPath(pattern, in, http.WithQueryParams())
+	opts = append([]http.CallOption{
+		http.Accept("application/protojson"),
+		http.Operation(OperationAIChatServiceGetKnowledgeDocument),
+		http.PathTemplate(pattern),
+	}, opts...)
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *AIChatServiceHTTPClientImpl) GetKnowledgeJob(ctx context.Context, in *GetKnowledgeJobRequest, opts ...http.CallOption) (*KnowledgeJob, error) {
+	var out KnowledgeJob
+	pattern := "/api/v1/knowledge/jobs/{job_id}"
+	path := http.BuildPath(pattern, in, http.WithQueryParams())
+	opts = append([]http.CallOption{
+		http.Accept("application/protojson"),
+		http.Operation(OperationAIChatServiceGetKnowledgeJob),
+		http.PathTemplate(pattern),
+	}, opts...)
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -330,6 +509,40 @@ func (c *AIChatServiceHTTPClientImpl) ListMessages(ctx context.Context, in *List
 		http.PathTemplate(pattern),
 	}, opts...)
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *AIChatServiceHTTPClientImpl) ReindexKnowledgeDocument(ctx context.Context, in *ReindexKnowledgeDocumentRequest, opts ...http.CallOption) (*ReindexKnowledgeDocumentReply, error) {
+	var out ReindexKnowledgeDocumentReply
+	pattern := "/api/v1/knowledge/documents/{document_id}:reindex"
+	path := http.BuildPath(pattern, in)
+	opts = append([]http.CallOption{
+		http.Accept("application/protojson"),
+		http.ContentType("application/protojson"),
+		http.Operation(OperationAIChatServiceReindexKnowledgeDocument),
+		http.PathTemplate(pattern),
+	}, opts...)
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *AIChatServiceHTTPClientImpl) UpdateKnowledgeDocument(ctx context.Context, in *UpdateKnowledgeDocumentRequest, opts ...http.CallOption) (*KnowledgeDocument, error) {
+	var out KnowledgeDocument
+	pattern := "/api/v1/knowledge/documents/{document_id}"
+	path := http.BuildPath(pattern, in)
+	opts = append([]http.CallOption{
+		http.Accept("application/protojson"),
+		http.ContentType("application/protojson"),
+		http.Operation(OperationAIChatServiceUpdateKnowledgeDocument),
+		http.PathTemplate(pattern),
+	}, opts...)
+	err := c.cc.Invoke(ctx, "PATCH", path, in, &out, opts...)
 	if err != nil {
 		return nil, err
 	}

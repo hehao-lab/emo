@@ -11,6 +11,7 @@ import (
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
+	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -19,13 +20,18 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	AIChatService_Health_FullMethodName                  = "/aichat.v1.AIChatService/Health"
-	AIChatService_CreateConversation_FullMethodName      = "/aichat.v1.AIChatService/CreateConversation"
-	AIChatService_ListConversations_FullMethodName       = "/aichat.v1.AIChatService/ListConversations"
-	AIChatService_ListMessages_FullMethodName            = "/aichat.v1.AIChatService/ListMessages"
-	AIChatService_Chat_FullMethodName                    = "/aichat.v1.AIChatService/Chat"
-	AIChatService_CreateKnowledgeDocument_FullMethodName = "/aichat.v1.AIChatService/CreateKnowledgeDocument"
-	AIChatService_ListKnowledgeDocuments_FullMethodName  = "/aichat.v1.AIChatService/ListKnowledgeDocuments"
+	AIChatService_Health_FullMethodName                   = "/aichat.v1.AIChatService/Health"
+	AIChatService_CreateConversation_FullMethodName       = "/aichat.v1.AIChatService/CreateConversation"
+	AIChatService_ListConversations_FullMethodName        = "/aichat.v1.AIChatService/ListConversations"
+	AIChatService_ListMessages_FullMethodName             = "/aichat.v1.AIChatService/ListMessages"
+	AIChatService_Chat_FullMethodName                     = "/aichat.v1.AIChatService/Chat"
+	AIChatService_CreateKnowledgeDocument_FullMethodName  = "/aichat.v1.AIChatService/CreateKnowledgeDocument"
+	AIChatService_ListKnowledgeDocuments_FullMethodName   = "/aichat.v1.AIChatService/ListKnowledgeDocuments"
+	AIChatService_GetKnowledgeDocument_FullMethodName     = "/aichat.v1.AIChatService/GetKnowledgeDocument"
+	AIChatService_UpdateKnowledgeDocument_FullMethodName  = "/aichat.v1.AIChatService/UpdateKnowledgeDocument"
+	AIChatService_DeleteKnowledgeDocument_FullMethodName  = "/aichat.v1.AIChatService/DeleteKnowledgeDocument"
+	AIChatService_ReindexKnowledgeDocument_FullMethodName = "/aichat.v1.AIChatService/ReindexKnowledgeDocument"
+	AIChatService_GetKnowledgeJob_FullMethodName          = "/aichat.v1.AIChatService/GetKnowledgeJob"
 )
 
 // AIChatServiceClient is the client API for AIChatService service.
@@ -49,10 +55,15 @@ type AIChatServiceClient interface {
 	ListMessages(ctx context.Context, in *ListMessagesRequest, opts ...grpc.CallOption) (*MessageSet, error)
 	// Chat sends a non-streaming chat request and waits for the full AI answer.
 	Chat(ctx context.Context, in *ChatRequest, opts ...grpc.CallOption) (*ChatReply, error)
-	// CreateKnowledgeDocument uploads text knowledge into the user's knowledge base.
-	CreateKnowledgeDocument(ctx context.Context, in *CreateKnowledgeDocumentRequest, opts ...grpc.CallOption) (*KnowledgeDocument, error)
+	// CreateKnowledgeDocument queues an object-storage document for indexing.
+	CreateKnowledgeDocument(ctx context.Context, in *CreateKnowledgeDocumentRequest, opts ...grpc.CallOption) (*CreateKnowledgeDocumentReply, error)
 	// ListKnowledgeDocuments returns the user's knowledge base documents.
 	ListKnowledgeDocuments(ctx context.Context, in *ListKnowledgeDocumentsRequest, opts ...grpc.CallOption) (*KnowledgeDocumentSet, error)
+	GetKnowledgeDocument(ctx context.Context, in *GetKnowledgeDocumentRequest, opts ...grpc.CallOption) (*KnowledgeDocument, error)
+	UpdateKnowledgeDocument(ctx context.Context, in *UpdateKnowledgeDocumentRequest, opts ...grpc.CallOption) (*KnowledgeDocument, error)
+	DeleteKnowledgeDocument(ctx context.Context, in *DeleteKnowledgeDocumentRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	ReindexKnowledgeDocument(ctx context.Context, in *ReindexKnowledgeDocumentRequest, opts ...grpc.CallOption) (*ReindexKnowledgeDocumentReply, error)
+	GetKnowledgeJob(ctx context.Context, in *GetKnowledgeJobRequest, opts ...grpc.CallOption) (*KnowledgeJob, error)
 }
 
 type aIChatServiceClient struct {
@@ -113,9 +124,9 @@ func (c *aIChatServiceClient) Chat(ctx context.Context, in *ChatRequest, opts ..
 	return out, nil
 }
 
-func (c *aIChatServiceClient) CreateKnowledgeDocument(ctx context.Context, in *CreateKnowledgeDocumentRequest, opts ...grpc.CallOption) (*KnowledgeDocument, error) {
+func (c *aIChatServiceClient) CreateKnowledgeDocument(ctx context.Context, in *CreateKnowledgeDocumentRequest, opts ...grpc.CallOption) (*CreateKnowledgeDocumentReply, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(KnowledgeDocument)
+	out := new(CreateKnowledgeDocumentReply)
 	err := c.cc.Invoke(ctx, AIChatService_CreateKnowledgeDocument_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -127,6 +138,56 @@ func (c *aIChatServiceClient) ListKnowledgeDocuments(ctx context.Context, in *Li
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(KnowledgeDocumentSet)
 	err := c.cc.Invoke(ctx, AIChatService_ListKnowledgeDocuments_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *aIChatServiceClient) GetKnowledgeDocument(ctx context.Context, in *GetKnowledgeDocumentRequest, opts ...grpc.CallOption) (*KnowledgeDocument, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(KnowledgeDocument)
+	err := c.cc.Invoke(ctx, AIChatService_GetKnowledgeDocument_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *aIChatServiceClient) UpdateKnowledgeDocument(ctx context.Context, in *UpdateKnowledgeDocumentRequest, opts ...grpc.CallOption) (*KnowledgeDocument, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(KnowledgeDocument)
+	err := c.cc.Invoke(ctx, AIChatService_UpdateKnowledgeDocument_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *aIChatServiceClient) DeleteKnowledgeDocument(ctx context.Context, in *DeleteKnowledgeDocumentRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, AIChatService_DeleteKnowledgeDocument_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *aIChatServiceClient) ReindexKnowledgeDocument(ctx context.Context, in *ReindexKnowledgeDocumentRequest, opts ...grpc.CallOption) (*ReindexKnowledgeDocumentReply, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ReindexKnowledgeDocumentReply)
+	err := c.cc.Invoke(ctx, AIChatService_ReindexKnowledgeDocument_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *aIChatServiceClient) GetKnowledgeJob(ctx context.Context, in *GetKnowledgeJobRequest, opts ...grpc.CallOption) (*KnowledgeJob, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(KnowledgeJob)
+	err := c.cc.Invoke(ctx, AIChatService_GetKnowledgeJob_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -154,10 +215,15 @@ type AIChatServiceServer interface {
 	ListMessages(context.Context, *ListMessagesRequest) (*MessageSet, error)
 	// Chat sends a non-streaming chat request and waits for the full AI answer.
 	Chat(context.Context, *ChatRequest) (*ChatReply, error)
-	// CreateKnowledgeDocument uploads text knowledge into the user's knowledge base.
-	CreateKnowledgeDocument(context.Context, *CreateKnowledgeDocumentRequest) (*KnowledgeDocument, error)
+	// CreateKnowledgeDocument queues an object-storage document for indexing.
+	CreateKnowledgeDocument(context.Context, *CreateKnowledgeDocumentRequest) (*CreateKnowledgeDocumentReply, error)
 	// ListKnowledgeDocuments returns the user's knowledge base documents.
 	ListKnowledgeDocuments(context.Context, *ListKnowledgeDocumentsRequest) (*KnowledgeDocumentSet, error)
+	GetKnowledgeDocument(context.Context, *GetKnowledgeDocumentRequest) (*KnowledgeDocument, error)
+	UpdateKnowledgeDocument(context.Context, *UpdateKnowledgeDocumentRequest) (*KnowledgeDocument, error)
+	DeleteKnowledgeDocument(context.Context, *DeleteKnowledgeDocumentRequest) (*emptypb.Empty, error)
+	ReindexKnowledgeDocument(context.Context, *ReindexKnowledgeDocumentRequest) (*ReindexKnowledgeDocumentReply, error)
+	GetKnowledgeJob(context.Context, *GetKnowledgeJobRequest) (*KnowledgeJob, error)
 	mustEmbedUnimplementedAIChatServiceServer()
 }
 
@@ -183,11 +249,26 @@ func (UnimplementedAIChatServiceServer) ListMessages(context.Context, *ListMessa
 func (UnimplementedAIChatServiceServer) Chat(context.Context, *ChatRequest) (*ChatReply, error) {
 	return nil, status.Error(codes.Unimplemented, "method Chat not implemented")
 }
-func (UnimplementedAIChatServiceServer) CreateKnowledgeDocument(context.Context, *CreateKnowledgeDocumentRequest) (*KnowledgeDocument, error) {
+func (UnimplementedAIChatServiceServer) CreateKnowledgeDocument(context.Context, *CreateKnowledgeDocumentRequest) (*CreateKnowledgeDocumentReply, error) {
 	return nil, status.Error(codes.Unimplemented, "method CreateKnowledgeDocument not implemented")
 }
 func (UnimplementedAIChatServiceServer) ListKnowledgeDocuments(context.Context, *ListKnowledgeDocumentsRequest) (*KnowledgeDocumentSet, error) {
 	return nil, status.Error(codes.Unimplemented, "method ListKnowledgeDocuments not implemented")
+}
+func (UnimplementedAIChatServiceServer) GetKnowledgeDocument(context.Context, *GetKnowledgeDocumentRequest) (*KnowledgeDocument, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetKnowledgeDocument not implemented")
+}
+func (UnimplementedAIChatServiceServer) UpdateKnowledgeDocument(context.Context, *UpdateKnowledgeDocumentRequest) (*KnowledgeDocument, error) {
+	return nil, status.Error(codes.Unimplemented, "method UpdateKnowledgeDocument not implemented")
+}
+func (UnimplementedAIChatServiceServer) DeleteKnowledgeDocument(context.Context, *DeleteKnowledgeDocumentRequest) (*emptypb.Empty, error) {
+	return nil, status.Error(codes.Unimplemented, "method DeleteKnowledgeDocument not implemented")
+}
+func (UnimplementedAIChatServiceServer) ReindexKnowledgeDocument(context.Context, *ReindexKnowledgeDocumentRequest) (*ReindexKnowledgeDocumentReply, error) {
+	return nil, status.Error(codes.Unimplemented, "method ReindexKnowledgeDocument not implemented")
+}
+func (UnimplementedAIChatServiceServer) GetKnowledgeJob(context.Context, *GetKnowledgeJobRequest) (*KnowledgeJob, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetKnowledgeJob not implemented")
 }
 func (UnimplementedAIChatServiceServer) mustEmbedUnimplementedAIChatServiceServer() {}
 func (UnimplementedAIChatServiceServer) testEmbeddedByValue()                       {}
@@ -336,6 +417,96 @@ func _AIChatService_ListKnowledgeDocuments_Handler(srv interface{}, ctx context.
 	return interceptor(ctx, in, info, handler)
 }
 
+func _AIChatService_GetKnowledgeDocument_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetKnowledgeDocumentRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AIChatServiceServer).GetKnowledgeDocument(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AIChatService_GetKnowledgeDocument_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AIChatServiceServer).GetKnowledgeDocument(ctx, req.(*GetKnowledgeDocumentRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AIChatService_UpdateKnowledgeDocument_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateKnowledgeDocumentRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AIChatServiceServer).UpdateKnowledgeDocument(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AIChatService_UpdateKnowledgeDocument_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AIChatServiceServer).UpdateKnowledgeDocument(ctx, req.(*UpdateKnowledgeDocumentRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AIChatService_DeleteKnowledgeDocument_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteKnowledgeDocumentRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AIChatServiceServer).DeleteKnowledgeDocument(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AIChatService_DeleteKnowledgeDocument_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AIChatServiceServer).DeleteKnowledgeDocument(ctx, req.(*DeleteKnowledgeDocumentRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AIChatService_ReindexKnowledgeDocument_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ReindexKnowledgeDocumentRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AIChatServiceServer).ReindexKnowledgeDocument(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AIChatService_ReindexKnowledgeDocument_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AIChatServiceServer).ReindexKnowledgeDocument(ctx, req.(*ReindexKnowledgeDocumentRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AIChatService_GetKnowledgeJob_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetKnowledgeJobRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AIChatServiceServer).GetKnowledgeJob(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AIChatService_GetKnowledgeJob_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AIChatServiceServer).GetKnowledgeJob(ctx, req.(*GetKnowledgeJobRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // AIChatService_ServiceDesc is the grpc.ServiceDesc for AIChatService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -370,6 +541,26 @@ var AIChatService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListKnowledgeDocuments",
 			Handler:    _AIChatService_ListKnowledgeDocuments_Handler,
+		},
+		{
+			MethodName: "GetKnowledgeDocument",
+			Handler:    _AIChatService_GetKnowledgeDocument_Handler,
+		},
+		{
+			MethodName: "UpdateKnowledgeDocument",
+			Handler:    _AIChatService_UpdateKnowledgeDocument_Handler,
+		},
+		{
+			MethodName: "DeleteKnowledgeDocument",
+			Handler:    _AIChatService_DeleteKnowledgeDocument_Handler,
+		},
+		{
+			MethodName: "ReindexKnowledgeDocument",
+			Handler:    _AIChatService_ReindexKnowledgeDocument_Handler,
+		},
+		{
+			MethodName: "GetKnowledgeJob",
+			Handler:    _AIChatService_GetKnowledgeJob_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

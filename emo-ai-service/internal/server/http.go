@@ -48,6 +48,7 @@ func NewHTTPServer(
 	}
 	var opts = []http.ServerOption{
 		http.Filter(corsFilter),
+		http.ResponseEncoder(contractResponseEncoder),
 		http.Middleware(
 			recovery.Recovery(),
 			auth.ServerMiddleware(tokenManager, publicOperations),
@@ -77,7 +78,28 @@ func NewHTTPServer(
 	srv.HandleFunc("/v1/files/avatar", func(w nethttp.ResponseWriter, r *nethttp.Request) {
 		fileSvc.UploadAvatarHTTP(w, r, tokenManager)
 	})
+	srv.HandleFunc("/v1/files/knowledge", func(w nethttp.ResponseWriter, r *nethttp.Request) {
+		fileSvc.UploadKnowledgeHTTP(w, r, tokenManager)
+	})
 	return srv
+}
+
+func contractResponseEncoder(w nethttp.ResponseWriter, r *nethttp.Request, v any) error {
+	switch {
+	case r.Method == nethttp.MethodPost && r.URL.Path == "/api/v1/conversations":
+		w.WriteHeader(nethttp.StatusCreated)
+	case r.Method == nethttp.MethodPost && r.URL.Path == "/api/v1/chat":
+		w.WriteHeader(nethttp.StatusCreated)
+	case r.Method == nethttp.MethodPost && r.URL.Path == "/api/v1/knowledge/documents":
+		w.WriteHeader(nethttp.StatusAccepted)
+	case r.Method == nethttp.MethodPost && strings.HasPrefix(r.URL.Path, "/api/v1/knowledge/documents/") && strings.HasSuffix(r.URL.Path, ":reindex"):
+		w.WriteHeader(nethttp.StatusAccepted)
+	case r.Method == nethttp.MethodDelete && strings.HasPrefix(r.URL.Path, "/api/v1/knowledge/documents/"):
+		w.WriteHeader(nethttp.StatusNoContent)
+		_, err := w.Write(nil)
+		return err
+	}
+	return http.DefaultResponseEncoder(w, r, v)
 }
 
 func corsFilter(next nethttp.Handler) nethttp.Handler {

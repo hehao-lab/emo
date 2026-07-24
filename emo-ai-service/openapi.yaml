@@ -94,6 +94,29 @@ paths:
                 - AIChatService
             description: ListKnowledgeDocuments returns the user's knowledge base documents.
             operationId: AIChatService_ListKnowledgeDocuments
+            parameters:
+                - name: page
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: pageSize
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: status
+                  in: query
+                  schema:
+                    type: string
+                - name: query
+                  in: query
+                  schema:
+                    type: string
+                - name: cursor
+                  in: query
+                  schema:
+                    type: string
             responses:
                 "200":
                     description: OK
@@ -104,7 +127,7 @@ paths:
         post:
             tags:
                 - AIChatService
-            description: CreateKnowledgeDocument uploads text knowledge into the user's knowledge base.
+            description: CreateKnowledgeDocument queues an object-storage document for indexing.
             operationId: AIChatService_CreateKnowledgeDocument
             requestBody:
                 content:
@@ -118,7 +141,104 @@ paths:
                     content:
                         application/json:
                             schema:
+                                $ref: '#/components/schemas/aichat.v1.CreateKnowledgeDocumentReply'
+    /api/v1/knowledge/documents/{documentId}:
+        get:
+            tags:
+                - AIChatService
+            operationId: AIChatService_GetKnowledgeDocument
+            parameters:
+                - name: documentId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
                                 $ref: '#/components/schemas/aichat.v1.KnowledgeDocument'
+        delete:
+            tags:
+                - AIChatService
+            operationId: AIChatService_DeleteKnowledgeDocument
+            parameters:
+                - name: documentId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content: {}
+        patch:
+            tags:
+                - AIChatService
+            operationId: AIChatService_UpdateKnowledgeDocument
+            parameters:
+                - name: documentId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/aichat.v1.UpdateKnowledgeDocumentRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/aichat.v1.KnowledgeDocument'
+    /api/v1/knowledge/documents/{documentId}:reindex:
+        post:
+            tags:
+                - AIChatService
+            operationId: AIChatService_ReindexKnowledgeDocument
+            parameters:
+                - name: documentId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/aichat.v1.ReindexKnowledgeDocumentRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/aichat.v1.ReindexKnowledgeDocumentReply'
+    /api/v1/knowledge/jobs/{jobId}:
+        get:
+            tags:
+                - AIChatService
+            operationId: AIChatService_GetKnowledgeJob
+            parameters:
+                - name: jobId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/aichat.v1.KnowledgeJob'
     /v1/auth/logout:
         post:
             tags:
@@ -1219,6 +1339,8 @@ components:
                     type: string
                 systemPrompt:
                     type: string
+                clientRequestId:
+                    type: string
             description: ChatRequest is shared by the streaming and non-streaming chat APIs.
         aichat.v1.Conversation:
             type: object
@@ -1244,6 +1366,15 @@ components:
             properties:
                 title:
                     type: string
+        aichat.v1.CreateKnowledgeDocumentReply:
+            type: object
+            properties:
+                id:
+                    type: string
+                status:
+                    type: string
+                jobId:
+                    type: string
         aichat.v1.CreateKnowledgeDocumentRequest:
             type: object
             properties:
@@ -1253,11 +1384,25 @@ components:
                     type: string
                 source:
                     type: string
+                objectReference:
+                    type: string
+                metadataJson:
+                    type: string
         aichat.v1.HealthReply:
             type: object
             properties:
                 status:
                     type: string
+        aichat.v1.KnowledgeChunk:
+            type: object
+            properties:
+                id:
+                    type: string
+                content:
+                    type: string
+                sequence:
+                    type: integer
+                    format: int32
         aichat.v1.KnowledgeDocument:
             type: object
             properties:
@@ -1272,6 +1417,33 @@ components:
                     format: int32
                 createdAt:
                     type: string
+                status:
+                    type: string
+                progress:
+                    type: integer
+                    format: int32
+                errorCode:
+                    type: string
+                errorDetail:
+                    type: string
+                indexVersion:
+                    type: integer
+                    format: int32
+                embeddingModel:
+                    type: string
+                embeddingDimension:
+                    type: integer
+                    format: int32
+                updatedAt:
+                    type: string
+                metadataJson:
+                    type: string
+                preview:
+                    type: string
+                chunks:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/aichat.v1.KnowledgeChunk'
             description: KnowledgeDocument mirrors a stored knowledge document summary.
         aichat.v1.KnowledgeDocumentSet:
             type: object
@@ -1280,6 +1452,41 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/aichat.v1.KnowledgeDocument'
+                total:
+                    type: string
+                nextCursor:
+                    type: string
+                page:
+                    type: integer
+                    format: int32
+                pageSize:
+                    type: integer
+                    format: int32
+        aichat.v1.KnowledgeJob:
+            type: object
+            properties:
+                id:
+                    type: string
+                documentId:
+                    type: string
+                kind:
+                    type: string
+                status:
+                    type: string
+                progress:
+                    type: integer
+                    format: int32
+                targetIndexVersion:
+                    type: integer
+                    format: int32
+                errorCode:
+                    type: string
+                errorDetail:
+                    type: string
+                createdAt:
+                    type: string
+                updatedAt:
+                    type: string
         aichat.v1.Message:
             type: object
             properties:
@@ -1298,6 +1505,18 @@ components:
                     type: string
                 createdAt:
                     type: string
+                providerRequestId:
+                    type: string
+                requestId:
+                    type: string
+                clientRequestId:
+                    type: string
+                turnStatus:
+                    type: string
+                referencesJson:
+                    type: string
+                usageJson:
+                    type: string
             description: Message mirrors the FastAPI message DTO.
         aichat.v1.MessageSet:
             type: object
@@ -1306,6 +1525,29 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/aichat.v1.Message'
+        aichat.v1.ReindexKnowledgeDocumentReply:
+            type: object
+            properties:
+                jobId:
+                    type: string
+                status:
+                    type: string
+        aichat.v1.ReindexKnowledgeDocumentRequest:
+            type: object
+            properties:
+                documentId:
+                    type: string
+        aichat.v1.UpdateKnowledgeDocumentRequest:
+            type: object
+            properties:
+                documentId:
+                    type: string
+                title:
+                    type: string
+                source:
+                    type: string
+                metadataJson:
+                    type: string
         chat.v1.ChatContextSummary:
             type: object
             properties:
@@ -1382,6 +1624,26 @@ components:
                     type: string
                 createdAt:
                     type: string
+                references:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/chat.v1.KnowledgeReference'
+                usage:
+                    $ref: '#/components/schemas/chat.v1.ChatUsage'
+                clientRequestId:
+                    type: string
+                requestId:
+                    type: string
+                turnStatus:
+                    type: string
+                provider:
+                    type: string
+                providerRequestId:
+                    type: string
+                referencesJson:
+                    type: string
+                usageJson:
+                    type: string
         chat.v1.ChatSession:
             type: object
             properties:
@@ -1406,6 +1668,23 @@ components:
                     type: string
                 updatedAt:
                     type: string
+        chat.v1.ChatUsage:
+            type: object
+            properties:
+                promptTokens:
+                    type: integer
+                    format: int32
+                completionTokens:
+                    type: integer
+                    format: int32
+                totalTokens:
+                    type: integer
+                    format: int32
+                costMicros:
+                    type: string
+                cachedTokens:
+                    type: integer
+                    format: int32
         chat.v1.CreateFeedbackRequest:
             type: object
             properties:
@@ -1425,6 +1704,24 @@ components:
                     type: string
                 scenario:
                     type: string
+        chat.v1.KnowledgeReference:
+            type: object
+            properties:
+                key:
+                    type: string
+                documentId:
+                    type: string
+                title:
+                    type: string
+                source:
+                    type: string
+                chunkId:
+                    type: string
+                snippet:
+                    type: string
+                score:
+                    type: number
+                    format: double
         chat.v1.ListMessagesResponse:
             type: object
             properties:

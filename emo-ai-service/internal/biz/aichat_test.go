@@ -35,11 +35,29 @@ func (m *mockAIChatRepo) StreamChat(ctx context.Context, req *AIChatRequest) (*A
 	return m.stream, nil
 }
 
-func (m *mockAIChatRepo) CreateKnowledgeDocument(ctx context.Context, req *AICreateKnowledgeDocument) (*AIKnowledgeDocument, error) {
+func (m *mockAIChatRepo) CreateKnowledgeDocument(ctx context.Context, req *AICreateKnowledgeDocument) (*AICreateKnowledgeDocumentReply, error) {
 	return nil, nil
 }
 
-func (m *mockAIChatRepo) ListKnowledgeDocuments(ctx context.Context, userID string) ([]*AIKnowledgeDocument, error) {
+func (m *mockAIChatRepo) ListKnowledgeDocuments(ctx context.Context, userID string, options AIKnowledgeListOptions) (*AIKnowledgeDocumentSet, error) {
+	return nil, nil
+}
+
+func (m *mockAIChatRepo) GetKnowledgeDocument(context.Context, string, string) (*AIKnowledgeDocument, error) {
+	return nil, nil
+}
+
+func (m *mockAIChatRepo) UpdateKnowledgeDocument(context.Context, *AIUpdateKnowledgeDocument) (*AIKnowledgeDocument, error) {
+	return nil, nil
+}
+
+func (m *mockAIChatRepo) DeleteKnowledgeDocument(context.Context, string, string) error { return nil }
+
+func (m *mockAIChatRepo) ReindexKnowledgeDocument(context.Context, string, string) (*AIReindexKnowledgeDocumentReply, error) {
+	return nil, nil
+}
+
+func (m *mockAIChatRepo) GetKnowledgeJob(context.Context, string, string) (*AIKnowledgeJob, error) {
 	return nil, nil
 }
 
@@ -50,6 +68,7 @@ type mockChatRepo struct {
 	messages      []*ChatMessage
 	touchedID     int64
 	touchedDelta  int
+	dailyUsage    *ChatDailyUsage
 }
 
 func newMockChatRepo() *mockChatRepo {
@@ -109,21 +128,37 @@ func (m *mockChatRepo) UpdateMessage(ctx context.Context, message *ChatMessage) 
 		existing.Status = message.Status
 		existing.ErrorMessage = message.ErrorMessage
 		existing.ReferencesJSON = message.ReferencesJSON
+		existing.UsageJSON = message.UsageJSON
+		existing.PromptTokens = message.PromptTokens
+		existing.CompletionTokens = message.CompletionTokens
+		existing.TotalTokens = message.TotalTokens
+		existing.CachedTokens = message.CachedTokens
+		existing.CostMicros = message.CostMicros
+		existing.RequestID = message.RequestID
+		existing.Provider = message.Provider
+		existing.ProviderRequestID = message.ProviderRequestID
 		out := *existing
 		return &out, nil
 	}
 	return nil, nil
 }
 
-func (m *mockChatRepo) FindMessagesByRequestID(ctx context.Context, userID int64, clientRequestID string) ([]*ChatMessage, error) {
+func (m *mockChatRepo) FindMessagesByIdempotencyKey(ctx context.Context, userID int64, idempotencyKey string) ([]*ChatMessage, error) {
 	var out []*ChatMessage
 	for _, message := range m.messages {
-		if message.UserID == userID && message.ClientRequestID != nil && *message.ClientRequestID == clientRequestID {
+		if message.UserID == userID && message.IdempotencyKey != nil && *message.IdempotencyKey == idempotencyKey {
 			copyMessage := *message
 			out = append(out, &copyMessage)
 		}
 	}
 	return out, nil
+}
+
+func (m *mockChatRepo) DailyUsage(context.Context, int64, time.Time) (*ChatDailyUsage, error) {
+	if m.dailyUsage != nil {
+		return m.dailyUsage, nil
+	}
+	return &ChatDailyUsage{}, nil
 }
 
 func (m *mockChatRepo) ListMessages(ctx context.Context, userID, sessionID int64, page, pageSize int32) ([]*ChatMessage, int64, error) {
@@ -162,7 +197,7 @@ func TestAIChatUsecase_StreamChatPersistsMessages(t *testing.T) {
 		`data: {"content":"world"}`,
 		``,
 		`event: done`,
-		`data: {"conversation_id":"upstream-session-1","assistant_message_id":"upstream-message-2","content":"Hello world"}`,
+		`data: {"conversation_id":"upstream-session-1","assistant_message_id":"upstream-message-2","content":"Hello world","model_name":"gpt-test","provider":"openai","provider_request_id":"resp-1","request_id":"req-1","usage":{"prompt_tokens":10,"completion_tokens":2,"total_tokens":12,"cached_tokens":3,"cost_micros":55},"references":[{"key":"K1","document_id":"doc-1","title":"Guide","chunk_id":"chunk-1","snippet":"text","score":0.9}]}`,
 		``,
 	}, "\n")
 	chatRepo := newMockChatRepo()
@@ -174,9 +209,11 @@ func TestAIChatUsecase_StreamChatPersistsMessages(t *testing.T) {
 	}, chatRepo)
 
 	stream, err := uc.StreamChat(context.Background(), &AIChatRequest{
-		UserID:         7,
-		UpstreamUserID: "7",
-		Message:        "你好",
+		UserID:          7,
+		UpstreamUserID:  "7",
+		Message:         "你好",
+		ClientRequestID: "client-1",
+		IdempotencyKey:  "turn-1",
 	})
 	if err != nil {
 		t.Fatalf("StreamChat() error = %v", err)
@@ -194,6 +231,12 @@ func TestAIChatUsecase_StreamChatPersistsMessages(t *testing.T) {
 	}
 	if chatRepo.messages[1].Role != "assistant" || chatRepo.messages[1].Content != "Hello world" {
 		t.Fatalf("assistant message = %#v", chatRepo.messages[1])
+	}
+	if chatRepo.messages[1].TotalTokens != 12 || chatRepo.messages[1].CostMicros != 55 || chatRepo.messages[1].CachedTokens != 3 {
+		t.Fatalf("assistant usage = %#v", chatRepo.messages[1])
+	}
+	if chatRepo.messages[1].Provider != "openai" || chatRepo.messages[1].ProviderRequestID != "resp-1" || chatRepo.messages[1].RequestID != "req-1" {
+		t.Fatalf("assistant provider metadata = %#v", chatRepo.messages[1])
 	}
 	if got := chatRepo.sessions[1].UpstreamConversationID; got != "upstream-session-1" {
 		t.Fatalf("upstream conversation id = %q, want upstream-session-1", got)
@@ -213,5 +256,65 @@ func TestAIChatUsecase_StreamChatPersistsMessages(t *testing.T) {
 	}
 	if strings.Contains(output, "upstream-session-1") || strings.Contains(output, "upstream-message-2") {
 		t.Fatalf("stream output leaked upstream ids: %s", output)
+	}
+}
+
+func TestAIChatUsecase_StreamChatReplaysCompletedTurn(t *testing.T) {
+	body := "event: done\ndata: {\"conversation_id\":\"upstream-1\",\"content\":\"answer\",\"usage\":{\"total_tokens\":4}}\n\n"
+	chatRepo := newMockChatRepo()
+	uc := NewAIChatUsecase(&mockAIChatRepo{stream: &AIChatStream{
+		StatusCode: 201,
+		Body:       io.NopCloser(strings.NewReader(body)),
+	}}, chatRepo)
+	req := &AIChatRequest{
+		UserID: 7, UpstreamUserID: "7", Message: "same question",
+		ClientRequestID: "client-replay", IdempotencyKey: "turn-replay",
+	}
+
+	first, err := uc.StreamChat(context.Background(), req)
+	if err != nil {
+		t.Fatalf("first StreamChat() error = %v", err)
+	}
+	if _, err := io.ReadAll(first.Body); err != nil {
+		t.Fatalf("read first stream: %v", err)
+	}
+	second, err := uc.StreamChat(context.Background(), req)
+	if err != nil {
+		t.Fatalf("replay StreamChat() error = %v", err)
+	}
+	if !second.IdempotencyReplayed {
+		t.Fatal("replay did not set IdempotencyReplayed")
+	}
+	replayed, err := io.ReadAll(second.Body)
+	if err != nil {
+		t.Fatalf("read replay stream: %v", err)
+	}
+	if !strings.Contains(string(replayed), "event: done") || !strings.Contains(string(replayed), "answer") {
+		t.Fatalf("replay body = %s", replayed)
+	}
+	if len(chatRepo.messages) != 2 {
+		t.Fatalf("replay created duplicate messages: %d", len(chatRepo.messages))
+	}
+
+	conflicting := *req
+	conflicting.Message = "different question"
+	if _, err := uc.StreamChat(context.Background(), &conflicting); err == nil || !strings.Contains(err.Error(), "different payload") {
+		t.Fatalf("payload conflict error = %v", err)
+	}
+}
+
+func TestAIChatUsecase_StreamChatEnforcesDailyQuota(t *testing.T) {
+	chatRepo := newMockChatRepo()
+	chatRepo.dailyUsage = &ChatDailyUsage{TotalTokens: 100, CostMicros: 400}
+	uc := NewAIChatUsecase(&mockAIChatRepo{}, chatRepo)
+	uc.dailyTokenLimit = 100
+	uc.dailyCostMicrosLimit = 1000
+
+	_, err := uc.StreamChat(context.Background(), &AIChatRequest{
+		UserID: 7, UpstreamUserID: "7", Message: "question",
+		ClientRequestID: "quota-client", IdempotencyKey: "quota-turn",
+	})
+	if err == nil || !strings.Contains(err.Error(), "daily token limit") {
+		t.Fatalf("quota error = %v", err)
 	}
 }

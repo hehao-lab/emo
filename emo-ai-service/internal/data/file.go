@@ -29,12 +29,20 @@ type FileAssetModel struct {
 func (FileAssetModel) TableName() string { return "file_assets" }
 
 type fileRepoImpl struct {
-	db      *gorm.DB
-	storage *minioStorage
+	db               *gorm.DB
+	storage          *minioStorage
+	knowledgeStorage *minioStorage
 }
 
 func NewFileRepo(d *Data) biz.FileRepo {
-	return &fileRepoImpl{db: d.db, storage: newMinioStorage()}
+	return &fileRepoImpl{db: d.db, storage: newMinioStorage(), knowledgeStorage: newKnowledgeMinioStorage()}
+}
+
+func (r *fileRepoImpl) UploadKnowledge(ctx context.Context, objectKey, mimeType string, content []byte) (string, error) {
+	if r.knowledgeStorage == nil || !r.knowledgeStorage.configured() {
+		return "", biz.ErrFileStorageMissing
+	}
+	return r.knowledgeStorage.uploadKnowledge(ctx, objectKey, mimeType, content)
 }
 
 func (r *fileRepoImpl) UploadAvatar(ctx context.Context, objectKey, mimeType string, content []byte) (string, error) {

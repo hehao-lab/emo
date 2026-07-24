@@ -10,6 +10,7 @@ import (
 	_ "google.golang.org/genproto/googleapis/api/annotations"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
+	emptypb "google.golang.org/protobuf/types/known/emptypb"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
@@ -217,16 +218,22 @@ func (x *ConversationSet) GetItems() []*Conversation {
 
 // Message mirrors the FastAPI message DTO.
 type Message struct {
-	state          protoimpl.MessageState `protogen:"open.v1"`
-	Id             string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	ConversationId string                 `protobuf:"bytes,2,opt,name=conversation_id,json=conversationId,proto3" json:"conversation_id,omitempty"`
-	Role           string                 `protobuf:"bytes,3,opt,name=role,proto3" json:"role,omitempty"`
-	Content        string                 `protobuf:"bytes,4,opt,name=content,proto3" json:"content,omitempty"`
-	Sequence       int32                  `protobuf:"varint,5,opt,name=sequence,proto3" json:"sequence,omitempty"`
-	ModelName      *string                `protobuf:"bytes,6,opt,name=model_name,json=modelName,proto3,oneof" json:"model_name,omitempty"`
-	CreatedAt      string                 `protobuf:"bytes,7,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	unknownFields  protoimpl.UnknownFields
-	sizeCache      protoimpl.SizeCache
+	state             protoimpl.MessageState `protogen:"open.v1"`
+	Id                string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	ConversationId    string                 `protobuf:"bytes,2,opt,name=conversation_id,json=conversationId,proto3" json:"conversation_id,omitempty"`
+	Role              string                 `protobuf:"bytes,3,opt,name=role,proto3" json:"role,omitempty"`
+	Content           string                 `protobuf:"bytes,4,opt,name=content,proto3" json:"content,omitempty"`
+	Sequence          int32                  `protobuf:"varint,5,opt,name=sequence,proto3" json:"sequence,omitempty"`
+	ModelName         *string                `protobuf:"bytes,6,opt,name=model_name,json=modelName,proto3,oneof" json:"model_name,omitempty"`
+	CreatedAt         string                 `protobuf:"bytes,7,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	ProviderRequestId *string                `protobuf:"bytes,8,opt,name=provider_request_id,json=providerRequestId,proto3,oneof" json:"provider_request_id,omitempty"`
+	RequestId         *string                `protobuf:"bytes,9,opt,name=request_id,json=requestId,proto3,oneof" json:"request_id,omitempty"`
+	ClientRequestId   *string                `protobuf:"bytes,10,opt,name=client_request_id,json=clientRequestId,proto3,oneof" json:"client_request_id,omitempty"`
+	TurnStatus        string                 `protobuf:"bytes,11,opt,name=turn_status,json=turnStatus,proto3" json:"turn_status,omitempty"`
+	ReferencesJson    string                 `protobuf:"bytes,12,opt,name=references_json,json=referencesJson,proto3" json:"references_json,omitempty"`
+	UsageJson         string                 `protobuf:"bytes,13,opt,name=usage_json,json=usageJson,proto3" json:"usage_json,omitempty"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
 }
 
 func (x *Message) Reset() {
@@ -308,6 +315,48 @@ func (x *Message) GetCreatedAt() string {
 	return ""
 }
 
+func (x *Message) GetProviderRequestId() string {
+	if x != nil && x.ProviderRequestId != nil {
+		return *x.ProviderRequestId
+	}
+	return ""
+}
+
+func (x *Message) GetRequestId() string {
+	if x != nil && x.RequestId != nil {
+		return *x.RequestId
+	}
+	return ""
+}
+
+func (x *Message) GetClientRequestId() string {
+	if x != nil && x.ClientRequestId != nil {
+		return *x.ClientRequestId
+	}
+	return ""
+}
+
+func (x *Message) GetTurnStatus() string {
+	if x != nil {
+		return x.TurnStatus
+	}
+	return ""
+}
+
+func (x *Message) GetReferencesJson() string {
+	if x != nil {
+		return x.ReferencesJson
+	}
+	return ""
+}
+
+func (x *Message) GetUsageJson() string {
+	if x != nil {
+		return x.UsageJson
+	}
+	return ""
+}
+
 type MessageSet struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Items         []*Message             `protobuf:"bytes,1,rep,name=items,proto3" json:"items,omitempty"`
@@ -354,14 +403,25 @@ func (x *MessageSet) GetItems() []*Message {
 
 // KnowledgeDocument mirrors a stored knowledge document summary.
 type KnowledgeDocument struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Title         string                 `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
-	Source        *string                `protobuf:"bytes,3,opt,name=source,proto3,oneof" json:"source,omitempty"`
-	ChunkCount    int32                  `protobuf:"varint,4,opt,name=chunk_count,json=chunkCount,proto3" json:"chunk_count,omitempty"`
-	CreatedAt     string                 `protobuf:"bytes,5,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state              protoimpl.MessageState `protogen:"open.v1"`
+	Id                 string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Title              string                 `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
+	Source             *string                `protobuf:"bytes,3,opt,name=source,proto3,oneof" json:"source,omitempty"`
+	ChunkCount         int32                  `protobuf:"varint,4,opt,name=chunk_count,json=chunkCount,proto3" json:"chunk_count,omitempty"`
+	CreatedAt          string                 `protobuf:"bytes,5,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	Status             string                 `protobuf:"bytes,6,opt,name=status,proto3" json:"status,omitempty"`
+	Progress           int32                  `protobuf:"varint,7,opt,name=progress,proto3" json:"progress,omitempty"`
+	ErrorCode          *string                `protobuf:"bytes,8,opt,name=error_code,json=errorCode,proto3,oneof" json:"error_code,omitempty"`
+	ErrorDetail        *string                `protobuf:"bytes,9,opt,name=error_detail,json=errorDetail,proto3,oneof" json:"error_detail,omitempty"`
+	IndexVersion       int32                  `protobuf:"varint,10,opt,name=index_version,json=indexVersion,proto3" json:"index_version,omitempty"`
+	EmbeddingModel     *string                `protobuf:"bytes,11,opt,name=embedding_model,json=embeddingModel,proto3,oneof" json:"embedding_model,omitempty"`
+	EmbeddingDimension int32                  `protobuf:"varint,12,opt,name=embedding_dimension,json=embeddingDimension,proto3" json:"embedding_dimension,omitempty"`
+	UpdatedAt          string                 `protobuf:"bytes,13,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	MetadataJson       string                 `protobuf:"bytes,14,opt,name=metadata_json,json=metadataJson,proto3" json:"metadata_json,omitempty"`
+	Preview            *string                `protobuf:"bytes,15,opt,name=preview,proto3,oneof" json:"preview,omitempty"`
+	Chunks             []*KnowledgeChunk      `protobuf:"bytes,16,rep,name=chunks,proto3" json:"chunks,omitempty"`
+	unknownFields      protoimpl.UnknownFields
+	sizeCache          protoimpl.SizeCache
 }
 
 func (x *KnowledgeDocument) Reset() {
@@ -429,9 +489,90 @@ func (x *KnowledgeDocument) GetCreatedAt() string {
 	return ""
 }
 
+func (x *KnowledgeDocument) GetStatus() string {
+	if x != nil {
+		return x.Status
+	}
+	return ""
+}
+
+func (x *KnowledgeDocument) GetProgress() int32 {
+	if x != nil {
+		return x.Progress
+	}
+	return 0
+}
+
+func (x *KnowledgeDocument) GetErrorCode() string {
+	if x != nil && x.ErrorCode != nil {
+		return *x.ErrorCode
+	}
+	return ""
+}
+
+func (x *KnowledgeDocument) GetErrorDetail() string {
+	if x != nil && x.ErrorDetail != nil {
+		return *x.ErrorDetail
+	}
+	return ""
+}
+
+func (x *KnowledgeDocument) GetIndexVersion() int32 {
+	if x != nil {
+		return x.IndexVersion
+	}
+	return 0
+}
+
+func (x *KnowledgeDocument) GetEmbeddingModel() string {
+	if x != nil && x.EmbeddingModel != nil {
+		return *x.EmbeddingModel
+	}
+	return ""
+}
+
+func (x *KnowledgeDocument) GetEmbeddingDimension() int32 {
+	if x != nil {
+		return x.EmbeddingDimension
+	}
+	return 0
+}
+
+func (x *KnowledgeDocument) GetUpdatedAt() string {
+	if x != nil {
+		return x.UpdatedAt
+	}
+	return ""
+}
+
+func (x *KnowledgeDocument) GetMetadataJson() string {
+	if x != nil {
+		return x.MetadataJson
+	}
+	return ""
+}
+
+func (x *KnowledgeDocument) GetPreview() string {
+	if x != nil && x.Preview != nil {
+		return *x.Preview
+	}
+	return ""
+}
+
+func (x *KnowledgeDocument) GetChunks() []*KnowledgeChunk {
+	if x != nil {
+		return x.Chunks
+	}
+	return nil
+}
+
 type KnowledgeDocumentSet struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Items         []*KnowledgeDocument   `protobuf:"bytes,1,rep,name=items,proto3" json:"items,omitempty"`
+	Total         int64                  `protobuf:"varint,2,opt,name=total,proto3" json:"total,omitempty"`
+	NextCursor    *string                `protobuf:"bytes,3,opt,name=next_cursor,json=nextCursor,proto3,oneof" json:"next_cursor,omitempty"`
+	Page          int32                  `protobuf:"varint,4,opt,name=page,proto3" json:"page,omitempty"`
+	PageSize      int32                  `protobuf:"varint,5,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -473,6 +614,210 @@ func (x *KnowledgeDocumentSet) GetItems() []*KnowledgeDocument {
 	return nil
 }
 
+func (x *KnowledgeDocumentSet) GetTotal() int64 {
+	if x != nil {
+		return x.Total
+	}
+	return 0
+}
+
+func (x *KnowledgeDocumentSet) GetNextCursor() string {
+	if x != nil && x.NextCursor != nil {
+		return *x.NextCursor
+	}
+	return ""
+}
+
+func (x *KnowledgeDocumentSet) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *KnowledgeDocumentSet) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+type KnowledgeChunk struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Content       string                 `protobuf:"bytes,2,opt,name=content,proto3" json:"content,omitempty"`
+	Sequence      int32                  `protobuf:"varint,3,opt,name=sequence,proto3" json:"sequence,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *KnowledgeChunk) Reset() {
+	*x = KnowledgeChunk{}
+	mi := &file_aichat_v1_aichat_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *KnowledgeChunk) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*KnowledgeChunk) ProtoMessage() {}
+
+func (x *KnowledgeChunk) ProtoReflect() protoreflect.Message {
+	mi := &file_aichat_v1_aichat_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use KnowledgeChunk.ProtoReflect.Descriptor instead.
+func (*KnowledgeChunk) Descriptor() ([]byte, []int) {
+	return file_aichat_v1_aichat_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *KnowledgeChunk) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *KnowledgeChunk) GetContent() string {
+	if x != nil {
+		return x.Content
+	}
+	return ""
+}
+
+func (x *KnowledgeChunk) GetSequence() int32 {
+	if x != nil {
+		return x.Sequence
+	}
+	return 0
+}
+
+type KnowledgeJob struct {
+	state              protoimpl.MessageState `protogen:"open.v1"`
+	Id                 string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	DocumentId         string                 `protobuf:"bytes,2,opt,name=document_id,json=documentId,proto3" json:"document_id,omitempty"`
+	Kind               string                 `protobuf:"bytes,3,opt,name=kind,proto3" json:"kind,omitempty"`
+	Status             string                 `protobuf:"bytes,4,opt,name=status,proto3" json:"status,omitempty"`
+	Progress           int32                  `protobuf:"varint,5,opt,name=progress,proto3" json:"progress,omitempty"`
+	TargetIndexVersion int32                  `protobuf:"varint,6,opt,name=target_index_version,json=targetIndexVersion,proto3" json:"target_index_version,omitempty"`
+	ErrorCode          *string                `protobuf:"bytes,7,opt,name=error_code,json=errorCode,proto3,oneof" json:"error_code,omitempty"`
+	ErrorDetail        *string                `protobuf:"bytes,8,opt,name=error_detail,json=errorDetail,proto3,oneof" json:"error_detail,omitempty"`
+	CreatedAt          string                 `protobuf:"bytes,9,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt          string                 `protobuf:"bytes,10,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	unknownFields      protoimpl.UnknownFields
+	sizeCache          protoimpl.SizeCache
+}
+
+func (x *KnowledgeJob) Reset() {
+	*x = KnowledgeJob{}
+	mi := &file_aichat_v1_aichat_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *KnowledgeJob) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*KnowledgeJob) ProtoMessage() {}
+
+func (x *KnowledgeJob) ProtoReflect() protoreflect.Message {
+	mi := &file_aichat_v1_aichat_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use KnowledgeJob.ProtoReflect.Descriptor instead.
+func (*KnowledgeJob) Descriptor() ([]byte, []int) {
+	return file_aichat_v1_aichat_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *KnowledgeJob) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *KnowledgeJob) GetDocumentId() string {
+	if x != nil {
+		return x.DocumentId
+	}
+	return ""
+}
+
+func (x *KnowledgeJob) GetKind() string {
+	if x != nil {
+		return x.Kind
+	}
+	return ""
+}
+
+func (x *KnowledgeJob) GetStatus() string {
+	if x != nil {
+		return x.Status
+	}
+	return ""
+}
+
+func (x *KnowledgeJob) GetProgress() int32 {
+	if x != nil {
+		return x.Progress
+	}
+	return 0
+}
+
+func (x *KnowledgeJob) GetTargetIndexVersion() int32 {
+	if x != nil {
+		return x.TargetIndexVersion
+	}
+	return 0
+}
+
+func (x *KnowledgeJob) GetErrorCode() string {
+	if x != nil && x.ErrorCode != nil {
+		return *x.ErrorCode
+	}
+	return ""
+}
+
+func (x *KnowledgeJob) GetErrorDetail() string {
+	if x != nil && x.ErrorDetail != nil {
+		return *x.ErrorDetail
+	}
+	return ""
+}
+
+func (x *KnowledgeJob) GetCreatedAt() string {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return ""
+}
+
+func (x *KnowledgeJob) GetUpdatedAt() string {
+	if x != nil {
+		return x.UpdatedAt
+	}
+	return ""
+}
+
 type CreateConversationRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Title         string                 `protobuf:"bytes,1,opt,name=title,proto3" json:"title,omitempty"`
@@ -482,7 +827,7 @@ type CreateConversationRequest struct {
 
 func (x *CreateConversationRequest) Reset() {
 	*x = CreateConversationRequest{}
-	mi := &file_aichat_v1_aichat_proto_msgTypes[8]
+	mi := &file_aichat_v1_aichat_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -494,7 +839,7 @@ func (x *CreateConversationRequest) String() string {
 func (*CreateConversationRequest) ProtoMessage() {}
 
 func (x *CreateConversationRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_aichat_v1_aichat_proto_msgTypes[8]
+	mi := &file_aichat_v1_aichat_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -507,7 +852,7 @@ func (x *CreateConversationRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateConversationRequest.ProtoReflect.Descriptor instead.
 func (*CreateConversationRequest) Descriptor() ([]byte, []int) {
-	return file_aichat_v1_aichat_proto_rawDescGZIP(), []int{8}
+	return file_aichat_v1_aichat_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *CreateConversationRequest) GetTitle() string {
@@ -525,7 +870,7 @@ type ListConversationsRequest struct {
 
 func (x *ListConversationsRequest) Reset() {
 	*x = ListConversationsRequest{}
-	mi := &file_aichat_v1_aichat_proto_msgTypes[9]
+	mi := &file_aichat_v1_aichat_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -537,7 +882,7 @@ func (x *ListConversationsRequest) String() string {
 func (*ListConversationsRequest) ProtoMessage() {}
 
 func (x *ListConversationsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_aichat_v1_aichat_proto_msgTypes[9]
+	mi := &file_aichat_v1_aichat_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -550,7 +895,7 @@ func (x *ListConversationsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListConversationsRequest.ProtoReflect.Descriptor instead.
 func (*ListConversationsRequest) Descriptor() ([]byte, []int) {
-	return file_aichat_v1_aichat_proto_rawDescGZIP(), []int{9}
+	return file_aichat_v1_aichat_proto_rawDescGZIP(), []int{11}
 }
 
 type ListMessagesRequest struct {
@@ -562,7 +907,7 @@ type ListMessagesRequest struct {
 
 func (x *ListMessagesRequest) Reset() {
 	*x = ListMessagesRequest{}
-	mi := &file_aichat_v1_aichat_proto_msgTypes[10]
+	mi := &file_aichat_v1_aichat_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -574,7 +919,7 @@ func (x *ListMessagesRequest) String() string {
 func (*ListMessagesRequest) ProtoMessage() {}
 
 func (x *ListMessagesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_aichat_v1_aichat_proto_msgTypes[10]
+	mi := &file_aichat_v1_aichat_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -587,7 +932,7 @@ func (x *ListMessagesRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListMessagesRequest.ProtoReflect.Descriptor instead.
 func (*ListMessagesRequest) Descriptor() ([]byte, []int) {
-	return file_aichat_v1_aichat_proto_rawDescGZIP(), []int{10}
+	return file_aichat_v1_aichat_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *ListMessagesRequest) GetConversationId() string {
@@ -599,17 +944,18 @@ func (x *ListMessagesRequest) GetConversationId() string {
 
 // ChatRequest is shared by the streaming and non-streaming chat APIs.
 type ChatRequest struct {
-	state          protoimpl.MessageState `protogen:"open.v1"`
-	ConversationId *string                `protobuf:"bytes,1,opt,name=conversation_id,json=conversationId,proto3,oneof" json:"conversation_id,omitempty"`
-	Message        string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
-	SystemPrompt   *string                `protobuf:"bytes,3,opt,name=system_prompt,json=systemPrompt,proto3,oneof" json:"system_prompt,omitempty"`
-	unknownFields  protoimpl.UnknownFields
-	sizeCache      protoimpl.SizeCache
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	ConversationId  *string                `protobuf:"bytes,1,opt,name=conversation_id,json=conversationId,proto3,oneof" json:"conversation_id,omitempty"`
+	Message         string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
+	SystemPrompt    *string                `protobuf:"bytes,3,opt,name=system_prompt,json=systemPrompt,proto3,oneof" json:"system_prompt,omitempty"`
+	ClientRequestId *string                `protobuf:"bytes,4,opt,name=client_request_id,json=clientRequestId,proto3,oneof" json:"client_request_id,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
 }
 
 func (x *ChatRequest) Reset() {
 	*x = ChatRequest{}
-	mi := &file_aichat_v1_aichat_proto_msgTypes[11]
+	mi := &file_aichat_v1_aichat_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -621,7 +967,7 @@ func (x *ChatRequest) String() string {
 func (*ChatRequest) ProtoMessage() {}
 
 func (x *ChatRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_aichat_v1_aichat_proto_msgTypes[11]
+	mi := &file_aichat_v1_aichat_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -634,7 +980,7 @@ func (x *ChatRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ChatRequest.ProtoReflect.Descriptor instead.
 func (*ChatRequest) Descriptor() ([]byte, []int) {
-	return file_aichat_v1_aichat_proto_rawDescGZIP(), []int{11}
+	return file_aichat_v1_aichat_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *ChatRequest) GetConversationId() string {
@@ -658,6 +1004,13 @@ func (x *ChatRequest) GetSystemPrompt() string {
 	return ""
 }
 
+func (x *ChatRequest) GetClientRequestId() string {
+	if x != nil && x.ClientRequestId != nil {
+		return *x.ClientRequestId
+	}
+	return ""
+}
+
 // ChatReply is returned by the non-streaming chat API after persistence is done.
 type ChatReply struct {
 	state            protoimpl.MessageState `protogen:"open.v1"`
@@ -670,7 +1023,7 @@ type ChatReply struct {
 
 func (x *ChatReply) Reset() {
 	*x = ChatReply{}
-	mi := &file_aichat_v1_aichat_proto_msgTypes[12]
+	mi := &file_aichat_v1_aichat_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -682,7 +1035,7 @@ func (x *ChatReply) String() string {
 func (*ChatReply) ProtoMessage() {}
 
 func (x *ChatReply) ProtoReflect() protoreflect.Message {
-	mi := &file_aichat_v1_aichat_proto_msgTypes[12]
+	mi := &file_aichat_v1_aichat_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -695,7 +1048,7 @@ func (x *ChatReply) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ChatReply.ProtoReflect.Descriptor instead.
 func (*ChatReply) Descriptor() ([]byte, []int) {
-	return file_aichat_v1_aichat_proto_rawDescGZIP(), []int{12}
+	return file_aichat_v1_aichat_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *ChatReply) GetConversation() *Conversation {
@@ -720,17 +1073,19 @@ func (x *ChatReply) GetAssistantMessage() *Message {
 }
 
 type CreateKnowledgeDocumentRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Title         string                 `protobuf:"bytes,1,opt,name=title,proto3" json:"title,omitempty"`
-	Content       string                 `protobuf:"bytes,2,opt,name=content,proto3" json:"content,omitempty"`
-	Source        *string                `protobuf:"bytes,3,opt,name=source,proto3,oneof" json:"source,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	Title           string                 `protobuf:"bytes,1,opt,name=title,proto3" json:"title,omitempty"`
+	Content         *string                `protobuf:"bytes,2,opt,name=content,proto3,oneof" json:"content,omitempty"`
+	Source          *string                `protobuf:"bytes,3,opt,name=source,proto3,oneof" json:"source,omitempty"`
+	ObjectReference *string                `protobuf:"bytes,4,opt,name=object_reference,json=objectReference,proto3,oneof" json:"object_reference,omitempty"`
+	MetadataJson    string                 `protobuf:"bytes,5,opt,name=metadata_json,json=metadataJson,proto3" json:"metadata_json,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
 }
 
 func (x *CreateKnowledgeDocumentRequest) Reset() {
 	*x = CreateKnowledgeDocumentRequest{}
-	mi := &file_aichat_v1_aichat_proto_msgTypes[13]
+	mi := &file_aichat_v1_aichat_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -742,7 +1097,7 @@ func (x *CreateKnowledgeDocumentRequest) String() string {
 func (*CreateKnowledgeDocumentRequest) ProtoMessage() {}
 
 func (x *CreateKnowledgeDocumentRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_aichat_v1_aichat_proto_msgTypes[13]
+	mi := &file_aichat_v1_aichat_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -755,7 +1110,7 @@ func (x *CreateKnowledgeDocumentRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateKnowledgeDocumentRequest.ProtoReflect.Descriptor instead.
 func (*CreateKnowledgeDocumentRequest) Descriptor() ([]byte, []int) {
-	return file_aichat_v1_aichat_proto_rawDescGZIP(), []int{13}
+	return file_aichat_v1_aichat_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *CreateKnowledgeDocumentRequest) GetTitle() string {
@@ -766,8 +1121,8 @@ func (x *CreateKnowledgeDocumentRequest) GetTitle() string {
 }
 
 func (x *CreateKnowledgeDocumentRequest) GetContent() string {
-	if x != nil {
-		return x.Content
+	if x != nil && x.Content != nil {
+		return *x.Content
 	}
 	return ""
 }
@@ -779,15 +1134,94 @@ func (x *CreateKnowledgeDocumentRequest) GetSource() string {
 	return ""
 }
 
+func (x *CreateKnowledgeDocumentRequest) GetObjectReference() string {
+	if x != nil && x.ObjectReference != nil {
+		return *x.ObjectReference
+	}
+	return ""
+}
+
+func (x *CreateKnowledgeDocumentRequest) GetMetadataJson() string {
+	if x != nil {
+		return x.MetadataJson
+	}
+	return ""
+}
+
+type CreateKnowledgeDocumentReply struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Status        string                 `protobuf:"bytes,2,opt,name=status,proto3" json:"status,omitempty"`
+	JobId         string                 `protobuf:"bytes,3,opt,name=job_id,json=jobId,proto3" json:"job_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateKnowledgeDocumentReply) Reset() {
+	*x = CreateKnowledgeDocumentReply{}
+	mi := &file_aichat_v1_aichat_proto_msgTypes[16]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateKnowledgeDocumentReply) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateKnowledgeDocumentReply) ProtoMessage() {}
+
+func (x *CreateKnowledgeDocumentReply) ProtoReflect() protoreflect.Message {
+	mi := &file_aichat_v1_aichat_proto_msgTypes[16]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateKnowledgeDocumentReply.ProtoReflect.Descriptor instead.
+func (*CreateKnowledgeDocumentReply) Descriptor() ([]byte, []int) {
+	return file_aichat_v1_aichat_proto_rawDescGZIP(), []int{16}
+}
+
+func (x *CreateKnowledgeDocumentReply) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *CreateKnowledgeDocumentReply) GetStatus() string {
+	if x != nil {
+		return x.Status
+	}
+	return ""
+}
+
+func (x *CreateKnowledgeDocumentReply) GetJobId() string {
+	if x != nil {
+		return x.JobId
+	}
+	return ""
+}
+
 type ListKnowledgeDocumentsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
+	Page          int32                  `protobuf:"varint,1,opt,name=page,proto3" json:"page,omitempty"`
+	PageSize      int32                  `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	Status        *string                `protobuf:"bytes,3,opt,name=status,proto3,oneof" json:"status,omitempty"`
+	Query         *string                `protobuf:"bytes,4,opt,name=query,proto3,oneof" json:"query,omitempty"`
+	Cursor        *string                `protobuf:"bytes,5,opt,name=cursor,proto3,oneof" json:"cursor,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *ListKnowledgeDocumentsRequest) Reset() {
 	*x = ListKnowledgeDocumentsRequest{}
-	mi := &file_aichat_v1_aichat_proto_msgTypes[14]
+	mi := &file_aichat_v1_aichat_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -799,7 +1233,7 @@ func (x *ListKnowledgeDocumentsRequest) String() string {
 func (*ListKnowledgeDocumentsRequest) ProtoMessage() {}
 
 func (x *ListKnowledgeDocumentsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_aichat_v1_aichat_proto_msgTypes[14]
+	mi := &file_aichat_v1_aichat_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -812,14 +1246,345 @@ func (x *ListKnowledgeDocumentsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListKnowledgeDocumentsRequest.ProtoReflect.Descriptor instead.
 func (*ListKnowledgeDocumentsRequest) Descriptor() ([]byte, []int) {
-	return file_aichat_v1_aichat_proto_rawDescGZIP(), []int{14}
+	return file_aichat_v1_aichat_proto_rawDescGZIP(), []int{17}
+}
+
+func (x *ListKnowledgeDocumentsRequest) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *ListKnowledgeDocumentsRequest) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+func (x *ListKnowledgeDocumentsRequest) GetStatus() string {
+	if x != nil && x.Status != nil {
+		return *x.Status
+	}
+	return ""
+}
+
+func (x *ListKnowledgeDocumentsRequest) GetQuery() string {
+	if x != nil && x.Query != nil {
+		return *x.Query
+	}
+	return ""
+}
+
+func (x *ListKnowledgeDocumentsRequest) GetCursor() string {
+	if x != nil && x.Cursor != nil {
+		return *x.Cursor
+	}
+	return ""
+}
+
+type GetKnowledgeDocumentRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	DocumentId    string                 `protobuf:"bytes,1,opt,name=document_id,json=documentId,proto3" json:"document_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetKnowledgeDocumentRequest) Reset() {
+	*x = GetKnowledgeDocumentRequest{}
+	mi := &file_aichat_v1_aichat_proto_msgTypes[18]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetKnowledgeDocumentRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetKnowledgeDocumentRequest) ProtoMessage() {}
+
+func (x *GetKnowledgeDocumentRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_aichat_v1_aichat_proto_msgTypes[18]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetKnowledgeDocumentRequest.ProtoReflect.Descriptor instead.
+func (*GetKnowledgeDocumentRequest) Descriptor() ([]byte, []int) {
+	return file_aichat_v1_aichat_proto_rawDescGZIP(), []int{18}
+}
+
+func (x *GetKnowledgeDocumentRequest) GetDocumentId() string {
+	if x != nil {
+		return x.DocumentId
+	}
+	return ""
+}
+
+type UpdateKnowledgeDocumentRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	DocumentId    string                 `protobuf:"bytes,1,opt,name=document_id,json=documentId,proto3" json:"document_id,omitempty"`
+	Title         *string                `protobuf:"bytes,2,opt,name=title,proto3,oneof" json:"title,omitempty"`
+	Source        *string                `protobuf:"bytes,3,opt,name=source,proto3,oneof" json:"source,omitempty"`
+	MetadataJson  *string                `protobuf:"bytes,4,opt,name=metadata_json,json=metadataJson,proto3,oneof" json:"metadata_json,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateKnowledgeDocumentRequest) Reset() {
+	*x = UpdateKnowledgeDocumentRequest{}
+	mi := &file_aichat_v1_aichat_proto_msgTypes[19]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateKnowledgeDocumentRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateKnowledgeDocumentRequest) ProtoMessage() {}
+
+func (x *UpdateKnowledgeDocumentRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_aichat_v1_aichat_proto_msgTypes[19]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateKnowledgeDocumentRequest.ProtoReflect.Descriptor instead.
+func (*UpdateKnowledgeDocumentRequest) Descriptor() ([]byte, []int) {
+	return file_aichat_v1_aichat_proto_rawDescGZIP(), []int{19}
+}
+
+func (x *UpdateKnowledgeDocumentRequest) GetDocumentId() string {
+	if x != nil {
+		return x.DocumentId
+	}
+	return ""
+}
+
+func (x *UpdateKnowledgeDocumentRequest) GetTitle() string {
+	if x != nil && x.Title != nil {
+		return *x.Title
+	}
+	return ""
+}
+
+func (x *UpdateKnowledgeDocumentRequest) GetSource() string {
+	if x != nil && x.Source != nil {
+		return *x.Source
+	}
+	return ""
+}
+
+func (x *UpdateKnowledgeDocumentRequest) GetMetadataJson() string {
+	if x != nil && x.MetadataJson != nil {
+		return *x.MetadataJson
+	}
+	return ""
+}
+
+type DeleteKnowledgeDocumentRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	DocumentId    string                 `protobuf:"bytes,1,opt,name=document_id,json=documentId,proto3" json:"document_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteKnowledgeDocumentRequest) Reset() {
+	*x = DeleteKnowledgeDocumentRequest{}
+	mi := &file_aichat_v1_aichat_proto_msgTypes[20]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteKnowledgeDocumentRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteKnowledgeDocumentRequest) ProtoMessage() {}
+
+func (x *DeleteKnowledgeDocumentRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_aichat_v1_aichat_proto_msgTypes[20]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteKnowledgeDocumentRequest.ProtoReflect.Descriptor instead.
+func (*DeleteKnowledgeDocumentRequest) Descriptor() ([]byte, []int) {
+	return file_aichat_v1_aichat_proto_rawDescGZIP(), []int{20}
+}
+
+func (x *DeleteKnowledgeDocumentRequest) GetDocumentId() string {
+	if x != nil {
+		return x.DocumentId
+	}
+	return ""
+}
+
+type ReindexKnowledgeDocumentRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	DocumentId    string                 `protobuf:"bytes,1,opt,name=document_id,json=documentId,proto3" json:"document_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ReindexKnowledgeDocumentRequest) Reset() {
+	*x = ReindexKnowledgeDocumentRequest{}
+	mi := &file_aichat_v1_aichat_proto_msgTypes[21]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ReindexKnowledgeDocumentRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ReindexKnowledgeDocumentRequest) ProtoMessage() {}
+
+func (x *ReindexKnowledgeDocumentRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_aichat_v1_aichat_proto_msgTypes[21]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ReindexKnowledgeDocumentRequest.ProtoReflect.Descriptor instead.
+func (*ReindexKnowledgeDocumentRequest) Descriptor() ([]byte, []int) {
+	return file_aichat_v1_aichat_proto_rawDescGZIP(), []int{21}
+}
+
+func (x *ReindexKnowledgeDocumentRequest) GetDocumentId() string {
+	if x != nil {
+		return x.DocumentId
+	}
+	return ""
+}
+
+type ReindexKnowledgeDocumentReply struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	JobId         string                 `protobuf:"bytes,1,opt,name=job_id,json=jobId,proto3" json:"job_id,omitempty"`
+	Status        string                 `protobuf:"bytes,2,opt,name=status,proto3" json:"status,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ReindexKnowledgeDocumentReply) Reset() {
+	*x = ReindexKnowledgeDocumentReply{}
+	mi := &file_aichat_v1_aichat_proto_msgTypes[22]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ReindexKnowledgeDocumentReply) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ReindexKnowledgeDocumentReply) ProtoMessage() {}
+
+func (x *ReindexKnowledgeDocumentReply) ProtoReflect() protoreflect.Message {
+	mi := &file_aichat_v1_aichat_proto_msgTypes[22]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ReindexKnowledgeDocumentReply.ProtoReflect.Descriptor instead.
+func (*ReindexKnowledgeDocumentReply) Descriptor() ([]byte, []int) {
+	return file_aichat_v1_aichat_proto_rawDescGZIP(), []int{22}
+}
+
+func (x *ReindexKnowledgeDocumentReply) GetJobId() string {
+	if x != nil {
+		return x.JobId
+	}
+	return ""
+}
+
+func (x *ReindexKnowledgeDocumentReply) GetStatus() string {
+	if x != nil {
+		return x.Status
+	}
+	return ""
+}
+
+type GetKnowledgeJobRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	JobId         string                 `protobuf:"bytes,1,opt,name=job_id,json=jobId,proto3" json:"job_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetKnowledgeJobRequest) Reset() {
+	*x = GetKnowledgeJobRequest{}
+	mi := &file_aichat_v1_aichat_proto_msgTypes[23]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetKnowledgeJobRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetKnowledgeJobRequest) ProtoMessage() {}
+
+func (x *GetKnowledgeJobRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_aichat_v1_aichat_proto_msgTypes[23]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetKnowledgeJobRequest.ProtoReflect.Descriptor instead.
+func (*GetKnowledgeJobRequest) Descriptor() ([]byte, []int) {
+	return file_aichat_v1_aichat_proto_rawDescGZIP(), []int{23}
+}
+
+func (x *GetKnowledgeJobRequest) GetJobId() string {
+	if x != nil {
+		return x.JobId
+	}
+	return ""
 }
 
 var File_aichat_v1_aichat_proto protoreflect.FileDescriptor
 
 const file_aichat_v1_aichat_proto_rawDesc = "" +
 	"\n" +
-	"\x16aichat/v1/aichat.proto\x12\taichat.v1\x1a\x1cgoogle/api/annotations.proto\"\x0f\n" +
+	"\x16aichat/v1/aichat.proto\x12\taichat.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x1bgoogle/protobuf/empty.proto\"\x0f\n" +
 	"\rHealthRequest\"%\n" +
 	"\vHealthReply\x12\x16\n" +
 	"\x06status\x18\x01 \x01(\tR\x06status\"r\n" +
@@ -831,7 +1596,7 @@ const file_aichat_v1_aichat_proto_rawDesc = "" +
 	"\n" +
 	"updated_at\x18\x04 \x01(\tR\tupdatedAt\"@\n" +
 	"\x0fConversationSet\x12-\n" +
-	"\x05items\x18\x01 \x03(\v2\x17.aichat.v1.ConversationR\x05items\"\xde\x01\n" +
+	"\x05items\x18\x01 \x03(\v2\x17.aichat.v1.ConversationR\x05items\"\x8e\x04\n" +
 	"\aMessage\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12'\n" +
 	"\x0fconversation_id\x18\x02 \x01(\tR\x0econversationId\x12\x12\n" +
@@ -841,11 +1606,24 @@ const file_aichat_v1_aichat_proto_rawDesc = "" +
 	"\n" +
 	"model_name\x18\x06 \x01(\tH\x00R\tmodelName\x88\x01\x01\x12\x1d\n" +
 	"\n" +
-	"created_at\x18\a \x01(\tR\tcreatedAtB\r\n" +
-	"\v_model_name\"6\n" +
+	"created_at\x18\a \x01(\tR\tcreatedAt\x123\n" +
+	"\x13provider_request_id\x18\b \x01(\tH\x01R\x11providerRequestId\x88\x01\x01\x12\"\n" +
+	"\n" +
+	"request_id\x18\t \x01(\tH\x02R\trequestId\x88\x01\x01\x12/\n" +
+	"\x11client_request_id\x18\n" +
+	" \x01(\tH\x03R\x0fclientRequestId\x88\x01\x01\x12\x1f\n" +
+	"\vturn_status\x18\v \x01(\tR\n" +
+	"turnStatus\x12'\n" +
+	"\x0freferences_json\x18\f \x01(\tR\x0ereferencesJson\x12\x1d\n" +
+	"\n" +
+	"usage_json\x18\r \x01(\tR\tusageJsonB\r\n" +
+	"\v_model_nameB\x16\n" +
+	"\x14_provider_request_idB\r\n" +
+	"\v_request_idB\x14\n" +
+	"\x12_client_request_id\"6\n" +
 	"\n" +
 	"MessageSet\x12(\n" +
-	"\x05items\x18\x01 \x03(\v2\x12.aichat.v1.MessageR\x05items\"\xa1\x01\n" +
+	"\x05items\x18\x01 \x03(\v2\x12.aichat.v1.MessageR\x05items\"\xfb\x04\n" +
 	"\x11KnowledgeDocument\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x14\n" +
 	"\x05title\x18\x02 \x01(\tR\x05title\x12\x1b\n" +
@@ -853,39 +1631,133 @@ const file_aichat_v1_aichat_proto_rawDesc = "" +
 	"\vchunk_count\x18\x04 \x01(\x05R\n" +
 	"chunkCount\x12\x1d\n" +
 	"\n" +
-	"created_at\x18\x05 \x01(\tR\tcreatedAtB\t\n" +
-	"\a_source\"J\n" +
+	"created_at\x18\x05 \x01(\tR\tcreatedAt\x12\x16\n" +
+	"\x06status\x18\x06 \x01(\tR\x06status\x12\x1a\n" +
+	"\bprogress\x18\a \x01(\x05R\bprogress\x12\"\n" +
+	"\n" +
+	"error_code\x18\b \x01(\tH\x01R\terrorCode\x88\x01\x01\x12&\n" +
+	"\ferror_detail\x18\t \x01(\tH\x02R\verrorDetail\x88\x01\x01\x12#\n" +
+	"\rindex_version\x18\n" +
+	" \x01(\x05R\findexVersion\x12,\n" +
+	"\x0fembedding_model\x18\v \x01(\tH\x03R\x0eembeddingModel\x88\x01\x01\x12/\n" +
+	"\x13embedding_dimension\x18\f \x01(\x05R\x12embeddingDimension\x12\x1d\n" +
+	"\n" +
+	"updated_at\x18\r \x01(\tR\tupdatedAt\x12#\n" +
+	"\rmetadata_json\x18\x0e \x01(\tR\fmetadataJson\x12\x1d\n" +
+	"\apreview\x18\x0f \x01(\tH\x04R\apreview\x88\x01\x01\x121\n" +
+	"\x06chunks\x18\x10 \x03(\v2\x19.aichat.v1.KnowledgeChunkR\x06chunksB\t\n" +
+	"\a_sourceB\r\n" +
+	"\v_error_codeB\x0f\n" +
+	"\r_error_detailB\x12\n" +
+	"\x10_embedding_modelB\n" +
+	"\n" +
+	"\b_preview\"\xc7\x01\n" +
 	"\x14KnowledgeDocumentSet\x122\n" +
-	"\x05items\x18\x01 \x03(\v2\x1c.aichat.v1.KnowledgeDocumentR\x05items\"1\n" +
+	"\x05items\x18\x01 \x03(\v2\x1c.aichat.v1.KnowledgeDocumentR\x05items\x12\x14\n" +
+	"\x05total\x18\x02 \x01(\x03R\x05total\x12$\n" +
+	"\vnext_cursor\x18\x03 \x01(\tH\x00R\n" +
+	"nextCursor\x88\x01\x01\x12\x12\n" +
+	"\x04page\x18\x04 \x01(\x05R\x04page\x12\x1b\n" +
+	"\tpage_size\x18\x05 \x01(\x05R\bpageSizeB\x0e\n" +
+	"\f_next_cursor\"V\n" +
+	"\x0eKnowledgeChunk\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x18\n" +
+	"\acontent\x18\x02 \x01(\tR\acontent\x12\x1a\n" +
+	"\bsequence\x18\x03 \x01(\x05R\bsequence\"\xe3\x02\n" +
+	"\fKnowledgeJob\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1f\n" +
+	"\vdocument_id\x18\x02 \x01(\tR\n" +
+	"documentId\x12\x12\n" +
+	"\x04kind\x18\x03 \x01(\tR\x04kind\x12\x16\n" +
+	"\x06status\x18\x04 \x01(\tR\x06status\x12\x1a\n" +
+	"\bprogress\x18\x05 \x01(\x05R\bprogress\x120\n" +
+	"\x14target_index_version\x18\x06 \x01(\x05R\x12targetIndexVersion\x12\"\n" +
+	"\n" +
+	"error_code\x18\a \x01(\tH\x00R\terrorCode\x88\x01\x01\x12&\n" +
+	"\ferror_detail\x18\b \x01(\tH\x01R\verrorDetail\x88\x01\x01\x12\x1d\n" +
+	"\n" +
+	"created_at\x18\t \x01(\tR\tcreatedAt\x12\x1d\n" +
+	"\n" +
+	"updated_at\x18\n" +
+	" \x01(\tR\tupdatedAtB\r\n" +
+	"\v_error_codeB\x0f\n" +
+	"\r_error_detail\"1\n" +
 	"\x19CreateConversationRequest\x12\x14\n" +
 	"\x05title\x18\x01 \x01(\tR\x05title\"\x1a\n" +
 	"\x18ListConversationsRequest\">\n" +
 	"\x13ListMessagesRequest\x12'\n" +
-	"\x0fconversation_id\x18\x01 \x01(\tR\x0econversationId\"\xa5\x01\n" +
+	"\x0fconversation_id\x18\x01 \x01(\tR\x0econversationId\"\xec\x01\n" +
 	"\vChatRequest\x12,\n" +
 	"\x0fconversation_id\x18\x01 \x01(\tH\x00R\x0econversationId\x88\x01\x01\x12\x18\n" +
 	"\amessage\x18\x02 \x01(\tR\amessage\x12(\n" +
-	"\rsystem_prompt\x18\x03 \x01(\tH\x01R\fsystemPrompt\x88\x01\x01B\x12\n" +
+	"\rsystem_prompt\x18\x03 \x01(\tH\x01R\fsystemPrompt\x88\x01\x01\x12/\n" +
+	"\x11client_request_id\x18\x04 \x01(\tH\x02R\x0fclientRequestId\x88\x01\x01B\x12\n" +
 	"\x10_conversation_idB\x10\n" +
-	"\x0e_system_prompt\"\xc0\x01\n" +
+	"\x0e_system_promptB\x14\n" +
+	"\x12_client_request_id\"\xc0\x01\n" +
 	"\tChatReply\x12;\n" +
 	"\fconversation\x18\x01 \x01(\v2\x17.aichat.v1.ConversationR\fconversation\x125\n" +
 	"\fuser_message\x18\x02 \x01(\v2\x12.aichat.v1.MessageR\vuserMessage\x12?\n" +
-	"\x11assistant_message\x18\x03 \x01(\v2\x12.aichat.v1.MessageR\x10assistantMessage\"x\n" +
+	"\x11assistant_message\x18\x03 \x01(\v2\x12.aichat.v1.MessageR\x10assistantMessage\"\xf3\x01\n" +
 	"\x1eCreateKnowledgeDocumentRequest\x12\x14\n" +
-	"\x05title\x18\x01 \x01(\tR\x05title\x12\x18\n" +
-	"\acontent\x18\x02 \x01(\tR\acontent\x12\x1b\n" +
-	"\x06source\x18\x03 \x01(\tH\x00R\x06source\x88\x01\x01B\t\n" +
-	"\a_source\"\x1f\n" +
-	"\x1dListKnowledgeDocumentsRequest2\xb7\x06\n" +
+	"\x05title\x18\x01 \x01(\tR\x05title\x12\x1d\n" +
+	"\acontent\x18\x02 \x01(\tH\x00R\acontent\x88\x01\x01\x12\x1b\n" +
+	"\x06source\x18\x03 \x01(\tH\x01R\x06source\x88\x01\x01\x12.\n" +
+	"\x10object_reference\x18\x04 \x01(\tH\x02R\x0fobjectReference\x88\x01\x01\x12#\n" +
+	"\rmetadata_json\x18\x05 \x01(\tR\fmetadataJsonB\n" +
+	"\n" +
+	"\b_contentB\t\n" +
+	"\a_sourceB\x13\n" +
+	"\x11_object_reference\"]\n" +
+	"\x1cCreateKnowledgeDocumentReply\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x16\n" +
+	"\x06status\x18\x02 \x01(\tR\x06status\x12\x15\n" +
+	"\x06job_id\x18\x03 \x01(\tR\x05jobId\"\xc5\x01\n" +
+	"\x1dListKnowledgeDocumentsRequest\x12\x12\n" +
+	"\x04page\x18\x01 \x01(\x05R\x04page\x12\x1b\n" +
+	"\tpage_size\x18\x02 \x01(\x05R\bpageSize\x12\x1b\n" +
+	"\x06status\x18\x03 \x01(\tH\x00R\x06status\x88\x01\x01\x12\x19\n" +
+	"\x05query\x18\x04 \x01(\tH\x01R\x05query\x88\x01\x01\x12\x1b\n" +
+	"\x06cursor\x18\x05 \x01(\tH\x02R\x06cursor\x88\x01\x01B\t\n" +
+	"\a_statusB\b\n" +
+	"\x06_queryB\t\n" +
+	"\a_cursor\">\n" +
+	"\x1bGetKnowledgeDocumentRequest\x12\x1f\n" +
+	"\vdocument_id\x18\x01 \x01(\tR\n" +
+	"documentId\"\xca\x01\n" +
+	"\x1eUpdateKnowledgeDocumentRequest\x12\x1f\n" +
+	"\vdocument_id\x18\x01 \x01(\tR\n" +
+	"documentId\x12\x19\n" +
+	"\x05title\x18\x02 \x01(\tH\x00R\x05title\x88\x01\x01\x12\x1b\n" +
+	"\x06source\x18\x03 \x01(\tH\x01R\x06source\x88\x01\x01\x12(\n" +
+	"\rmetadata_json\x18\x04 \x01(\tH\x02R\fmetadataJson\x88\x01\x01B\b\n" +
+	"\x06_titleB\t\n" +
+	"\a_sourceB\x10\n" +
+	"\x0e_metadata_json\"A\n" +
+	"\x1eDeleteKnowledgeDocumentRequest\x12\x1f\n" +
+	"\vdocument_id\x18\x01 \x01(\tR\n" +
+	"documentId\"B\n" +
+	"\x1fReindexKnowledgeDocumentRequest\x12\x1f\n" +
+	"\vdocument_id\x18\x01 \x01(\tR\n" +
+	"documentId\"N\n" +
+	"\x1dReindexKnowledgeDocumentReply\x12\x15\n" +
+	"\x06job_id\x18\x01 \x01(\tR\x05jobId\x12\x16\n" +
+	"\x06status\x18\x02 \x01(\tR\x06status\"/\n" +
+	"\x16GetKnowledgeJobRequest\x12\x15\n" +
+	"\x06job_id\x18\x01 \x01(\tR\x05jobId2\xaa\f\n" +
 	"\rAIChatService\x12R\n" +
 	"\x06Health\x12\x18.aichat.v1.HealthRequest\x1a\x16.aichat.v1.HealthReply\"\x16\x82\xd3\xe4\x93\x02\x10\x12\x0e/api/v1/health\x12u\n" +
 	"\x12CreateConversation\x12$.aichat.v1.CreateConversationRequest\x1a\x17.aichat.v1.Conversation\" \x82\xd3\xe4\x93\x02\x1a:\x01*\"\x15/api/v1/conversations\x12s\n" +
 	"\x11ListConversations\x12#.aichat.v1.ListConversationsRequest\x1a\x1a.aichat.v1.ConversationSet\"\x1d\x82\xd3\xe4\x93\x02\x17\x12\x15/api/v1/conversations\x12\x7f\n" +
 	"\fListMessages\x12\x1e.aichat.v1.ListMessagesRequest\x1a\x15.aichat.v1.MessageSet\"8\x82\xd3\xe4\x93\x022\x120/api/v1/conversations/{conversation_id}/messages\x12M\n" +
-	"\x04Chat\x12\x16.aichat.v1.ChatRequest\x1a\x14.aichat.v1.ChatReply\"\x17\x82\xd3\xe4\x93\x02\x11:\x01*\"\f/api/v1/chat\x12\x8a\x01\n" +
-	"\x17CreateKnowledgeDocument\x12).aichat.v1.CreateKnowledgeDocumentRequest\x1a\x1c.aichat.v1.KnowledgeDocument\"&\x82\xd3\xe4\x93\x02 :\x01*\"\x1b/api/v1/knowledge/documents\x12\x88\x01\n" +
-	"\x16ListKnowledgeDocuments\x12(.aichat.v1.ListKnowledgeDocumentsRequest\x1a\x1f.aichat.v1.KnowledgeDocumentSet\"#\x82\xd3\xe4\x93\x02\x1d\x12\x1b/api/v1/knowledge/documentsB'Z%emo-ai-service/api/aichat/v1;aichatv1b\x06proto3"
+	"\x04Chat\x12\x16.aichat.v1.ChatRequest\x1a\x14.aichat.v1.ChatReply\"\x17\x82\xd3\xe4\x93\x02\x11:\x01*\"\f/api/v1/chat\x12\x95\x01\n" +
+	"\x17CreateKnowledgeDocument\x12).aichat.v1.CreateKnowledgeDocumentRequest\x1a'.aichat.v1.CreateKnowledgeDocumentReply\"&\x82\xd3\xe4\x93\x02 :\x01*\"\x1b/api/v1/knowledge/documents\x12\x88\x01\n" +
+	"\x16ListKnowledgeDocuments\x12(.aichat.v1.ListKnowledgeDocumentsRequest\x1a\x1f.aichat.v1.KnowledgeDocumentSet\"#\x82\xd3\xe4\x93\x02\x1d\x12\x1b/api/v1/knowledge/documents\x12\x8f\x01\n" +
+	"\x14GetKnowledgeDocument\x12&.aichat.v1.GetKnowledgeDocumentRequest\x1a\x1c.aichat.v1.KnowledgeDocument\"1\x82\xd3\xe4\x93\x02+\x12)/api/v1/knowledge/documents/{document_id}\x12\x98\x01\n" +
+	"\x17UpdateKnowledgeDocument\x12).aichat.v1.UpdateKnowledgeDocumentRequest\x1a\x1c.aichat.v1.KnowledgeDocument\"4\x82\xd3\xe4\x93\x02.:\x01*2)/api/v1/knowledge/documents/{document_id}\x12\x8f\x01\n" +
+	"\x17DeleteKnowledgeDocument\x12).aichat.v1.DeleteKnowledgeDocumentRequest\x1a\x16.google.protobuf.Empty\"1\x82\xd3\xe4\x93\x02+*)/api/v1/knowledge/documents/{document_id}\x12\xae\x01\n" +
+	"\x18ReindexKnowledgeDocument\x12*.aichat.v1.ReindexKnowledgeDocumentRequest\x1a(.aichat.v1.ReindexKnowledgeDocumentReply\"<\x82\xd3\xe4\x93\x026:\x01*\"1/api/v1/knowledge/documents/{document_id}:reindex\x12v\n" +
+	"\x0fGetKnowledgeJob\x12!.aichat.v1.GetKnowledgeJobRequest\x1a\x17.aichat.v1.KnowledgeJob\"'\x82\xd3\xe4\x93\x02!\x12\x1f/api/v1/knowledge/jobs/{job_id}B'Z%emo-ai-service/api/aichat/v1;aichatv1b\x06proto3"
 
 var (
 	file_aichat_v1_aichat_proto_rawDescOnce sync.Once
@@ -899,50 +1771,71 @@ func file_aichat_v1_aichat_proto_rawDescGZIP() []byte {
 	return file_aichat_v1_aichat_proto_rawDescData
 }
 
-var file_aichat_v1_aichat_proto_msgTypes = make([]protoimpl.MessageInfo, 15)
+var file_aichat_v1_aichat_proto_msgTypes = make([]protoimpl.MessageInfo, 24)
 var file_aichat_v1_aichat_proto_goTypes = []any{
-	(*HealthRequest)(nil),                  // 0: aichat.v1.HealthRequest
-	(*HealthReply)(nil),                    // 1: aichat.v1.HealthReply
-	(*Conversation)(nil),                   // 2: aichat.v1.Conversation
-	(*ConversationSet)(nil),                // 3: aichat.v1.ConversationSet
-	(*Message)(nil),                        // 4: aichat.v1.Message
-	(*MessageSet)(nil),                     // 5: aichat.v1.MessageSet
-	(*KnowledgeDocument)(nil),              // 6: aichat.v1.KnowledgeDocument
-	(*KnowledgeDocumentSet)(nil),           // 7: aichat.v1.KnowledgeDocumentSet
-	(*CreateConversationRequest)(nil),      // 8: aichat.v1.CreateConversationRequest
-	(*ListConversationsRequest)(nil),       // 9: aichat.v1.ListConversationsRequest
-	(*ListMessagesRequest)(nil),            // 10: aichat.v1.ListMessagesRequest
-	(*ChatRequest)(nil),                    // 11: aichat.v1.ChatRequest
-	(*ChatReply)(nil),                      // 12: aichat.v1.ChatReply
-	(*CreateKnowledgeDocumentRequest)(nil), // 13: aichat.v1.CreateKnowledgeDocumentRequest
-	(*ListKnowledgeDocumentsRequest)(nil),  // 14: aichat.v1.ListKnowledgeDocumentsRequest
+	(*HealthRequest)(nil),                   // 0: aichat.v1.HealthRequest
+	(*HealthReply)(nil),                     // 1: aichat.v1.HealthReply
+	(*Conversation)(nil),                    // 2: aichat.v1.Conversation
+	(*ConversationSet)(nil),                 // 3: aichat.v1.ConversationSet
+	(*Message)(nil),                         // 4: aichat.v1.Message
+	(*MessageSet)(nil),                      // 5: aichat.v1.MessageSet
+	(*KnowledgeDocument)(nil),               // 6: aichat.v1.KnowledgeDocument
+	(*KnowledgeDocumentSet)(nil),            // 7: aichat.v1.KnowledgeDocumentSet
+	(*KnowledgeChunk)(nil),                  // 8: aichat.v1.KnowledgeChunk
+	(*KnowledgeJob)(nil),                    // 9: aichat.v1.KnowledgeJob
+	(*CreateConversationRequest)(nil),       // 10: aichat.v1.CreateConversationRequest
+	(*ListConversationsRequest)(nil),        // 11: aichat.v1.ListConversationsRequest
+	(*ListMessagesRequest)(nil),             // 12: aichat.v1.ListMessagesRequest
+	(*ChatRequest)(nil),                     // 13: aichat.v1.ChatRequest
+	(*ChatReply)(nil),                       // 14: aichat.v1.ChatReply
+	(*CreateKnowledgeDocumentRequest)(nil),  // 15: aichat.v1.CreateKnowledgeDocumentRequest
+	(*CreateKnowledgeDocumentReply)(nil),    // 16: aichat.v1.CreateKnowledgeDocumentReply
+	(*ListKnowledgeDocumentsRequest)(nil),   // 17: aichat.v1.ListKnowledgeDocumentsRequest
+	(*GetKnowledgeDocumentRequest)(nil),     // 18: aichat.v1.GetKnowledgeDocumentRequest
+	(*UpdateKnowledgeDocumentRequest)(nil),  // 19: aichat.v1.UpdateKnowledgeDocumentRequest
+	(*DeleteKnowledgeDocumentRequest)(nil),  // 20: aichat.v1.DeleteKnowledgeDocumentRequest
+	(*ReindexKnowledgeDocumentRequest)(nil), // 21: aichat.v1.ReindexKnowledgeDocumentRequest
+	(*ReindexKnowledgeDocumentReply)(nil),   // 22: aichat.v1.ReindexKnowledgeDocumentReply
+	(*GetKnowledgeJobRequest)(nil),          // 23: aichat.v1.GetKnowledgeJobRequest
+	(*emptypb.Empty)(nil),                   // 24: google.protobuf.Empty
 }
 var file_aichat_v1_aichat_proto_depIdxs = []int32{
 	2,  // 0: aichat.v1.ConversationSet.items:type_name -> aichat.v1.Conversation
 	4,  // 1: aichat.v1.MessageSet.items:type_name -> aichat.v1.Message
-	6,  // 2: aichat.v1.KnowledgeDocumentSet.items:type_name -> aichat.v1.KnowledgeDocument
-	2,  // 3: aichat.v1.ChatReply.conversation:type_name -> aichat.v1.Conversation
-	4,  // 4: aichat.v1.ChatReply.user_message:type_name -> aichat.v1.Message
-	4,  // 5: aichat.v1.ChatReply.assistant_message:type_name -> aichat.v1.Message
-	0,  // 6: aichat.v1.AIChatService.Health:input_type -> aichat.v1.HealthRequest
-	8,  // 7: aichat.v1.AIChatService.CreateConversation:input_type -> aichat.v1.CreateConversationRequest
-	9,  // 8: aichat.v1.AIChatService.ListConversations:input_type -> aichat.v1.ListConversationsRequest
-	10, // 9: aichat.v1.AIChatService.ListMessages:input_type -> aichat.v1.ListMessagesRequest
-	11, // 10: aichat.v1.AIChatService.Chat:input_type -> aichat.v1.ChatRequest
-	13, // 11: aichat.v1.AIChatService.CreateKnowledgeDocument:input_type -> aichat.v1.CreateKnowledgeDocumentRequest
-	14, // 12: aichat.v1.AIChatService.ListKnowledgeDocuments:input_type -> aichat.v1.ListKnowledgeDocumentsRequest
-	1,  // 13: aichat.v1.AIChatService.Health:output_type -> aichat.v1.HealthReply
-	2,  // 14: aichat.v1.AIChatService.CreateConversation:output_type -> aichat.v1.Conversation
-	3,  // 15: aichat.v1.AIChatService.ListConversations:output_type -> aichat.v1.ConversationSet
-	5,  // 16: aichat.v1.AIChatService.ListMessages:output_type -> aichat.v1.MessageSet
-	12, // 17: aichat.v1.AIChatService.Chat:output_type -> aichat.v1.ChatReply
-	6,  // 18: aichat.v1.AIChatService.CreateKnowledgeDocument:output_type -> aichat.v1.KnowledgeDocument
-	7,  // 19: aichat.v1.AIChatService.ListKnowledgeDocuments:output_type -> aichat.v1.KnowledgeDocumentSet
-	13, // [13:20] is the sub-list for method output_type
-	6,  // [6:13] is the sub-list for method input_type
-	6,  // [6:6] is the sub-list for extension type_name
-	6,  // [6:6] is the sub-list for extension extendee
-	0,  // [0:6] is the sub-list for field type_name
+	8,  // 2: aichat.v1.KnowledgeDocument.chunks:type_name -> aichat.v1.KnowledgeChunk
+	6,  // 3: aichat.v1.KnowledgeDocumentSet.items:type_name -> aichat.v1.KnowledgeDocument
+	2,  // 4: aichat.v1.ChatReply.conversation:type_name -> aichat.v1.Conversation
+	4,  // 5: aichat.v1.ChatReply.user_message:type_name -> aichat.v1.Message
+	4,  // 6: aichat.v1.ChatReply.assistant_message:type_name -> aichat.v1.Message
+	0,  // 7: aichat.v1.AIChatService.Health:input_type -> aichat.v1.HealthRequest
+	10, // 8: aichat.v1.AIChatService.CreateConversation:input_type -> aichat.v1.CreateConversationRequest
+	11, // 9: aichat.v1.AIChatService.ListConversations:input_type -> aichat.v1.ListConversationsRequest
+	12, // 10: aichat.v1.AIChatService.ListMessages:input_type -> aichat.v1.ListMessagesRequest
+	13, // 11: aichat.v1.AIChatService.Chat:input_type -> aichat.v1.ChatRequest
+	15, // 12: aichat.v1.AIChatService.CreateKnowledgeDocument:input_type -> aichat.v1.CreateKnowledgeDocumentRequest
+	17, // 13: aichat.v1.AIChatService.ListKnowledgeDocuments:input_type -> aichat.v1.ListKnowledgeDocumentsRequest
+	18, // 14: aichat.v1.AIChatService.GetKnowledgeDocument:input_type -> aichat.v1.GetKnowledgeDocumentRequest
+	19, // 15: aichat.v1.AIChatService.UpdateKnowledgeDocument:input_type -> aichat.v1.UpdateKnowledgeDocumentRequest
+	20, // 16: aichat.v1.AIChatService.DeleteKnowledgeDocument:input_type -> aichat.v1.DeleteKnowledgeDocumentRequest
+	21, // 17: aichat.v1.AIChatService.ReindexKnowledgeDocument:input_type -> aichat.v1.ReindexKnowledgeDocumentRequest
+	23, // 18: aichat.v1.AIChatService.GetKnowledgeJob:input_type -> aichat.v1.GetKnowledgeJobRequest
+	1,  // 19: aichat.v1.AIChatService.Health:output_type -> aichat.v1.HealthReply
+	2,  // 20: aichat.v1.AIChatService.CreateConversation:output_type -> aichat.v1.Conversation
+	3,  // 21: aichat.v1.AIChatService.ListConversations:output_type -> aichat.v1.ConversationSet
+	5,  // 22: aichat.v1.AIChatService.ListMessages:output_type -> aichat.v1.MessageSet
+	14, // 23: aichat.v1.AIChatService.Chat:output_type -> aichat.v1.ChatReply
+	16, // 24: aichat.v1.AIChatService.CreateKnowledgeDocument:output_type -> aichat.v1.CreateKnowledgeDocumentReply
+	7,  // 25: aichat.v1.AIChatService.ListKnowledgeDocuments:output_type -> aichat.v1.KnowledgeDocumentSet
+	6,  // 26: aichat.v1.AIChatService.GetKnowledgeDocument:output_type -> aichat.v1.KnowledgeDocument
+	6,  // 27: aichat.v1.AIChatService.UpdateKnowledgeDocument:output_type -> aichat.v1.KnowledgeDocument
+	24, // 28: aichat.v1.AIChatService.DeleteKnowledgeDocument:output_type -> google.protobuf.Empty
+	22, // 29: aichat.v1.AIChatService.ReindexKnowledgeDocument:output_type -> aichat.v1.ReindexKnowledgeDocumentReply
+	9,  // 30: aichat.v1.AIChatService.GetKnowledgeJob:output_type -> aichat.v1.KnowledgeJob
+	19, // [19:31] is the sub-list for method output_type
+	7,  // [7:19] is the sub-list for method input_type
+	7,  // [7:7] is the sub-list for extension type_name
+	7,  // [7:7] is the sub-list for extension extendee
+	0,  // [0:7] is the sub-list for field type_name
 }
 
 func init() { file_aichat_v1_aichat_proto_init() }
@@ -952,15 +1845,19 @@ func file_aichat_v1_aichat_proto_init() {
 	}
 	file_aichat_v1_aichat_proto_msgTypes[4].OneofWrappers = []any{}
 	file_aichat_v1_aichat_proto_msgTypes[6].OneofWrappers = []any{}
-	file_aichat_v1_aichat_proto_msgTypes[11].OneofWrappers = []any{}
+	file_aichat_v1_aichat_proto_msgTypes[7].OneofWrappers = []any{}
+	file_aichat_v1_aichat_proto_msgTypes[9].OneofWrappers = []any{}
 	file_aichat_v1_aichat_proto_msgTypes[13].OneofWrappers = []any{}
+	file_aichat_v1_aichat_proto_msgTypes[15].OneofWrappers = []any{}
+	file_aichat_v1_aichat_proto_msgTypes[17].OneofWrappers = []any{}
+	file_aichat_v1_aichat_proto_msgTypes[19].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_aichat_v1_aichat_proto_rawDesc), len(file_aichat_v1_aichat_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   15,
+			NumMessages:   24,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

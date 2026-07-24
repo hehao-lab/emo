@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -12,14 +13,16 @@ import (
 )
 
 const (
-	AvatarBizType = "avatar"
-	MaxAvatarSize = 5 * 1024 * 1024
+	AvatarBizType        = "avatar"
+	MaxAvatarSize        = 5 * 1024 * 1024
+	MaxKnowledgeFileSize = 20 * 1024 * 1024
 )
 
 var (
-	ErrUnsupportedUpload  = errors.New("unsupported upload type")
-	ErrInvalidAvatar      = errors.New("avatar must be a JPEG, PNG, WebP, or GIF image no larger than 5 MB")
-	ErrFileStorageMissing = errors.New("file storage is not configured")
+	ErrUnsupportedUpload    = errors.New("unsupported upload type")
+	ErrInvalidAvatar        = errors.New("avatar must be a JPEG, PNG, WebP, or GIF image no larger than 5 MB")
+	ErrFileStorageMissing   = errors.New("file storage is not configured")
+	ErrInvalidKnowledgeFile = errors.New("knowledge file must be TXT, Markdown, PDF, or DOCX and no larger than 20 MB")
 )
 
 type FileAsset struct {
@@ -51,6 +54,23 @@ type FileRepo interface {
 	GetFile(ctx context.Context, userID, id int64) (*FileAsset, error)
 	DeleteFile(ctx context.Context, userID, id int64) error
 	UploadAvatar(ctx context.Context, objectKey, mimeType string, content []byte) (string, error)
+	UploadKnowledge(ctx context.Context, objectKey, mimeType string, content []byte) (string, error)
+}
+
+func (uc *FileUsecase) UploadKnowledge(ctx context.Context, userID int64, filename, mimeType string, content []byte) (string, error) {
+	if userID <= 0 || len(content) == 0 || len(content) > MaxKnowledgeFileSize {
+		return "", ErrInvalidKnowledgeFile
+	}
+	extension := strings.ToLower(strings.TrimPrefix(filepath.Ext(filename), "."))
+	allowed := map[string]bool{"txt": true, "md": true, "markdown": true, "pdf": true, "docx": true}
+	if !allowed[extension] {
+		return "", ErrInvalidKnowledgeFile
+	}
+	if strings.TrimSpace(mimeType) == "" {
+		mimeType = "application/octet-stream"
+	}
+	objectKey := fmt.Sprintf("knowledge/%d/%s/%s.%s", userID, time.Now().Format("20060102"), uuid.NewString(), extension)
+	return uc.repo.UploadKnowledge(ctx, objectKey, mimeType, bytes.Clone(content))
 }
 
 type FileUsecase struct {

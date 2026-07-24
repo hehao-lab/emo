@@ -3,8 +3,8 @@ package data
 import (
 	"bytes"
 	"context"
-	"crypto/rand"
 	"crypto/hmac"
+	"crypto/rand"
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/hex"
@@ -33,7 +33,7 @@ type aiChatRepo struct {
 	baseURL string
 	client  *http.Client
 	// streamClient has no whole-request timeout because SSE duration is controlled by context cancellation.
-	streamClient *http.Client
+	streamClient   *http.Client
 	identitySecret []byte
 }
 
@@ -55,7 +55,7 @@ func NewAIChatRepo(c *conf.AIService) biz.AIChatRepo {
 		client: &http.Client{
 			Timeout: protoDurationOrDefault(c.GetTimeout(), 120*time.Second),
 		},
-		streamClient: &http.Client{},
+		streamClient:   &http.Client{},
 		identitySecret: []byte(identitySecret),
 	}
 }
@@ -101,9 +101,9 @@ func (r *aiChatRepo) ListMessages(ctx context.Context, userID string, conversati
 func (r *aiChatRepo) Chat(ctx context.Context, req *biz.AIChatRequest) (*biz.AIChatReply, error) {
 	var out chatReplyPO
 	if err := r.doJSON(ctx, http.MethodPost, "/api/v1/chat", req.UpstreamUserID, chatRequestPO{
-		ConversationID: req.ConversationID,
-		Message:        req.Message,
-		SystemPrompt:   req.SystemPrompt,
+		ConversationID:  req.ConversationID,
+		Message:         req.Message,
+		SystemPrompt:    req.SystemPrompt,
 		ClientRequestID: optionalStringPO(req.ClientRequestID),
 	}, &out); err != nil {
 		return nil, err
@@ -114,9 +114,9 @@ func (r *aiChatRepo) Chat(ctx context.Context, req *biz.AIChatRequest) (*biz.AIC
 // StreamChat opens the upstream POST SSE response and returns its body for pass-through.
 func (r *aiChatRepo) StreamChat(ctx context.Context, req *biz.AIChatRequest) (*biz.AIChatStream, error) {
 	body, err := json.Marshal(chatRequestPO{
-		ConversationID: req.ConversationID,
-		Message:        req.Message,
-		SystemPrompt:   req.SystemPrompt,
+		ConversationID:  req.ConversationID,
+		Message:         req.Message,
+		SystemPrompt:    req.SystemPrompt,
 		ClientRequestID: optionalStringPO(req.ClientRequestID),
 	})
 	if err != nil {
@@ -370,37 +370,37 @@ func (p conversationSetPO) toBiz() []*biz.AIConversation {
 
 // messagePO is the downstream message shape owned by data.
 type messagePO struct {
-	ID             string  `json:"id"`
-	ConversationID string  `json:"conversation_id"`
-	Role           string  `json:"role"`
-	Content        string  `json:"content"`
-	Sequence       int32   `json:"sequence"`
-	ModelName      *string `json:"model_name"`
+	ID                string  `json:"id"`
+	ConversationID    string  `json:"conversation_id"`
+	Role              string  `json:"role"`
+	Content           string  `json:"content"`
+	Sequence          int32   `json:"sequence"`
+	ModelName         *string `json:"model_name"`
 	ProviderRequestID *string `json:"provider_request_id"`
-	RequestID      *string `json:"request_id"`
-	ClientRequestID *string `json:"client_request_id"`
-	TurnStatus     string `json:"turn_status"`
-	ReferencesJSON *string `json:"references_json"`
-	UsageJSON      *string `json:"usage_json"`
-	CreatedAt      string  `json:"created_at"`
+	RequestID         *string `json:"request_id"`
+	ClientRequestID   *string `json:"client_request_id"`
+	TurnStatus        string  `json:"turn_status"`
+	ReferencesJSON    *string `json:"references_json"`
+	UsageJSON         *string `json:"usage_json"`
+	CreatedAt         string  `json:"created_at"`
 }
 
 // toBiz converts a downstream message into the biz domain shape.
 func (p messagePO) toBiz() *biz.AIMessage {
 	return &biz.AIMessage{
-		ID:             p.ID,
-		ConversationID: p.ConversationID,
-		Role:           p.Role,
-		Content:        p.Content,
-		Sequence:       p.Sequence,
-		ModelName:      p.ModelName,
+		ID:                p.ID,
+		ConversationID:    p.ConversationID,
+		Role:              p.Role,
+		Content:           p.Content,
+		Sequence:          p.Sequence,
+		ModelName:         p.ModelName,
 		ProviderRequestID: p.ProviderRequestID,
-		RequestID:      p.RequestID,
-		ClientRequestID: p.ClientRequestID,
-		TurnStatus:     p.TurnStatus,
-		ReferencesJSON: stringValuePO(p.ReferencesJSON, "[]"),
-		UsageJSON:      stringValuePO(p.UsageJSON, "{}"),
-		CreatedAt:      p.CreatedAt,
+		RequestID:         p.RequestID,
+		ClientRequestID:   p.ClientRequestID,
+		TurnStatus:        p.TurnStatus,
+		ReferencesJSON:    stringValuePO(p.ReferencesJSON, "[]"),
+		UsageJSON:         stringValuePO(p.UsageJSON, "{}"),
+		CreatedAt:         p.CreatedAt,
 	}
 }
 
@@ -420,9 +420,9 @@ func (p messageSetPO) toBiz() []*biz.AIMessage {
 
 // chatRequestPO is the JSON payload expected by FastAPI chat endpoints.
 type chatRequestPO struct {
-	ConversationID *string `json:"conversation_id,omitempty"`
-	Message        string  `json:"message"`
-	SystemPrompt   *string `json:"system_prompt,omitempty"`
+	ConversationID  *string `json:"conversation_id,omitempty"`
+	Message         string  `json:"message"`
+	SystemPrompt    *string `json:"system_prompt,omitempty"`
 	ClientRequestID *string `json:"client_request_id,omitempty"`
 }
 

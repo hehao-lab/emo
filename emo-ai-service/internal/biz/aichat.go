@@ -27,19 +27,19 @@ type AIConversation struct {
 
 // AIMessage is the domain shape for a persisted chat message.
 type AIMessage struct {
-	ID             string
-	ConversationID string
-	Role           string
-	Content        string
-	Sequence       int32
-	ModelName      *string
+	ID                string
+	ConversationID    string
+	Role              string
+	Content           string
+	Sequence          int32
+	ModelName         *string
 	ProviderRequestID *string
-	RequestID      *string
-	ClientRequestID *string
-	TurnStatus     string
-	ReferencesJSON string
-	UsageJSON      string
-	CreatedAt      string
+	RequestID         *string
+	ClientRequestID   *string
+	TurnStatus        string
+	ReferencesJSON    string
+	UsageJSON         string
+	CreatedAt         string
 }
 
 // AIKnowledgeDocument is the domain shape for a knowledge-base document summary.
@@ -102,14 +102,14 @@ type AIKnowledgeListOptions struct {
 // UserID is the Kratos user identity. UpstreamUserID is used only to construct
 // the signed internal assertion accepted by the model service.
 type AIChatRequest struct {
-	UserID         int64
-	UpstreamUserID string
-	ConversationID *string
-	Message        string
-	SystemPrompt   *string
+	UserID          int64
+	UpstreamUserID  string
+	ConversationID  *string
+	Message         string
+	SystemPrompt    *string
 	ClientRequestID string
-	IdempotencyKey string
-	Traceparent    string
+	IdempotencyKey  string
+	Traceparent     string
 }
 
 // AIChatReply is the full response from the non-streaming chat endpoint.
@@ -121,13 +121,13 @@ type AIChatReply struct {
 
 // AICreateKnowledgeDocument carries the text that FastAPI should index.
 type AICreateKnowledgeDocument struct {
-	UserID         int64
-	UpstreamUserID string
-	Title          string
-	Content        *string
-	Source         *string
+	UserID          int64
+	UpstreamUserID  string
+	Title           string
+	Content         *string
+	Source          *string
 	ObjectReference *string
-	MetadataJSON   string
+	MetadataJSON    string
 }
 
 type AICreateKnowledgeDocumentReply struct {
@@ -180,19 +180,19 @@ type AIChatRepo interface {
 // AIChatUsecase validates BFF-level input, proxies model work to FastAPI,
 // and stores the frontend-facing chat history in the local chat tables.
 type AIChatUsecase struct {
-	repo     AIChatRepo
-	chatRepo ChatRepo
-	turnLocks sync.Map
-	dailyTokenLimit int64
+	repo                 AIChatRepo
+	chatRepo             ChatRepo
+	turnLocks            sync.Map
+	dailyTokenLimit      int64
 	dailyCostMicrosLimit int64
 }
 
 // NewAIChatUsecase 构建 AI 聊天应用场景。
 func NewAIChatUsecase(repo AIChatRepo, chatRepo ChatRepo) *AIChatUsecase {
 	return &AIChatUsecase{
-		repo: repo,
-		chatRepo: chatRepo,
-		dailyTokenLimit: envInt64("EMO_AI_DAILY_TOKEN_LIMIT"),
+		repo:                 repo,
+		chatRepo:             chatRepo,
+		dailyTokenLimit:      envInt64("EMO_AI_DAILY_TOKEN_LIMIT"),
 		dailyCostMicrosLimit: envInt64("EMO_AI_DAILY_COST_MICROS_LIMIT"),
 	}
 }
@@ -351,14 +351,14 @@ func (uc *AIChatUsecase) StreamChat(ctx context.Context, req *AIChatRequest) (*A
 		releaseRequest()
 	}
 	userMessage, err := uc.chatRepo.CreateMessage(ctx, &ChatMessage{
-		SessionID:   session.ID,
-		UserID:      req.UserID,
-		Role:        "user",
-		Content:     strings.TrimSpace(req.Message),
-		ContentType: "text",
-		Status:      "completed",
-		ClientRequestID: optionalString(req.ClientRequestID),
-		IdempotencyKey: optionalString(req.IdempotencyKey),
+		SessionID:          session.ID,
+		UserID:             req.UserID,
+		Role:               "user",
+		Content:            strings.TrimSpace(req.Message),
+		ContentType:        "text",
+		Status:             "completed",
+		ClientRequestID:    optionalString(req.ClientRequestID),
+		IdempotencyKey:     optionalString(req.IdempotencyKey),
 		RequestPayloadHash: requestHash,
 	})
 	if err != nil {
@@ -366,17 +366,17 @@ func (uc *AIChatUsecase) StreamChat(ctx context.Context, req *AIChatRequest) (*A
 		return nil, err
 	}
 	assistantMessage, err := uc.chatRepo.CreateMessage(ctx, &ChatMessage{
-		SessionID:       session.ID,
-		UserID:          req.UserID,
-		Role:            "assistant",
-		Content:         "",
-		ContentType:     "text",
-		Status:          "pending",
-		ClientRequestID: optionalString(req.ClientRequestID),
-		IdempotencyKey:  optionalString(req.IdempotencyKey),
+		SessionID:          session.ID,
+		UserID:             req.UserID,
+		Role:               "assistant",
+		Content:            "",
+		ContentType:        "text",
+		Status:             "pending",
+		ClientRequestID:    optionalString(req.ClientRequestID),
+		IdempotencyKey:     optionalString(req.IdempotencyKey),
 		RequestPayloadHash: requestHash,
-		ReferencesJSON:  "[]",
-		UsageJSON:       "{}",
+		ReferencesJSON:     "[]",
+		UsageJSON:          "{}",
 	})
 	if err != nil {
 		releaseLocks()
@@ -552,11 +552,11 @@ func (uc *AIChatUsecase) copyAndPersistSSE(ctx context.Context, source io.ReadCl
 	defer release()
 
 	state := &ssePersistState{
-		ctx:       context.WithoutCancel(ctx),
+		ctx:        context.WithoutCancel(ctx),
 		requestCtx: ctx,
-		uc:        uc,
-		session:   session,
-		assistant: assistant,
+		uc:         uc,
+		session:    session,
+		assistant:  assistant,
 	}
 	defer state.finishIfNeeded()
 	reader := bufio.NewReader(source)
@@ -657,22 +657,22 @@ func (s *ssePersistState) writeEvent(writer io.Writer, lines []string) error {
 		turnStatus = "completed"
 	}
 	assistantMessage, err := s.uc.chatRepo.UpdateMessage(s.ctx, &ChatMessage{
-		ID:              s.assistant.ID,
-		UserID:          s.assistant.UserID,
-		Content:         assistantContent,
-		Model:           stringFromPayload(payload, "model_name"),
-		Status:          turnStatus,
-		RequestID:       stringFromPayload(payload, "request_id"),
-		Provider:        stringFromPayload(payload, "provider"),
+		ID:                s.assistant.ID,
+		UserID:            s.assistant.UserID,
+		Content:           assistantContent,
+		Model:             stringFromPayload(payload, "model_name"),
+		Status:            turnStatus,
+		RequestID:         stringFromPayload(payload, "request_id"),
+		Provider:          stringFromPayload(payload, "provider"),
 		ProviderRequestID: stringFromPayload(payload, "provider_request_id"),
-		ReferencesJSON:  referencesJSON,
-		UsageJSON:       usageJSON,
-		PromptTokens:    usage.PromptTokens,
-		CompletionTokens: usage.CompletionTokens,
-		TotalTokens:     usage.TotalTokens,
-		CachedTokens:    usage.CachedTokens,
-		CostMicros:      usage.CostMicros,
-		LatencyMS:       int32FromPayload(payload, "latency_ms"),
+		ReferencesJSON:    referencesJSON,
+		UsageJSON:         usageJSON,
+		PromptTokens:      usage.PromptTokens,
+		CompletionTokens:  usage.CompletionTokens,
+		TotalTokens:       usage.TotalTokens,
+		CachedTokens:      usage.CachedTokens,
+		CostMicros:        usage.CostMicros,
+		LatencyMS:         int32FromPayload(payload, "latency_ms"),
 	})
 	if err != nil {
 		return err
@@ -1008,18 +1008,18 @@ func localAIMessage(message *ChatMessage) *AIMessage {
 		return nil
 	}
 	return &AIMessage{
-		ID:             strconv.FormatInt(message.ID, 10),
-		ConversationID: strconv.FormatInt(message.SessionID, 10),
-		Role:           message.Role,
-		Content:        message.Content,
-		ModelName:      optionalString(message.Model),
+		ID:                strconv.FormatInt(message.ID, 10),
+		ConversationID:    strconv.FormatInt(message.SessionID, 10),
+		Role:              message.Role,
+		Content:           message.Content,
+		ModelName:         optionalString(message.Model),
 		ProviderRequestID: optionalString(message.ProviderRequestID),
-		RequestID:      optionalString(message.RequestID),
-		ClientRequestID: message.ClientRequestID,
-		TurnStatus:     message.Status,
-		ReferencesJSON: jsonArrayString(message.ReferencesJSON),
-		UsageJSON:      jsonObjectString(message.UsageJSON),
-		CreatedAt:      formatUnixTime(message.CreatedAt),
+		RequestID:         optionalString(message.RequestID),
+		ClientRequestID:   message.ClientRequestID,
+		TurnStatus:        message.Status,
+		ReferencesJSON:    jsonArrayString(message.ReferencesJSON),
+		UsageJSON:         jsonObjectString(message.UsageJSON),
+		CreatedAt:         formatUnixTime(message.CreatedAt),
 	}
 }
 

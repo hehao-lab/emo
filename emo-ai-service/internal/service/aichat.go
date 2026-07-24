@@ -95,11 +95,11 @@ func (s *AIChatService) Chat(ctx context.Context, req *v1.ChatRequest) (*v1.Chat
 		return nil, kerrors.Forbidden("SYSTEM_PROMPT_FORBIDDEN", "system prompt is restricted to administrators")
 	}
 	reply, err := s.uc.Chat(ctx, &biz.AIChatRequest{
-		UserID:         userID,
-		UpstreamUserID: upstreamUserID(userID),
-		ConversationID: req.ConversationId,
-		Message:        req.GetMessage(),
-		SystemPrompt:   req.SystemPrompt,
+		UserID:          userID,
+		UpstreamUserID:  upstreamUserID(userID),
+		ConversationID:  req.ConversationId,
+		Message:         req.GetMessage(),
+		SystemPrompt:    req.SystemPrompt,
 		ClientRequestID: req.GetClientRequestId(),
 	})
 	if err != nil {
@@ -119,13 +119,13 @@ func (s *AIChatService) CreateKnowledgeDocument(ctx context.Context, req *v1.Cre
 		return nil, err
 	}
 	reply, err := s.uc.CreateKnowledgeDocument(ctx, &biz.AICreateKnowledgeDocument{
-		UserID:         userID,
-		UpstreamUserID: upstreamUserID(userID),
-		Title:          req.GetTitle(),
-		Content:        req.Content,
-		Source:         req.Source,
+		UserID:          userID,
+		UpstreamUserID:  upstreamUserID(userID),
+		Title:           req.GetTitle(),
+		Content:         req.Content,
+		Source:          req.Source,
 		ObjectReference: req.ObjectReference,
-		MetadataJSON:   req.GetMetadataJson(),
+		MetadataJSON:    req.GetMetadataJson(),
 	})
 	if err != nil {
 		return nil, err
@@ -240,19 +240,19 @@ func toAIMessageDTO(in *biz.AIMessage) *v1.Message {
 		return nil
 	}
 	return &v1.Message{
-		Id:             in.ID,
-		ConversationId: in.ConversationID,
-		Role:           in.Role,
-		Content:        in.Content,
-		Sequence:       in.Sequence,
-		ModelName:      in.ModelName,
+		Id:                in.ID,
+		ConversationId:    in.ConversationID,
+		Role:              in.Role,
+		Content:           in.Content,
+		Sequence:          in.Sequence,
+		ModelName:         in.ModelName,
 		ProviderRequestId: in.ProviderRequestID,
-		RequestId:      in.RequestID,
-		ClientRequestId: in.ClientRequestID,
-		TurnStatus:     in.TurnStatus,
-		ReferencesJson: in.ReferencesJSON,
-		UsageJson:      in.UsageJSON,
-		CreatedAt:      in.CreatedAt,
+		RequestId:         in.RequestID,
+		ClientRequestId:   in.ClientRequestID,
+		TurnStatus:        in.TurnStatus,
+		ReferencesJson:    in.ReferencesJSON,
+		UsageJson:         in.UsageJSON,
+		CreatedAt:         in.CreatedAt,
 	}
 }
 
@@ -266,22 +266,22 @@ func toAIKnowledgeDocumentDTO(in *biz.AIKnowledgeDocument) *v1.KnowledgeDocument
 		chunks = append(chunks, &v1.KnowledgeChunk{Id: chunk.ID, Content: chunk.Content, Sequence: chunk.Sequence})
 	}
 	return &v1.KnowledgeDocument{
-		Id:         in.ID,
-		Title:      in.Title,
-		Source:     in.Source,
-		ChunkCount: in.ChunkCount,
-		CreatedAt:  in.CreatedAt,
-		Status: in.Status,
-		Progress: in.Progress,
-		ErrorCode: in.ErrorCode,
-		ErrorDetail: in.ErrorDetail,
-		IndexVersion: in.IndexVersion,
-		EmbeddingModel: in.EmbeddingModel,
+		Id:                 in.ID,
+		Title:              in.Title,
+		Source:             in.Source,
+		ChunkCount:         in.ChunkCount,
+		CreatedAt:          in.CreatedAt,
+		Status:             in.Status,
+		Progress:           in.Progress,
+		ErrorCode:          in.ErrorCode,
+		ErrorDetail:        in.ErrorDetail,
+		IndexVersion:       in.IndexVersion,
+		EmbeddingModel:     in.EmbeddingModel,
 		EmbeddingDimension: in.EmbeddingDimension,
-		UpdatedAt: in.UpdatedAt,
-		MetadataJson: in.MetadataJSON,
-		Preview: in.Preview,
-		Chunks: chunks,
+		UpdatedAt:          in.UpdatedAt,
+		MetadataJson:       in.MetadataJSON,
+		Preview:            in.Preview,
+		Chunks:             chunks,
 	}
 }
 
