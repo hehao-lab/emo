@@ -1,0 +1,44 @@
+# Emo AI Service 配置模板
+# =======================
+# 复制此文件为 config.yaml 并根据你的环境修改。
+# 生产环境建议全部通过环境变量注入，不依赖文件中的默认值。
+#
+# 用法:
+#   cp configs/config.example.yaml configs/config.yaml  (复制后修改)
+#   go run ./cmd/emo-ai-service -conf ./configs          (启动)
+
+server:
+  http:
+    network: tcp
+    addr: 0.0.0.0:8000       # HTTP 监听地址
+    timeout: 0s               # 0 = 不超时（SSE 长连接需要）
+  grpc:
+    network: tcp
+    addr: 0.0.0.0:9000       # gRPC 监听地址
+    timeout: 30s
+
+data:
+  database:
+    driver: mysql
+    # DSN 格式: user:password@tcp(host:port)/dbname?charset=utf8mb4&parseTime=True&loc=Local
+    # 通过环境变量覆盖: EMO_DATABASE_SOURCE
+    source: ${EMO_DATABASE_SOURCE:root:root123456@tcp(127.0.0.1:3306)/emo_ai?charset=utf8mb4&parseTime=True&loc=Local}
+  redis:
+    network: tcp
+    # 通过环境变量覆盖: EMO_REDIS_ADDR / EMO_REDIS_PASSWORD
+    addr: ${EMO_REDIS_ADDR:127.0.0.1:6379}
+    read_timeout: 3s
+    write_timeout: 3s
+
+auth:
+  # ⚠️ production 环境务必通过 EMO_JWT_SECRET 设置安全随机密钥，否则启动直接 panic
+  # 生成方式: openssl rand -base64 64
+  jwt_secret: ${EMO_JWT_SECRET:please-change-this-secret-in-production}
+  access_token_ttl: 7200s        # 访问令牌有效期 2 小时
+  refresh_token_ttl: 2592000s    # 刷新令牌有效期 30 天
+  issuer: emo-ai-service
+
+ai_service:
+  # 下游 FastAPI AI 服务地址。不配不影响启动，但聊天功能不可用。
+  base_url: ${EMO_AI_SERVICE_BASE_URL:http://127.0.0.1:8000}
+  timeout: 120s

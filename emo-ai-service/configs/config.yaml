@@ -10,18 +10,21 @@ server:
 data:
   database:
     driver: mysql
-    source: ${EMO_DATABASE_SOURCE:emo_app:root123456789@tcp(121.43.33.200:3306)/emo_ai?charset=utf8mb4&parseTime=True&loc=Local}
+    # ⚠️ 本地开发请用环境变量覆盖: $env:EMO_DATABASE_SOURCE = "root:你的密码@tcp(127.0.0.1:3306)/emo_ai?..."
+    source: ${EMO_DATABASE_SOURCE:root:root123456@tcp(127.0.0.1:3306)/emo_ai?charset=utf8mb4&parseTime=True&loc=Local}
   redis:
     network: tcp
+    # ⚠️ 如果 Redis 不在本机或有密码，请用环境变量覆盖: $env:EMO_REDIS_ADDR / $env:EMO_REDIS_PASSWORD
     addr: ${EMO_REDIS_ADDR:127.0.0.1:6379}
     read_timeout: 3s
     write_timeout: 3s
-    #password: "123456789"
 auth:
+  # ⚠️ production 环境必须通过 EMO_JWT_SECRET 设置为安全随机字符串，否则会 panic
   jwt_secret: ${EMO_JWT_SECRET:please-change-this-secret-in-production}
   access_token_ttl: 7200s
   refresh_token_ttl: 2592000s
   issuer: emo-ai-service
 ai_service:
-  base_url: ${EMO_AI_SERVICE_BASE_URL:http://192.168.31.155:8000}
+  # ⚠️ 本地开发如果没有 AI 服务，不影响启动（聊天功能不可用）
+  base_url: ${EMO_AI_SERVICE_BASE_URL:http://127.0.0.1:8000}
   timeout: 120s
