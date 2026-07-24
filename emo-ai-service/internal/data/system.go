@@ -139,7 +139,7 @@ func (r *systemRepoImpl) ListAnnouncements(ctx context.Context, platform string)
 	return out, nil
 }
 
-func decodeConfigString(value string) string {
+func trimJSONQuote(value string) string {
 	var decoded string
 	if err := json.Unmarshal([]byte(value), &decoded); err == nil {
 		return decoded

@@ -63,7 +63,10 @@ func wireApp(confServer *conf.Server, confData *conf.Data, confAuth *conf.Auth, 
 	fileRepo := data.NewFileRepo(dataData)
 	fileUsecase := biz.NewFileUsecase(fileRepo)
 	fileService := service.NewFileService(fileUsecase)
-	httpServer := server.NewHTTPServer(confServer, tokenManager, userService, profileService, securityService, diaryService, chatService, aiChatService, emotionService, systemService, fileService)
+	adminRepo := data.NewAdminRepo(dataData)
+	adminUsecase := biz.NewAdminUsecase(adminRepo)
+	adminService := service.NewAdminService(adminUsecase)
+	httpServer := server.NewHTTPServer(confServer, tokenManager, userService, profileService, securityService, diaryService, chatService, aiChatService, emotionService, systemService, fileService, adminService)
 	app := newApp(logger, grpcServer, httpServer)
 	return app, func() {
 		cleanup()

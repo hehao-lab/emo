@@ -1,6 +1,7 @@
 package server
 
 import (
+	adminv1 "emo-ai-service/api/admin/v1"
 	aichatv1 "emo-ai-service/api/aichat/v1"
 	chatv1 "emo-ai-service/api/chat/v1"
 	diaryv1 "emo-ai-service/api/diary/v1"
@@ -33,6 +34,7 @@ func NewHTTPServer(
 	emotionSvc *service.EmotionService,
 	systemSvc *service.SystemService,
 	fileSvc *service.FileService,
+	adminSvc *service.AdminService,
 ) *http.Server {
 	publicOperations := map[string]bool{
 		userv1.OperationUserServiceSendRegisterEmailCode: true,
@@ -81,6 +83,7 @@ func NewHTTPServer(
 	srv.HandleFunc("/v1/files/knowledge", func(w nethttp.ResponseWriter, r *nethttp.Request) {
 		fileSvc.UploadKnowledgeHTTP(w, r, tokenManager)
 	})
+	adminv1.RegisterAdminServiceHTTPServer(srv, adminSvc)
 	return srv
 }
 

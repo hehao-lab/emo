@@ -1,0 +1,387 @@
+syntax = "proto3";
+
+package admin.v1;
+
+option go_package = "emo-ai-service/api/admin/v1;v1";
+
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+
+service AdminService {
+  rpc GetDashboardOverview(GetDashboardOverviewRequest) returns (DashboardOverview) {
+    option (google.api.http) = { get: "/v1/admin/dashboard/overview" };
+  }
+  rpc GetDashboardTrends(GetDashboardTrendsRequest) returns (DashboardTrends) {
+    option (google.api.http) = { get: "/v1/admin/dashboard/trends" };
+  }
+
+  rpc ListUsers(ListUsersRequest) returns (ListUsersResponse) {
+    option (google.api.http) = { get: "/v1/admin/users" };
+  }
+  rpc GetUser(GetUserRequest) returns (AdminUser) {
+    option (google.api.http) = { get: "/v1/admin/users/{user_id}" };
+  }
+  rpc UpdateUserStatus(UpdateUserStatusRequest) returns (AdminUser) {
+    option (google.api.http) = { patch: "/v1/admin/users/{user_id}/status" body: "*" };
+  }
+  rpc UpdateUserRoles(UpdateUserRolesRequest) returns (AdminUser) {
+    option (google.api.http) = { patch: "/v1/admin/users/{user_id}/roles" body: "*" };
+  }
+  rpc UpdateUserPassword(UpdateUserPasswordRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = { patch: "/v1/admin/users/{user_id}/password" body: "*" };
+  }
+
+  rpc ListDiaries(ListDiariesRequest) returns (ListDiariesResponse) {
+    option (google.api.http) = { get: "/v1/admin/diaries" };
+  }
+  rpc GetDiary(GetDiaryRequest) returns (AdminDiary) {
+    option (google.api.http) = { get: "/v1/admin/diaries/{id}" };
+  }
+  rpc DeleteDiary(DeleteDiaryRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = { delete: "/v1/admin/diaries/{id}" };
+  }
+
+  rpc ListEmotionAnalyses(ListEmotionAnalysesRequest) returns (ListEmotionAnalysesResponse) {
+    option (google.api.http) = { get: "/v1/admin/emotion/analyses" };
+  }
+  rpc GetEmotionAnalysis(GetEmotionAnalysisRequest) returns (AdminEmotionAnalysis) {
+    option (google.api.http) = { get: "/v1/admin/emotion/analyses/{id}" };
+  }
+
+  rpc ListChatSessions(ListChatSessionsRequest) returns (ListChatSessionsResponse) {
+    option (google.api.http) = { get: "/v1/admin/chat/sessions" };
+  }
+  rpc ListChatMessages(ListChatMessagesRequest) returns (ListChatMessagesResponse) {
+    option (google.api.http) = { get: "/v1/admin/chat/sessions/{session_id}/messages" };
+  }
+
+  rpc ListLoginLogs(ListLoginLogsRequest) returns (ListLoginLogsResponse) {
+    option (google.api.http) = { get: "/v1/admin/security/login-logs" };
+  }
+  rpc ListSecurityEvents(ListSecurityEventsRequest) returns (ListSecurityEventsResponse) {
+    option (google.api.http) = { get: "/v1/admin/security/events" };
+  }
+
+  rpc ListConfigs(ListConfigsRequest) returns (ListConfigsResponse) {
+    option (google.api.http) = { get: "/v1/admin/system/configs" };
+  }
+  rpc CreateConfig(CreateConfigRequest) returns (AdminSystemConfig) {
+    option (google.api.http) = { post: "/v1/admin/system/configs" body: "*" };
+  }
+  rpc UpdateConfig(UpdateConfigRequest) returns (AdminSystemConfig) {
+    option (google.api.http) = { patch: "/v1/admin/system/configs/{id}" body: "*" };
+  }
+  rpc DeleteConfig(DeleteConfigRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = { delete: "/v1/admin/system/configs/{id}" };
+  }
+
+  rpc ListAnnouncements(ListAnnouncementsRequest) returns (ListAnnouncementsResponse) {
+    option (google.api.http) = { get: "/v1/admin/system/announcements" };
+  }
+  rpc CreateAnnouncement(CreateAnnouncementRequest) returns (AdminAnnouncement) {
+    option (google.api.http) = { post: "/v1/admin/system/announcements" body: "*" };
+  }
+  rpc UpdateAnnouncement(UpdateAnnouncementRequest) returns (AdminAnnouncement) {
+    option (google.api.http) = { patch: "/v1/admin/system/announcements/{id}" body: "*" };
+  }
+  rpc DeleteAnnouncement(DeleteAnnouncementRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = { delete: "/v1/admin/system/announcements/{id}" };
+  }
+
+  rpc ListVersions(ListVersionsRequest) returns (ListVersionsResponse) {
+    option (google.api.http) = { get: "/v1/admin/system/versions" };
+  }
+  rpc CreateVersion(CreateVersionRequest) returns (AdminAppVersion) {
+    option (google.api.http) = { post: "/v1/admin/system/versions" body: "*" };
+  }
+  rpc UpdateVersion(UpdateVersionRequest) returns (AdminAppVersion) {
+    option (google.api.http) = { patch: "/v1/admin/system/versions/{id}" body: "*" };
+  }
+  rpc DeleteVersion(DeleteVersionRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = { delete: "/v1/admin/system/versions/{id}" };
+  }
+
+  rpc ListMoodTags(ListMoodTagsRequest) returns (ListMoodTagsResponse) {
+    option (google.api.http) = { get: "/v1/admin/mood-tags" };
+  }
+  rpc CreateMoodTag(CreateMoodTagRequest) returns (AdminMoodTag) {
+    option (google.api.http) = { post: "/v1/admin/mood-tags" body: "*" };
+  }
+  rpc UpdateMoodTag(UpdateMoodTagRequest) returns (AdminMoodTag) {
+    option (google.api.http) = { patch: "/v1/admin/mood-tags/{id}" body: "*" };
+  }
+  rpc DeleteMoodTag(DeleteMoodTagRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = { delete: "/v1/admin/mood-tags/{id}" };
+  }
+
+  rpc ListFiles(ListFilesRequest) returns (ListFilesResponse) {
+    option (google.api.http) = { get: "/v1/admin/files" };
+  }
+  rpc GetFile(GetFileRequest) returns (AdminFile) {
+    option (google.api.http) = { get: "/v1/admin/files/{id}" };
+  }
+  rpc DeleteFile(DeleteFileRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = { delete: "/v1/admin/files/{id}" };
+  }
+}
+
+message GetDashboardOverviewRequest {}
+message DashboardOverview {
+  int64 user_count = 1;
+  int64 today_new_users = 2;
+  int64 diary_count = 3;
+  int64 today_diaries = 4;
+  int64 chat_session_count = 5;
+  int64 today_chat_messages = 6;
+  int64 emotion_analysis_count = 7;
+  int64 high_risk_analysis_count = 8;
+}
+message GetDashboardTrendsRequest { string start_date = 1; string end_date = 2; }
+message DashboardTrendPoint {
+  string date = 1;
+  int64 new_users = 2;
+  int64 diaries = 3;
+  int64 chat_messages = 4;
+  int64 emotion_analyses = 5;
+}
+message DashboardTrends { repeated DashboardTrendPoint points = 1; }
+
+message AdminUserProfile {
+  string nickname = 1;
+  string gender = 2;
+  string birthday = 3;
+  string bio = 4;
+  string location = 5;
+  string occupation = 6;
+  string industry = 7;
+  string language = 8;
+  string timezone = 9;
+}
+message AdminUser {
+  int64 user_id = 1;
+  string username = 2;
+  string phone = 3;
+  string email = 4;
+  string avatar = 5;
+  repeated string roles = 6;
+  int32 status = 7;
+  int64 last_login_at = 8;
+  int64 created_at = 9;
+  int64 updated_at = 10;
+  AdminUserProfile profile = 11;
+}
+message ListUsersRequest { int32 page = 1; int32 page_size = 2; string keyword = 3; int32 status = 4; string role = 5; }
+message ListUsersResponse { repeated AdminUser users = 1; int64 total = 2; }
+message GetUserRequest { int64 user_id = 1; }
+message UpdateUserStatusRequest { int64 user_id = 1; int32 status = 2; string reason = 3; }
+message UpdateUserRolesRequest { int64 user_id = 1; repeated string roles = 2; }
+message UpdateUserPasswordRequest { int64 user_id = 1; string password = 2; }
+
+message AdminMoodTag {
+  int64 id = 1;
+  string name = 2;
+  string color = 3;
+  string icon = 4;
+  int32 sort = 5;
+  bool system = 6;
+  int64 created_at = 7;
+  int64 updated_at = 8;
+}
+message AdminDiary {
+  int64 id = 1;
+  int64 user_id = 2;
+  string username = 3;
+  string title = 4;
+  string content = 5;
+  string mood = 6;
+  int32 mood_score = 7;
+  string weather = 8;
+  string location = 9;
+  string occurred_on = 10;
+  string visibility = 11;
+  repeated AdminMoodTag tags = 12;
+  repeated string attachment_urls = 13;
+  int64 analysis_id = 14;
+  int64 created_at = 15;
+  int64 updated_at = 16;
+}
+message ListDiariesRequest {
+  int32 page = 1;
+  int32 page_size = 2;
+  string keyword = 3;
+  int64 user_id = 4;
+  string mood = 5;
+  string start_date = 6;
+  string end_date = 7;
+}
+message ListDiariesResponse { repeated AdminDiary diaries = 1; int64 total = 2; }
+message GetDiaryRequest { int64 id = 1; }
+message DeleteDiaryRequest { int64 id = 1; }
+
+message EmotionDimensionScore { string dimension = 1; double score = 2; }
+message AdminEmotionAnalysis {
+  int64 id = 1;
+  int64 user_id = 2;
+  string username = 3;
+  string source_type = 4;
+  int64 source_id = 5;
+  string primary_emotion = 6;
+  string sentiment = 7;
+  double sentiment_score = 8;
+  int32 stress_score = 9;
+  int32 anxiety_score = 10;
+  int32 depression_risk_score = 11;
+  int32 energy_score = 12;
+  double confidence = 13;
+  string summary = 14;
+  string advice = 15;
+  string risk_level = 16;
+  string model = 17;
+  repeated EmotionDimensionScore dimensions = 18;
+  int64 created_at = 19;
+}
+message ListEmotionAnalysesRequest {
+  int32 page = 1;
+  int32 page_size = 2;
+  int64 user_id = 3;
+  string risk_level = 4;
+  string source_type = 5;
+  string start_date = 6;
+  string end_date = 7;
+}
+message ListEmotionAnalysesResponse { repeated AdminEmotionAnalysis analyses = 1; int64 total = 2; }
+message GetEmotionAnalysisRequest { int64 id = 1; }
+
+message AdminChatSession {
+  int64 id = 1;
+  int64 user_id = 2;
+  string username = 3;
+  string title = 4;
+  string scenario = 5;
+  string status = 6;
+  string summary = 7;
+  int32 message_count = 8;
+  int64 last_message_at = 9;
+  int64 created_at = 10;
+  int64 updated_at = 11;
+}
+message AdminChatMessage {
+  int64 id = 1;
+  int64 session_id = 2;
+  int64 user_id = 3;
+  string role = 4;
+  string content = 5;
+  string content_type = 6;
+  string status = 7;
+  int64 created_at = 8;
+}
+message ListChatSessionsRequest { int32 page = 1; int32 page_size = 2; int64 user_id = 3; string status = 4; }
+message ListChatSessionsResponse { repeated AdminChatSession sessions = 1; int64 total = 2; }
+message ListChatMessagesRequest { int64 session_id = 1; int32 page = 2; int32 page_size = 3; }
+message ListChatMessagesResponse { repeated AdminChatMessage messages = 1; int64 total = 2; }
+
+message AdminLoginLog {
+  int64 id = 1;
+  int64 user_id = 2;
+  string username = 3;
+  bool success = 4;
+  string fail_reason = 5;
+  string ip = 6;
+  string user_agent = 7;
+  string device_id = 8;
+  string location = 9;
+  int64 created_at = 10;
+}
+message AdminSecurityEvent {
+  int64 id = 1;
+  int64 user_id = 2;
+  string username = 3;
+  string event_type = 4;
+  string risk_level = 5;
+  string ip = 6;
+  string user_agent = 7;
+  string metadata_json = 8;
+  int64 created_at = 9;
+}
+message ListLoginLogsRequest { int32 page = 1; int32 page_size = 2; int64 user_id = 3; bool success_only = 4; }
+message ListLoginLogsResponse { repeated AdminLoginLog logs = 1; int64 total = 2; }
+message ListSecurityEventsRequest { int32 page = 1; int32 page_size = 2; int64 user_id = 3; string risk_level = 4; }
+message ListSecurityEventsResponse { repeated AdminSecurityEvent events = 1; int64 total = 2; }
+
+message AdminSystemConfig {
+  int64 id = 1;
+  string key = 2;
+  string value_json = 3;
+  string description = 4;
+  bool is_public = 5;
+  int64 created_at = 6;
+  int64 updated_at = 7;
+}
+message ListConfigsRequest { int32 page = 1; int32 page_size = 2; string keyword = 3; }
+message ListConfigsResponse { repeated AdminSystemConfig configs = 1; int64 total = 2; }
+message CreateConfigRequest { string key = 1; string value_json = 2; string description = 3; bool is_public = 4; }
+message UpdateConfigRequest { int64 id = 1; string value_json = 2; string description = 3; bool is_public = 4; }
+message DeleteConfigRequest { int64 id = 1; }
+
+message AdminAnnouncement {
+  int64 id = 1;
+  string title = 2;
+  string content = 3;
+  string target_platform = 4;
+  int64 start_at = 5;
+  int64 end_at = 6;
+  int32 status = 7;
+  int64 created_at = 8;
+  int64 updated_at = 9;
+}
+message ListAnnouncementsRequest { int32 page = 1; int32 page_size = 2; string platform = 3; int32 status = 4; bool filter_status = 5; }
+message ListAnnouncementsResponse { repeated AdminAnnouncement announcements = 1; int64 total = 2; }
+message CreateAnnouncementRequest { string title = 1; string content = 2; string target_platform = 3; int64 start_at = 4; int64 end_at = 5; int32 status = 6; }
+message UpdateAnnouncementRequest { int64 id = 1; string title = 2; string content = 3; string target_platform = 4; int64 start_at = 5; int64 end_at = 6; int32 status = 7; }
+message DeleteAnnouncementRequest { int64 id = 1; }
+
+message AdminAppVersion {
+  int64 id = 1;
+  string platform = 2;
+  string version = 3;
+  int32 build_no = 4;
+  bool force_update = 5;
+  string download_url = 6;
+  string changelog = 7;
+  string min_supported_version = 8;
+  int64 published_at = 9;
+  int64 created_at = 10;
+  int64 updated_at = 11;
+}
+message ListVersionsRequest { int32 page = 1; int32 page_size = 2; string platform = 3; }
+message ListVersionsResponse { repeated AdminAppVersion versions = 1; int64 total = 2; }
+message CreateVersionRequest { string platform = 1; string version = 2; int32 build_no = 3; bool force_update = 4; string download_url = 5; string changelog = 6; string min_supported_version = 7; int64 published_at = 8; }
+message UpdateVersionRequest { int64 id = 1; string platform = 2; string version = 3; int32 build_no = 4; bool force_update = 5; string download_url = 6; string changelog = 7; string min_supported_version = 8; int64 published_at = 9; }
+message DeleteVersionRequest { int64 id = 1; }
+
+message ListMoodTagsRequest { int32 page = 1; int32 page_size = 2; string keyword = 3; }
+message ListMoodTagsResponse { repeated AdminMoodTag tags = 1; int64 total = 2; }
+message CreateMoodTagRequest { string name = 1; string color = 2; string icon = 3; int32 sort = 4; }
+message UpdateMoodTagRequest { int64 id = 1; string name = 2; string color = 3; string icon = 4; int32 sort = 5; }
+message DeleteMoodTagRequest { int64 id = 1; }
+
+message AdminFile {
+  int64 id = 1;
+  int64 owner_user_id = 2;
+  string username = 3;
+  string biz_type = 4;
+  string storage_provider = 5;
+  string bucket = 6;
+  string object_key = 7;
+  string url = 8;
+  string mime_type = 9;
+  int64 size_bytes = 10;
+  string checksum = 11;
+  int32 status = 12;
+  int64 created_at = 13;
+  int64 updated_at = 14;
+}
+message ListFilesRequest { int32 page = 1; int32 page_size = 2; string biz_type = 3; int64 owner_user_id = 4; }
+message ListFilesResponse { repeated AdminFile files = 1; int64 total = 2; }
+message GetFileRequest { int64 id = 1; }
+message DeleteFileRequest { int64 id = 1; }

@@ -141,12 +141,6 @@ func WithUserID(ctx context.Context, userID int64) context.Context {
 	return context.WithValue(ctx, userIDKey, userID)
 }
 
-// WithRoles carries roles verified from the access token. Request bodies and
-// browser headers must never be trusted for authorization decisions.
-func WithRoles(ctx context.Context, roles []string) context.Context {
-	return context.WithValue(ctx, rolesKey, append([]string(nil), roles...))
-}
-
 func UserIDFromContext(ctx context.Context) (int64, bool) {
 	userID, ok := ctx.Value(userIDKey).(int64)
 	return userID, ok && userID > 0
@@ -158,16 +152,6 @@ func MustUserID(ctx context.Context) (int64, error) {
 		return 0, kerrors.Unauthorized("UNAUTHORIZED", "login required")
 	}
 	return userID, nil
-}
-
-func HasRole(ctx context.Context, wanted string) bool {
-	roles, _ := ctx.Value(rolesKey).([]string)
-	for _, role := range roles {
-		if strings.EqualFold(role, wanted) {
-			return true
-		}
-	}
-	return false
 }
 
 func ServerMiddleware(tm *TokenManager, publicOperations map[string]bool) middleware.Middleware {
@@ -189,7 +173,7 @@ func ServerMiddleware(tm *TokenManager, publicOperations map[string]bool) middle
 				if err != nil {
 					return nil, kerrors.Unauthorized("UNAUTHORIZED", "invalid access token")
 				}
-				ctx = WithRoles(WithUserID(ctx, claims.UserID), claims.Roles)
+				ctx = WithUserID(ctx, claims.UserID)
 			}
 			return next(ctx, req)
 		}
